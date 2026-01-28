@@ -16,12 +16,28 @@ export const syncUser = createServerFn({
 		}) => data,
 	)
 	.handler(async ({ data }) => {
+		// Check if user already exists and has a custom avatar
+		const existingUser = await prisma.user.findUnique({
+			where: { clerkId: data.clerkId },
+			select: { avatarUrl: true },
+		});
+
+		// Only use Clerk's avatar if user doesn't have a custom one
+		// Custom avatars are from UploadThing (ufs.sh domain)
+		const shouldUpdateAvatar =
+			!existingUser?.avatarUrl ||
+			existingUser.avatarUrl.includes("clerk.com") ||
+			existingUser.avatarUrl.includes("clerk.dev");
+
 		const user = await prisma.user.upsert({
 			where: { clerkId: data.clerkId },
 			update: {
 				email: data.email,
 				displayName: data.displayName,
-				avatarUrl: data.avatarUrl,
+				// Only update avatar if user doesn't have a custom one
+				...(shouldUpdateAvatar && data.avatarUrl
+					? { avatarUrl: data.avatarUrl }
+					: {}),
 			},
 			create: {
 				clerkId: data.clerkId,
@@ -74,6 +90,7 @@ export const updateUserProfile = createServerFn({
 			clerkId: string;
 			displayName?: string;
 			bio?: string;
+			avatarUrl?: string;
 			bannerUrl?: string;
 		}) => data,
 	)
@@ -83,6 +100,7 @@ export const updateUserProfile = createServerFn({
 			data: {
 				displayName: data.displayName,
 				bio: data.bio,
+				avatarUrl: data.avatarUrl,
 				bannerUrl: data.bannerUrl,
 			},
 		});

@@ -20,6 +20,7 @@ import { Route as PostsIdRouteImport } from './routes/posts/$id'
 import { Route as GamesSlugRouteImport } from './routes/games/$slug'
 import { Route as ArticlesNewRouteImport } from './routes/articles/new'
 import { Route as ArticlesIdRouteImport } from './routes/articles/$id'
+import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -76,11 +77,17 @@ const ArticlesIdRoute = ArticlesIdRouteImport.update({
   path: '/articles/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
+  id: '/api/uploadthing',
+  path: '/api/uploadthing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
   '/games/$slug': typeof GamesSlugRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
   '/games/$slug': typeof GamesSlugRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
   '/games/$slug': typeof GamesSlugRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/sign-up'
+    | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
     | '/games/$slug'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/sign-up'
+    | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
     | '/games/$slug'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/sign-up'
+    | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
     | '/games/$slug'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  ApiUploadthingRoute: typeof ApiUploadthingRoute
   ArticlesIdRoute: typeof ArticlesIdRoute
   ArticlesNewRoute: typeof ArticlesNewRoute
   GamesSlugRoute: typeof GamesSlugRoute
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArticlesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/uploadthing': {
+      id: '/api/uploadthing'
+      path: '/api/uploadthing'
+      fullPath: '/api/uploadthing'
+      preLoaderRoute: typeof ApiUploadthingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  ApiUploadthingRoute: ApiUploadthingRoute,
   ArticlesIdRoute: ArticlesIdRoute,
   ArticlesNewRoute: ArticlesNewRoute,
   GamesSlugRoute: GamesSlugRoute,

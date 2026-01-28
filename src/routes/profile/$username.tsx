@@ -147,18 +147,19 @@ function ProfilePage() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
-			{/* Banner */}
+			{/* Banner - 3:1 aspect ratio (Twitter-style), full width */}
 			<div
-				className="h-48 md:h-64 bg-gradient-to-r from-purple-600 to-pink-600"
-				style={
-					profile.bannerUrl
+				className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
+				style={{
+					aspectRatio: "3/1",
+					...(profile.bannerUrl
 						? {
 								backgroundImage: `url(${profile.bannerUrl})`,
 								backgroundSize: "cover",
 								backgroundPosition: "center",
 							}
-						: {}
-				}
+						: {}),
+				}}
 			/>
 
 			<div className="container mx-auto px-4">
@@ -363,6 +364,20 @@ function ProfilePage() {
 				<EditProfileModal
 					isOpen={isEditModalOpen}
 					onClose={() => setIsEditModalOpen(false)}
+					onSave={(updatedData) => {
+						// Update local profile state with new data
+						setProfile((prev) =>
+							prev
+								? {
+										...prev,
+										displayName: updatedData.displayName,
+										bio: updatedData.bio,
+										avatarUrl: updatedData.avatarUrl,
+										bannerUrl: updatedData.bannerUrl,
+									}
+								: null,
+						);
+					}}
 					user={profile}
 				/>
 			)}

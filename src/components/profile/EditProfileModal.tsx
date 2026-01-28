@@ -7,6 +7,12 @@ import { UploadButton } from "../../lib/uploadthing";
 interface EditProfileModalProps {
 	isOpen: boolean;
 	onClose: () => void;
+	onSave?: (updatedUser: {
+		displayName: string | null;
+		bio: string | null;
+		avatarUrl: string | null;
+		bannerUrl: string | null;
+	}) => void;
 	user: {
 		id: string;
 		clerkId: string;
@@ -21,6 +27,7 @@ interface EditProfileModalProps {
 export function EditProfileModal({
 	isOpen,
 	onClose,
+	onSave,
 	user,
 }: EditProfileModalProps) {
 	const router = useRouter();
@@ -45,13 +52,20 @@ export function EditProfileModal({
 					clerkId: user.clerkId,
 					displayName,
 					bio,
+					avatarUrl: avatarUrl || undefined,
 					bannerUrl: bannerUrl || undefined,
 				},
+			});
+			onSave?.({
+				displayName,
+				bio,
+				avatarUrl,
+				bannerUrl,
 			});
 			router.invalidate();
 			onClose();
 		} catch (err) {
-			console.error(err);
+			console.error("Failed to save profile:", err);
 			setError("Failed to save profile");
 		} finally {
 			setIsSaving(false);
@@ -108,101 +122,98 @@ export function EditProfileModal({
 						<span className="text-sm font-medium text-gray-400">
 							Banner Image
 						</span>
-						<div className="relative h-32 md:h-48 rounded-xl overflow-hidden bg-gray-800 border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors group">
-							{bannerUrl ? (
-								<>
-									<img
-										src={bannerUrl}
-										alt="Banner"
-										className="w-full h-full object-cover"
-									/>
-									<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-										<p className="text-white font-medium">Change Banner</p>
-									</div>
-								</>
-							) : (
-								<div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
-									<Upload size={24} className="mb-2" />
-									<p>Upload Banner (Max 1500x500)</p>
-								</div>
-							)}
-
-							<div className="absolute inset-0 opacity-0 cursor-pointer">
-								<UploadButton
-									endpoint="banner"
-									onClientUploadComplete={(res) => {
-										setBannerUrl(res[0].url);
-									}}
-									onUploadError={(error: Error) => {
-										setError(error.message);
-									}}
-									onBeforeUploadBegin={async (files) => {
-										try {
-											return await Promise.all(
-												files.map((f) => validateImage(f, 1500, 500)),
-											);
-										} catch (e) {
-											setError((e as Error).message);
-											throw e;
-										}
-									}}
-									appearance={{
-										button: "w-full h-full cursor-pointer",
-										allowedContent: "hidden",
-									}}
+						<div
+							className="relative rounded-xl overflow-hidden bg-gray-800 border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors"
+							style={{ aspectRatio: "3/1" }}
+						>
+							{bannerUrl && (
+								<img
+									src={bannerUrl}
+									alt="Banner"
+									className="absolute inset-0 w-full h-full object-cover pointer-events-none"
 								/>
+							)}
+							<div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 pointer-events-none bg-black/30">
+								<Upload size={24} className="mb-2" />
+								<p>{bannerUrl ? "Change Banner" : "Upload Banner (3:1)"}</p>
 							</div>
+							<UploadButton
+								endpoint="banner"
+								onClientUploadComplete={(res) => {
+									const url = res[0].ufsUrl || res[0].url;
+									setBannerUrl(url);
+								}}
+								onUploadError={(error: Error) => {
+									setError(error.message);
+								}}
+								onBeforeUploadBegin={async (files) => {
+									try {
+										return await Promise.all(
+											files.map((f) => validateImage(f, 1500, 500)),
+										);
+									} catch (e) {
+										setError((e as Error).message);
+										throw e;
+									}
+								}}
+								appearance={{
+									button:
+										"!absolute !inset-0 !w-full !h-full !bg-transparent !border-0 !ring-0 !shadow-none cursor-pointer",
+									allowedContent: "hidden",
+									container: "absolute inset-0 w-full h-full",
+								}}
+							/>
 						</div>
 						<p className="text-xs text-gray-500">
-							Recommended size: 1500x500px. Max 8MB.
+							Recommended size: 1500x500px (3:1). Max 8MB.
 						</p>
 					</div>
 
 					{/* Avatar Upload */}
 					<div className="flex items-center gap-6">
-						<div className="relative group">
-							<div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 border-2 border-gray-700 group-hover:border-purple-500 transition-colors">
+						<div className="relative w-24 h-24">
+							<div className="w-full h-full rounded-full overflow-hidden bg-gray-800 border-2 border-gray-700 hover:border-purple-500 transition-colors">
 								{avatarUrl ? (
 									<img
 										src={avatarUrl}
 										alt="Avatar"
-										className="w-full h-full object-cover"
+										className="w-full h-full object-cover pointer-events-none"
 									/>
 								) : (
-									<div className="w-full h-full flex items-center justify-center text-2xl text-white font-bold bg-gradient-to-br from-purple-500 to-pink-500">
+									<div className="w-full h-full flex items-center justify-center text-2xl text-white font-bold bg-gradient-to-br from-purple-500 to-pink-500 pointer-events-none">
 										{displayName?.[0]?.toUpperCase()}
 									</div>
 								)}
-								<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
-									<Upload size={20} className="text-white" />
-								</div>
 							</div>
-
-							<div className="absolute inset-0 opacity-0 cursor-pointer rounded-full overflow-hidden">
-								<UploadButton
-									endpoint="profilePicture"
-									onClientUploadComplete={(res) => {
-										setAvatarUrl(res[0].url);
-									}}
-									onUploadError={(error: Error) => {
-										setError(error.message);
-									}}
-									onBeforeUploadBegin={async (files) => {
-										try {
-											return await Promise.all(
-												files.map((f) => validateImage(f, 400, 400)),
-											);
-										} catch (e) {
-											setError((e as Error).message);
-											throw e;
-										}
-									}}
-									appearance={{
-										button: "w-full h-full cursor-pointer",
-										allowedContent: "hidden",
-									}}
-								/>
+							<div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center pointer-events-none">
+								<Upload size={20} className="text-white" />
 							</div>
+							<UploadButton
+								endpoint="profilePicture"
+								onClientUploadComplete={(res) => {
+									const url = res[0].ufsUrl || res[0].url;
+									setAvatarUrl(url);
+								}}
+								onUploadError={(error: Error) => {
+									setError(error.message);
+								}}
+								onBeforeUploadBegin={async (files) => {
+									try {
+										return await Promise.all(
+											files.map((f) => validateImage(f, 400, 400)),
+										);
+									} catch (e) {
+										setError((e as Error).message);
+										throw e;
+									}
+								}}
+								appearance={{
+									button:
+										"!absolute !inset-0 !w-full !h-full !bg-transparent !border-0 !ring-0 !shadow-none !rounded-full cursor-pointer",
+									allowedContent: "hidden",
+									container: "absolute inset-0 w-full h-full",
+								}}
+							/>
 						</div>
 						<div className="flex-1 space-y-2">
 							<h3 className="font-medium text-white">Profile Photo</h3>

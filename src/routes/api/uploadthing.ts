@@ -1,4 +1,5 @@
-import { createRouteHandler } from "uploadthing/h3";
+import { createFileRoute } from "@tanstack/react-router";
+import { createRouteHandler } from "uploadthing/server";
 import { uploadRouter } from "@/lib/server/uploadthing";
 
 const handler = createRouteHandler({
@@ -8,5 +9,11 @@ const handler = createRouteHandler({
 	},
 });
 
-export const POST = handler;
-export const GET = handler;
+export const Route = createFileRoute("/api/uploadthing")({
+	server: {
+		handlers: {
+			GET: async ({ request }) => handler(request),
+			POST: async ({ request }) => handler(request),
+		},
+	},
+});

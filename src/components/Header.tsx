@@ -68,30 +68,6 @@ export default function Header() {
 				</nav>
 
 				<div className="flex items-center gap-3">
-					{isSignedIn && user && (
-						<Link
-							to="/profile/$username"
-							params={{ username: user.username || user.id }}
-							className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
-						>
-							<div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
-								{user.imageUrl ? (
-									<img
-										src={user.imageUrl}
-										alt=""
-										className="w-full h-full object-cover"
-									/>
-								) : (
-									<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
-										{(user.firstName || user.username || "U")[0].toUpperCase()}
-									</span>
-								)}
-							</div>
-							<span className="text-sm text-gray-300">
-								{user.username || "Profile"}
-							</span>
-						</Link>
-					)}
 					<ClerkHeader />
 				</div>
 			</header>

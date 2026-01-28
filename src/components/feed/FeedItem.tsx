@@ -116,21 +116,11 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 
 	const handleToggleLike = async (e: React.MouseEvent) => {
 		e.preventDefault();
-		console.log("handleToggleLike called", {
-			user,
-			isSignedIn,
-			isLiking,
-			itemType: item.type,
-			itemId: item.id,
-		});
-		if (!user || isLiking) {
-			console.log("Early return:", { noUser: !user, isLiking });
-			return;
-		}
+		if (!user || isLiking) return;
+
 		setIsLiking(true);
 		try {
 			let result: { liked: boolean } | undefined;
-			console.log("Calling toggle function for", item.type);
 			if (item.type === "post") {
 				result = await togglePostLike({
 					data: { clerkId: user.id, postId: item.id },
@@ -144,7 +134,6 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 					data: { clerkId: user.id, reviewId: item.id },
 				});
 			}
-			console.log("Toggle result:", result);
 			setHasLiked(result.liked);
 			setLocalLikeCount((prev) => (result.liked ? prev + 1 : prev - 1));
 		} catch (error) {

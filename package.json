@@ -22,6 +22,7 @@
     "@clerk/backend": "^2.29.5",
     "@clerk/clerk-react": "^5.49.0",
     "@clerk/tanstack-start": "^0.11.5",
+    "@floating-ui/dom": "^1.7.5",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@tailwindcss/vite": "^4.0.6",

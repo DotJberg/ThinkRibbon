@@ -392,7 +392,13 @@ export const ModelName = {
   ArticleGame: 'ArticleGame',
   Review: 'Review',
   Comment: 'Comment',
-  Like: 'Like'
+  Like: 'Like',
+  ArticleImage: 'ArticleImage',
+  ReviewImage: 'ReviewImage',
+  ArticleDraft: 'ArticleDraft',
+  ArticleDraftImage: 'ArticleDraftImage',
+  ReviewDraft: 'ReviewDraft',
+  ReviewDraftImage: 'ReviewDraftImage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "follow" | "game" | "post" | "article" | "articleGame" | "review" | "comment" | "like"
+    modelProps: "user" | "follow" | "game" | "post" | "article" | "articleGame" | "review" | "comment" | "like" | "articleImage" | "reviewImage" | "articleDraft" | "articleDraftImage" | "reviewDraft" | "reviewDraftImage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1078,6 +1084,450 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ArticleImage: {
+      payload: Prisma.$ArticleImagePayload<ExtArgs>
+      fields: Prisma.ArticleImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ArticleImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ArticleImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>
+        }
+        findFirst: {
+          args: Prisma.ArticleImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ArticleImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>
+        }
+        findMany: {
+          args: Prisma.ArticleImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>[]
+        }
+        create: {
+          args: Prisma.ArticleImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>
+        }
+        createMany: {
+          args: Prisma.ArticleImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ArticleImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>[]
+        }
+        delete: {
+          args: Prisma.ArticleImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>
+        }
+        update: {
+          args: Prisma.ArticleImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ArticleImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ArticleImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ArticleImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ArticleImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleImagePayload>
+        }
+        aggregate: {
+          args: Prisma.ArticleImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArticleImage>
+        }
+        groupBy: {
+          args: Prisma.ArticleImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ArticleImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleImageCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReviewImage: {
+      payload: Prisma.$ReviewImagePayload<ExtArgs>
+      fields: Prisma.ReviewImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReviewImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReviewImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>
+        }
+        findFirst: {
+          args: Prisma.ReviewImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReviewImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>
+        }
+        findMany: {
+          args: Prisma.ReviewImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>[]
+        }
+        create: {
+          args: Prisma.ReviewImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>
+        }
+        createMany: {
+          args: Prisma.ReviewImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReviewImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>[]
+        }
+        delete: {
+          args: Prisma.ReviewImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>
+        }
+        update: {
+          args: Prisma.ReviewImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ReviewImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReviewImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReviewImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ReviewImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewImagePayload>
+        }
+        aggregate: {
+          args: Prisma.ReviewImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReviewImage>
+        }
+        groupBy: {
+          args: Prisma.ReviewImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReviewImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewImageCountAggregateOutputType> | number
+        }
+      }
+    }
+    ArticleDraft: {
+      payload: Prisma.$ArticleDraftPayload<ExtArgs>
+      fields: Prisma.ArticleDraftFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ArticleDraftFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ArticleDraftFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>
+        }
+        findFirst: {
+          args: Prisma.ArticleDraftFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ArticleDraftFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>
+        }
+        findMany: {
+          args: Prisma.ArticleDraftFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>[]
+        }
+        create: {
+          args: Prisma.ArticleDraftCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>
+        }
+        createMany: {
+          args: Prisma.ArticleDraftCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ArticleDraftCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>[]
+        }
+        delete: {
+          args: Prisma.ArticleDraftDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>
+        }
+        update: {
+          args: Prisma.ArticleDraftUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>
+        }
+        deleteMany: {
+          args: Prisma.ArticleDraftDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ArticleDraftUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ArticleDraftUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>[]
+        }
+        upsert: {
+          args: Prisma.ArticleDraftUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftPayload>
+        }
+        aggregate: {
+          args: Prisma.ArticleDraftAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArticleDraft>
+        }
+        groupBy: {
+          args: Prisma.ArticleDraftGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleDraftGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ArticleDraftCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleDraftCountAggregateOutputType> | number
+        }
+      }
+    }
+    ArticleDraftImage: {
+      payload: Prisma.$ArticleDraftImagePayload<ExtArgs>
+      fields: Prisma.ArticleDraftImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ArticleDraftImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ArticleDraftImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>
+        }
+        findFirst: {
+          args: Prisma.ArticleDraftImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ArticleDraftImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>
+        }
+        findMany: {
+          args: Prisma.ArticleDraftImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>[]
+        }
+        create: {
+          args: Prisma.ArticleDraftImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>
+        }
+        createMany: {
+          args: Prisma.ArticleDraftImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ArticleDraftImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>[]
+        }
+        delete: {
+          args: Prisma.ArticleDraftImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>
+        }
+        update: {
+          args: Prisma.ArticleDraftImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ArticleDraftImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ArticleDraftImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ArticleDraftImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ArticleDraftImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleDraftImagePayload>
+        }
+        aggregate: {
+          args: Prisma.ArticleDraftImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArticleDraftImage>
+        }
+        groupBy: {
+          args: Prisma.ArticleDraftImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleDraftImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ArticleDraftImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleDraftImageCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReviewDraft: {
+      payload: Prisma.$ReviewDraftPayload<ExtArgs>
+      fields: Prisma.ReviewDraftFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReviewDraftFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReviewDraftFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>
+        }
+        findFirst: {
+          args: Prisma.ReviewDraftFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReviewDraftFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>
+        }
+        findMany: {
+          args: Prisma.ReviewDraftFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>[]
+        }
+        create: {
+          args: Prisma.ReviewDraftCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>
+        }
+        createMany: {
+          args: Prisma.ReviewDraftCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReviewDraftCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>[]
+        }
+        delete: {
+          args: Prisma.ReviewDraftDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>
+        }
+        update: {
+          args: Prisma.ReviewDraftUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReviewDraftDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReviewDraftUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReviewDraftUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReviewDraftUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftPayload>
+        }
+        aggregate: {
+          args: Prisma.ReviewDraftAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReviewDraft>
+        }
+        groupBy: {
+          args: Prisma.ReviewDraftGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewDraftGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReviewDraftCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewDraftCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReviewDraftImage: {
+      payload: Prisma.$ReviewDraftImagePayload<ExtArgs>
+      fields: Prisma.ReviewDraftImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReviewDraftImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReviewDraftImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>
+        }
+        findFirst: {
+          args: Prisma.ReviewDraftImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReviewDraftImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>
+        }
+        findMany: {
+          args: Prisma.ReviewDraftImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>[]
+        }
+        create: {
+          args: Prisma.ReviewDraftImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>
+        }
+        createMany: {
+          args: Prisma.ReviewDraftImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReviewDraftImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>[]
+        }
+        delete: {
+          args: Prisma.ReviewDraftImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>
+        }
+        update: {
+          args: Prisma.ReviewDraftImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ReviewDraftImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReviewDraftImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReviewDraftImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ReviewDraftImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewDraftImagePayload>
+        }
+        aggregate: {
+          args: Prisma.ReviewDraftImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReviewDraftImage>
+        }
+        groupBy: {
+          args: Prisma.ReviewDraftImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewDraftImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReviewDraftImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewDraftImageCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1176,8 +1626,11 @@ export const ArticleScalarFieldEnum = {
   id: 'id',
   title: 'title',
   content: 'content',
+  contentJson: 'contentJson',
   excerpt: 'excerpt',
   coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
   published: 'published',
   authorId: 'authorId',
   createdAt: 'createdAt',
@@ -1199,8 +1652,11 @@ export const ReviewScalarFieldEnum = {
   id: 'id',
   title: 'title',
   content: 'content',
+  contentJson: 'contentJson',
   rating: 'rating',
   coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
   published: 'published',
   authorId: 'authorId',
   gameId: 'gameId',
@@ -1237,6 +1693,84 @@ export const LikeScalarFieldEnum = {
 } as const
 
 export type LikeScalarFieldEnum = (typeof LikeScalarFieldEnum)[keyof typeof LikeScalarFieldEnum]
+
+
+export const ArticleImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  articleId: 'articleId'
+} as const
+
+export type ArticleImageScalarFieldEnum = (typeof ArticleImageScalarFieldEnum)[keyof typeof ArticleImageScalarFieldEnum]
+
+
+export const ReviewImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  reviewId: 'reviewId'
+} as const
+
+export type ReviewImageScalarFieldEnum = (typeof ReviewImageScalarFieldEnum)[keyof typeof ReviewImageScalarFieldEnum]
+
+
+export const ArticleDraftScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  excerpt: 'excerpt',
+  coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
+  gameIds: 'gameIds',
+  authorId: 'authorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ArticleDraftScalarFieldEnum = (typeof ArticleDraftScalarFieldEnum)[keyof typeof ArticleDraftScalarFieldEnum]
+
+
+export const ArticleDraftImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  draftId: 'draftId'
+} as const
+
+export type ArticleDraftImageScalarFieldEnum = (typeof ArticleDraftImageScalarFieldEnum)[keyof typeof ArticleDraftImageScalarFieldEnum]
+
+
+export const ReviewDraftScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  rating: 'rating',
+  coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
+  gameId: 'gameId',
+  authorId: 'authorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewDraftScalarFieldEnum = (typeof ReviewDraftScalarFieldEnum)[keyof typeof ReviewDraftScalarFieldEnum]
+
+
+export const ReviewDraftImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  draftId: 'draftId'
+} as const
+
+export type ReviewDraftImageScalarFieldEnum = (typeof ReviewDraftImageScalarFieldEnum)[keyof typeof ReviewDraftImageScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1435,6 +1969,12 @@ export type GlobalOmitConfig = {
   review?: Prisma.ReviewOmit
   comment?: Prisma.CommentOmit
   like?: Prisma.LikeOmit
+  articleImage?: Prisma.ArticleImageOmit
+  reviewImage?: Prisma.ReviewImageOmit
+  articleDraft?: Prisma.ArticleDraftOmit
+  articleDraftImage?: Prisma.ArticleDraftImageOmit
+  reviewDraft?: Prisma.ReviewDraftOmit
+  reviewDraftImage?: Prisma.ReviewDraftImageOmit
 }
 
 /* Types for Logging */

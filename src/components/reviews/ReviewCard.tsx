@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Calendar, Gamepad2, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
+import { SpoilerBadge } from "../shared/SpoilerWarning";
 import { StarRating } from "../shared/StarRating";
 
 interface ReviewCardProps {
@@ -10,6 +11,8 @@ interface ReviewCardProps {
 		title: string;
 		content: string;
 		rating: number;
+		coverImageUrl?: string | null;
+		containsSpoilers?: boolean;
 		createdAt: Date | string;
 		author: {
 			id: string;
@@ -46,6 +49,19 @@ export function ReviewCard({
 
 	return (
 		<article className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden hover:border-gray-600/50 transition-colors group">
+			{/* Cover Image (if uploaded by user) */}
+			{review.coverImageUrl && (
+				<Link to="/reviews/$id" params={{ id: review.id }}>
+					<div className="aspect-video bg-gray-700 overflow-hidden">
+						<img
+							src={review.coverImageUrl}
+							alt={review.title}
+							className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+						/>
+					</div>
+				</Link>
+			)}
+
 			<div className="flex">
 				{/* Game Cover */}
 				<Link
@@ -53,7 +69,7 @@ export function ReviewCard({
 					params={{ slug: review.game.slug }}
 					className="flex-shrink-0"
 				>
-					<div className="w-24 h-32 sm:w-32 sm:h-44 bg-gray-700 overflow-hidden">
+					<div className="w-20 h-28 sm:w-24 sm:h-32 bg-gray-700 overflow-hidden">
 						{review.game.coverUrl ? (
 							<img
 								src={review.game.coverUrl}
@@ -71,14 +87,19 @@ export function ReviewCard({
 				<div className="flex-1 p-4 min-w-0">
 					{/* Header */}
 					<div className="flex items-start justify-between gap-2 mb-2">
-						<div>
-							<Link
-								to="/reviews/$id"
-								params={{ id: review.id }}
-								className="text-lg font-bold text-white hover:text-purple-400 transition-colors line-clamp-1"
-							>
-								{review.title}
-							</Link>
+						<div className="flex-1 min-w-0">
+							<div className="flex items-center gap-2">
+								<Link
+									to="/reviews/$id"
+									params={{ id: review.id }}
+									className="text-lg font-bold text-white hover:text-purple-400 transition-colors line-clamp-1"
+								>
+									{review.title}
+								</Link>
+								{review.containsSpoilers && (
+									<SpoilerBadge className="flex-shrink-0" />
+								)}
+							</div>
 							<Link
 								to="/games/$slug"
 								params={{ slug: review.game.slug }}
@@ -90,13 +111,8 @@ export function ReviewCard({
 						<StarRating rating={review.rating} size="sm" />
 					</div>
 
-					{/* Excerpt */}
-					<p className="text-gray-300 text-sm line-clamp-2 mb-3">
-						{review.content.slice(0, 150)}...
-					</p>
-
 					{/* Footer */}
-					<div className="flex items-center justify-between">
+					<div className="flex items-center justify-between mt-auto">
 						<div className="flex items-center gap-2">
 							<Link
 								to="/profile/$username"

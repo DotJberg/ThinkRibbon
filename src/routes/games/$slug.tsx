@@ -160,7 +160,7 @@ function GameDetailPage() {
 							{isSignedIn && (
 								<Link
 									to="/reviews/new"
-									search={{ gameId: game.id }}
+									search={{ gameId: game.id, draftId: undefined }}
 									className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-lg transition-all"
 								>
 									<Star size={20} />

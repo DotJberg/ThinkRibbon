@@ -1,8 +1,25 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Gamepad2, Search } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import {
+	ArrowLeft,
+	Cloud,
+	FileText,
+	Gamepad2,
+	Save,
+	Search,
+} from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Toaster, toast } from "sonner";
+import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
+import { NavigationWarning } from "../../components/editor/NavigationWarning";
+import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
+import {
+	deleteReviewDraft,
+	getReviewDrafts,
+	saveReviewDraft,
+} from "../../lib/server/drafts";
 import { searchGames } from "../../lib/server/games";
 import { createReview } from "../../lib/server/reviews";
 
@@ -10,15 +27,17 @@ export const Route = createFileRoute("/reviews/new")({
 	component: NewReviewPage,
 	validateSearch: (search: Record<string, unknown>) => ({
 		gameId: search.gameId as string | undefined,
+		draftId: search.draftId as string | undefined,
 	}),
 });
 
 function NewReviewPage() {
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
-	const { gameId } = Route.useSearch();
+	const { gameId, draftId: initialDraftId } = Route.useSearch();
 	const id = useId();
 
+	// Game selection state
 	const [selectedGame, setSelectedGame] = useState<{
 		id: string;
 		name: string;
@@ -30,10 +49,36 @@ function NewReviewPage() {
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
 
+	// Form state
 	const [title, setTitle] = useState("");
-	const [content, setContent] = useState("");
+	const [content, setContent] = useState(""); // TipTap JSON string
 	const [rating, setRating] = useState(0);
+	const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
+	const [containsSpoilers, setContainsSpoilers] = useState(false);
+
+	// Draft state
+	const [draftId, setDraftId] = useState<string | undefined>(initialDraftId);
+	const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+		"idle",
+	);
+	const [lastSaved, setLastSaved] = useState<Date | null>(null);
+	const [showDraftPicker, setShowDraftPicker] = useState(false);
+	const [availableDrafts, setAvailableDrafts] = useState<
+		Awaited<ReturnType<typeof getReviewDrafts>>
+	>([]);
+
+	// Submission state
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [hasPublished, setHasPublished] = useState(false);
+
+	// Auto-save debounce ref
+	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	// Track if there are unsaved changes (for navigation warning)
+	const hasUnsavedChanges =
+		!hasPublished &&
+		(title.trim() !== "" || content.trim() !== "" || rating > 0);
 
 	// Load pre-selected game
 	useEffect(() => {
@@ -41,6 +86,105 @@ function NewReviewPage() {
 			// We'd need to fetch the game by ID - for now just show the form
 		}
 	}, [gameId]);
+
+	// Load draft if draftId is provided
+	// biome-ignore lint/correctness/useExhaustiveDependencies: loadDraft is defined later and would cause infinite loop if included
+	useEffect(() => {
+		if (initialDraftId && user) {
+			loadDraft(initialDraftId);
+		}
+	}, [initialDraftId, user]);
+
+	// Load available drafts
+	useEffect(() => {
+		if (user && !initialDraftId) {
+			getReviewDrafts({ data: user.id }).then((drafts) => {
+				setAvailableDrafts(drafts);
+				if (drafts.length > 0 && !draftId) {
+					setShowDraftPicker(true);
+				}
+			});
+		}
+	}, [user, initialDraftId, draftId]);
+
+	const loadDraft = async (id: string) => {
+		if (!user) return;
+		try {
+			const drafts = await getReviewDrafts({ data: user.id });
+			const draft = drafts.find((d) => d.id === id);
+			if (draft) {
+				setTitle(draft.title || "");
+				setContent(draft.content || "");
+				setRating(draft.rating || 0);
+				setCoverImageUrl(draft.coverImageUrl);
+				setCoverFileKey(draft.coverFileKey);
+				setContainsSpoilers(draft.containsSpoilers);
+				setDraftId(draft.id);
+				// Note: Game selection from draft.gameId would need additional logic to fetch game details
+				toast.success("Draft loaded");
+			}
+		} catch (error) {
+			console.error("Failed to load draft:", error);
+		}
+	};
+
+	// Auto-save function
+	const autoSave = useCallback(async () => {
+		if (!user || !title.trim()) return;
+
+		setSaveStatus("saving");
+		try {
+			const result = await saveReviewDraft({
+				data: {
+					draftId,
+					title,
+					content,
+					rating: rating > 0 ? rating : undefined,
+					coverImageUrl: coverImageUrl || undefined,
+					coverFileKey: coverFileKey || undefined,
+					containsSpoilers,
+					gameId: selectedGame?.id,
+					authorClerkId: user.id,
+				},
+			});
+			setDraftId(result.id);
+			setLastSaved(new Date());
+			setSaveStatus("saved");
+		} catch (error) {
+			console.error("Auto-save failed:", error);
+			setSaveStatus("idle");
+		}
+	}, [
+		user,
+		draftId,
+		title,
+		content,
+		rating,
+		coverImageUrl,
+		coverFileKey,
+		containsSpoilers,
+		selectedGame,
+	]);
+
+	// Debounced auto-save on content changes
+	useEffect(() => {
+		if (!title.trim()) return;
+
+		if (saveTimeoutRef.current) {
+			clearTimeout(saveTimeoutRef.current);
+		}
+
+		setSaveStatus("idle");
+		saveTimeoutRef.current = setTimeout(() => {
+			autoSave();
+		}, 2000);
+
+		return () => {
+			if (saveTimeoutRef.current) {
+				clearTimeout(saveTimeoutRef.current);
+			}
+		};
+	}, [title, autoSave]);
 
 	// Handle search
 	useEffect(() => {
@@ -66,6 +210,16 @@ function NewReviewPage() {
 		return () => clearTimeout(timeoutId);
 	}, [searchQuery]);
 
+	const handleCoverUpload = (url: string, fileKey: string) => {
+		setCoverImageUrl(url);
+		setCoverFileKey(fileKey);
+	};
+
+	const handleCoverRemove = () => {
+		setCoverImageUrl(null);
+		setCoverFileKey(null);
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (
@@ -82,21 +236,46 @@ function NewReviewPage() {
 			const review = await createReview({
 				data: {
 					title,
-					content,
+					content, // This is now JSON string from TipTap
 					rating,
 					gameId: selectedGame.id,
+					coverImageUrl: coverImageUrl || undefined,
+					coverFileKey: coverFileKey || undefined,
+					containsSpoilers,
 					published: true,
 					authorClerkId: user.id,
 				},
 			});
+
+			// Delete the draft if it exists
+			if (draftId) {
+				await deleteReviewDraft({ data: { draftId, clerkId: user.id } });
+			}
+
+			setHasPublished(true);
 			navigate({ to: "/reviews/$id", params: { id: review.id } });
 		} catch (error) {
 			console.error("Failed to create review:", error);
-			alert(
+			toast.error(
 				"Failed to create review. You may have already reviewed this game.",
 			);
 		} finally {
 			setIsSubmitting(false);
+		}
+	};
+
+	const handleDraftSelect = (selectedDraftId: string) => {
+		loadDraft(selectedDraftId);
+		setShowDraftPicker(false);
+	};
+
+	const handleStartFresh = () => {
+		setShowDraftPicker(false);
+	};
+
+	const handleDeleteDraftOnLeave = async () => {
+		if (draftId && user) {
+			await deleteReviewDraft({ data: { draftId, clerkId: user.id } });
 		}
 	};
 
@@ -115,18 +294,105 @@ function NewReviewPage() {
 		);
 	}
 
+	// Draft picker modal
+	if (showDraftPicker && availableDrafts.length > 0) {
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center p-4">
+				<div className="bg-gray-900 border border-gray-700 rounded-xl max-w-lg w-full p-6">
+					<div className="flex items-center gap-3 mb-6">
+						<FileText className="text-purple-400" size={24} />
+						<h2 className="text-xl font-semibold text-white">
+							Resume a Draft?
+						</h2>
+					</div>
+
+					<p className="text-gray-400 mb-4">
+						You have {availableDrafts.length} saved review draft
+						{availableDrafts.length > 1 ? "s" : ""}. Would you like to continue
+						where you left off?
+					</p>
+
+					<div className="space-y-2 mb-6 max-h-64 overflow-y-auto">
+						{availableDrafts.map((draft) => (
+							<button
+								key={draft.id}
+								type="button"
+								onClick={() => handleDraftSelect(draft.id)}
+								className="w-full p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg text-left transition-colors"
+							>
+								<p className="text-white font-medium truncate">
+									{draft.title || "Untitled Review"}
+								</p>
+								<p className="text-sm text-gray-500">
+									{draft.rating ? `${draft.rating}/5 stars • ` : ""}
+									Last edited {new Date(draft.updatedAt).toLocaleDateString()}
+								</p>
+							</button>
+						))}
+					</div>
+
+					<div className="flex gap-3">
+						<button
+							type="button"
+							onClick={handleStartFresh}
+							className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+						>
+							Start Fresh
+						</button>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
-			<div className="container mx-auto px-4 py-8 max-w-3xl">
-				<Link
-					to="/"
-					className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
-				>
-					<ArrowLeft size={20} />
-					Back
-				</Link>
+			<Toaster position="top-right" theme="dark" />
+			<NavigationWarning
+				hasUnsavedChanges={hasUnsavedChanges}
+				draftId={draftId}
+				onDeleteDraft={handleDeleteDraftOnLeave}
+			/>
 
-				<h1 className="text-3xl font-bold text-white mb-8">Write a Review</h1>
+			<div className="container mx-auto px-4 py-8 max-w-4xl">
+				<div className="flex items-center justify-between mb-6">
+					<Link
+						to="/"
+						className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+					>
+						<ArrowLeft size={20} />
+						Back
+					</Link>
+
+					{/* Save status indicator */}
+					<div className="flex items-center gap-2 text-sm">
+						{saveStatus === "saving" && (
+							<>
+								<Cloud className="text-gray-400 animate-pulse" size={16} />
+								<span className="text-gray-400">Saving...</span>
+							</>
+						)}
+						{saveStatus === "saved" && lastSaved && (
+							<>
+								<Save className="text-green-400" size={16} />
+								<span className="text-green-400">
+									Saved {lastSaved.toLocaleTimeString()}
+								</span>
+							</>
+						)}
+					</div>
+				</div>
+
+				<div className="flex items-center justify-between mb-8">
+					<h1 className="text-3xl font-bold text-white">Write a Review</h1>
+					<Link
+						to="/drafts"
+						className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300 hover:text-white text-sm font-medium"
+					>
+						<FileText size={16} />
+						My Drafts
+					</Link>
+				</div>
 
 				<form onSubmit={handleSubmit} className="space-y-6">
 					{/* Game Selection */}
@@ -216,6 +482,14 @@ function NewReviewPage() {
 						</div>
 					)}
 
+					{/* Cover Image */}
+					<CoverImageUpload
+						currentUrl={coverImageUrl}
+						onUpload={handleCoverUpload}
+						onRemove={handleCoverRemove}
+						uploadEndpoint="reviewCover"
+					/>
+
 					{/* Rating */}
 					<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
 						<span className="block text-sm font-medium text-gray-300 mb-4">
@@ -248,22 +522,22 @@ function NewReviewPage() {
 						/>
 					</div>
 
-					{/* Content */}
+					{/* Spoiler Toggle */}
+					<SpoilerToggle
+						checked={containsSpoilers}
+						onChange={setContainsSpoilers}
+					/>
+
+					{/* Content - Rich Text Editor */}
 					<div>
-						<label
-							htmlFor={`${id}-content`}
-							className="block text-sm font-medium text-gray-300 mb-2"
-						>
+						<span className="block text-sm font-medium text-gray-300 mb-2">
 							Your Review
-						</label>
-						<textarea
-							id={`${id}-content`}
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
+						</span>
+						<RichTextEditor
+							content={content}
+							onChange={setContent}
 							placeholder="Write your thoughts about this game..."
-							rows={10}
-							className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 resize-none"
-							required
+							uploadEndpoint="reviewInlineImage"
 						/>
 					</div>
 

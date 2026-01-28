@@ -6,28 +6,56 @@ import {
 	UTApi,
 } from "uploadthing/server";
 import { prisma } from "@/db";
+import { IMAGE_CONSTRAINTS } from "@/lib/image-utils";
 
 const f = createUploadthing();
 const utapi = new UTApi();
 
+// Re-export for server use
+export { IMAGE_CONSTRAINTS };
+
+// Helper to extract file key from UploadThing URL
+export function extractFileKey(url: string): string | null {
+	// Format: https://<appId>.ufs.sh/f/<fileKey> or https://utfs.io/f/<fileKey>
+	const match = url.match(/\/f\/([^/?]+)/);
+	return match?.[1] || null;
+}
+
 // Helper to extract file key from UploadThing URL and delete the file
-async function deleteOldUploadThingFile(url: string | null): Promise<void> {
+export async function deleteUploadThingFile(url: string | null): Promise<void> {
 	if (!url) return;
 
 	// Only delete UploadThing files (ufs.sh or utfs.io domains)
 	if (!url.includes("ufs.sh") && !url.includes("utfs.io")) return;
 
 	try {
-		// Extract file key from URL
-		// Format: https://<appId>.ufs.sh/f/<fileKey> or https://utfs.io/f/<fileKey>
-		const match = url.match(/\/f\/([^/?]+)/);
-		if (match?.[1]) {
-			await utapi.deleteFiles(match[1]);
+		const fileKey = extractFileKey(url);
+		if (fileKey) {
+			await utapi.deleteFiles(fileKey);
 		}
 	} catch {
 		// Silently fail - don't block upload if deletion fails
 	}
 }
+
+// Delete multiple files
+export async function deleteUploadThingFiles(urls: string[]): Promise<void> {
+	const fileKeys = urls
+		.filter((url) => url.includes("ufs.sh") || url.includes("utfs.io"))
+		.map((url) => extractFileKey(url))
+		.filter((key): key is string => key !== null);
+
+	if (fileKeys.length > 0) {
+		try {
+			await utapi.deleteFiles(fileKeys);
+		} catch {
+			// Silently fail
+		}
+	}
+}
+
+// Alias for backward compatibility
+const deleteOldUploadThingFile = deleteUploadThingFile;
 
 // Helper to extract cookie value
 function getCookie(cookieHeader: string, name: string): string | null {
@@ -113,6 +141,66 @@ export const uploadRouter = {
 			});
 
 			return { uploadedBy: metadata.userId, url };
+		}),
+
+	// Article cover image - max 4MB, recommended 1920x1080
+	articleCover: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+		.middleware(authMiddleware)
+		.onUploadComplete(async ({ metadata, file }) => {
+			const url = file.ufsUrl || file.url;
+			const fileKey = extractFileKey(url);
+
+			return {
+				uploadedBy: metadata.userId,
+				url,
+				fileKey,
+				constraints: IMAGE_CONSTRAINTS.cover,
+			};
+		}),
+
+	// Review cover image - max 4MB, recommended 1920x1080
+	reviewCover: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+		.middleware(authMiddleware)
+		.onUploadComplete(async ({ metadata, file }) => {
+			const url = file.ufsUrl || file.url;
+			const fileKey = extractFileKey(url);
+
+			return {
+				uploadedBy: metadata.userId,
+				url,
+				fileKey,
+				constraints: IMAGE_CONSTRAINTS.cover,
+			};
+		}),
+
+	// Article inline image - max 2MB, recommended 1600x1600
+	articleInlineImage: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+		.middleware(authMiddleware)
+		.onUploadComplete(async ({ metadata, file }) => {
+			const url = file.ufsUrl || file.url;
+			const fileKey = extractFileKey(url);
+
+			return {
+				uploadedBy: metadata.userId,
+				url,
+				fileKey,
+				constraints: IMAGE_CONSTRAINTS.inline,
+			};
+		}),
+
+	// Review inline image - max 2MB, recommended 1600x1600
+	reviewInlineImage: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+		.middleware(authMiddleware)
+		.onUploadComplete(async ({ metadata, file }) => {
+			const url = file.ufsUrl || file.url;
+			const fileKey = extractFileKey(url);
+
+			return {
+				uploadedBy: metadata.userId,
+				url,
+				fileKey,
+				constraints: IMAGE_CONSTRAINTS.inline,
+			};
 		}),
 } satisfies FileRouter;
 

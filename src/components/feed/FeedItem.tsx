@@ -19,6 +19,7 @@ import {
 	togglePostLike,
 	toggleReviewLike,
 } from "../../lib/server/likes";
+import { SpoilerBadge } from "../shared/SpoilerWarning";
 
 function formatDistanceToNow(date: Date): string {
 	const now = new Date();
@@ -239,18 +240,21 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 
 			{/* Title (for articles and reviews) */}
 			{item.title && (
-				<h3 className="text-lg font-semibold text-white mb-2">
-					{config.link ? (
-						<Link
-							to={config.link}
-							className="hover:text-purple-400 transition-colors"
-						>
-							{item.title}
-						</Link>
-					) : (
-						item.title
-					)}
-				</h3>
+				<div className="flex items-start gap-2 mb-2">
+					<h3 className="text-lg font-semibold text-white flex-1">
+						{config.link ? (
+							<Link
+								to={config.link}
+								className="hover:text-purple-400 transition-colors"
+							>
+								{item.title}
+							</Link>
+						) : (
+							item.title
+						)}
+					</h3>
+					{item.containsSpoilers && <SpoilerBadge className="flex-shrink-0" />}
+				</div>
 			)}
 
 			{/* Rating (for reviews) */}
@@ -268,6 +272,19 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 						/>
 					))}
 				</div>
+			)}
+
+			{/* Cover Image (for reviews with user-uploaded cover) */}
+			{item.type === "review" && item.coverImageUrl && (
+				<Link to="/reviews/$id" params={{ id: item.id }} className="block mb-3">
+					<div className="h-32 bg-gray-700 rounded-lg overflow-hidden">
+						<img
+							src={item.coverImageUrl}
+							alt={item.title || "Review cover"}
+							className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+						/>
+					</div>
+				</Link>
 			)}
 
 			{/* Game (for reviews) */}
@@ -321,17 +338,17 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 			)}
 
 			{/* Content */}
-			<div className="text-gray-300 mb-3">
-				{item.type === "post" ? (
+			{item.type === "post" && (
+				<div className="text-gray-300 mb-3">
 					<p className="whitespace-pre-wrap">{item.content}</p>
-				) : (
-					<p className="line-clamp-3">
-						{item.excerpt ||
-							item.content.slice(0, 200) +
-								(item.content.length > 200 ? "..." : "")}
-					</p>
-				)}
-			</div>
+				</div>
+			)}
+			{item.type === "article" && item.excerpt && (
+				<div className="text-gray-300 mb-3">
+					<p className="line-clamp-3">{item.excerpt}</p>
+				</div>
+			)}
+			{/* Reviews don't show content preview - they show title, rating, and game info above */}
 
 			{/* Read More Link (for articles and reviews) */}
 			{config.link && (

@@ -59,7 +59,13 @@ export const ModelName = {
   ArticleGame: 'ArticleGame',
   Review: 'Review',
   Comment: 'Comment',
-  Like: 'Like'
+  Like: 'Like',
+  ArticleImage: 'ArticleImage',
+  ReviewImage: 'ReviewImage',
+  ArticleDraft: 'ArticleDraft',
+  ArticleDraftImage: 'ArticleDraftImage',
+  ReviewDraft: 'ReviewDraft',
+  ReviewDraftImage: 'ReviewDraftImage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -137,8 +143,11 @@ export const ArticleScalarFieldEnum = {
   id: 'id',
   title: 'title',
   content: 'content',
+  contentJson: 'contentJson',
   excerpt: 'excerpt',
   coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
   published: 'published',
   authorId: 'authorId',
   createdAt: 'createdAt',
@@ -160,8 +169,11 @@ export const ReviewScalarFieldEnum = {
   id: 'id',
   title: 'title',
   content: 'content',
+  contentJson: 'contentJson',
   rating: 'rating',
   coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
   published: 'published',
   authorId: 'authorId',
   gameId: 'gameId',
@@ -198,6 +210,84 @@ export const LikeScalarFieldEnum = {
 } as const
 
 export type LikeScalarFieldEnum = (typeof LikeScalarFieldEnum)[keyof typeof LikeScalarFieldEnum]
+
+
+export const ArticleImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  articleId: 'articleId'
+} as const
+
+export type ArticleImageScalarFieldEnum = (typeof ArticleImageScalarFieldEnum)[keyof typeof ArticleImageScalarFieldEnum]
+
+
+export const ReviewImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  reviewId: 'reviewId'
+} as const
+
+export type ReviewImageScalarFieldEnum = (typeof ReviewImageScalarFieldEnum)[keyof typeof ReviewImageScalarFieldEnum]
+
+
+export const ArticleDraftScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  excerpt: 'excerpt',
+  coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
+  gameIds: 'gameIds',
+  authorId: 'authorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ArticleDraftScalarFieldEnum = (typeof ArticleDraftScalarFieldEnum)[keyof typeof ArticleDraftScalarFieldEnum]
+
+
+export const ArticleDraftImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  draftId: 'draftId'
+} as const
+
+export type ArticleDraftImageScalarFieldEnum = (typeof ArticleDraftImageScalarFieldEnum)[keyof typeof ArticleDraftImageScalarFieldEnum]
+
+
+export const ReviewDraftScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  rating: 'rating',
+  coverImageUrl: 'coverImageUrl',
+  coverFileKey: 'coverFileKey',
+  containsSpoilers: 'containsSpoilers',
+  gameId: 'gameId',
+  authorId: 'authorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewDraftScalarFieldEnum = (typeof ReviewDraftScalarFieldEnum)[keyof typeof ReviewDraftScalarFieldEnum]
+
+
+export const ReviewDraftImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  fileKey: 'fileKey',
+  caption: 'caption',
+  draftId: 'draftId'
+} as const
+
+export type ReviewDraftImageScalarFieldEnum = (typeof ReviewDraftImageScalarFieldEnum)[keyof typeof ReviewDraftImageScalarFieldEnum]
 
 
 export const SortOrder = {

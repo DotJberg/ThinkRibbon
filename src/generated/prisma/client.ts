@@ -84,3 +84,33 @@ export type Comment = Prisma.CommentModel
  * 
  */
 export type Like = Prisma.LikeModel
+/**
+ * Model ArticleImage
+ * 
+ */
+export type ArticleImage = Prisma.ArticleImageModel
+/**
+ * Model ReviewImage
+ * 
+ */
+export type ReviewImage = Prisma.ReviewImageModel
+/**
+ * Model ArticleDraft
+ * 
+ */
+export type ArticleDraft = Prisma.ArticleDraftModel
+/**
+ * Model ArticleDraftImage
+ * 
+ */
+export type ArticleDraftImage = Prisma.ArticleDraftImageModel
+/**
+ * Model ReviewDraft
+ * 
+ */
+export type ReviewDraft = Prisma.ReviewDraftModel
+/**
+ * Model ReviewDraftImage
+ * 
+ */
+export type ReviewDraftImage = Prisma.ReviewDraftImageModel

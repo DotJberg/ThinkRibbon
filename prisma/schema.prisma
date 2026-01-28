@@ -22,13 +22,15 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  posts     Post[]
-  articles  Article[]
-  reviews   Review[]
-  comments  Comment[]
-  likes     Like[]
-  followers Follow[] @relation("following")
-  following Follow[] @relation("followers")
+  posts          Post[]
+  articles       Article[]
+  reviews        Review[]
+  comments       Comment[]
+  likes          Like[]
+  followers      Follow[]        @relation("following")
+  following      Follow[]        @relation("followers")
+  articleDrafts  ArticleDraft[]
+  reviewDrafts   ReviewDraft[]
 
   @@index([clerkId])
   @@index([username])
@@ -98,18 +100,22 @@ model Post {
 // Article Model - Long-form content
 // ============================================
 model Article {
-  id            String   @id @default(cuid())
-  title         String
-  content       String   @db.Text
-  excerpt       String?  @db.VarChar(500)
-  coverImageUrl String?
-  published     Boolean  @default(false)
-  authorId      String
-  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String   @id @default(cuid())
+  title            String
+  content          String   @db.Text
+  contentJson      String?  @db.Text // TipTap JSON content
+  excerpt          String?  @db.VarChar(500)
+  coverImageUrl    String?
+  coverFileKey     String?  // UploadThing file key for cleanup
+  containsSpoilers Boolean  @default(false)
+  published        Boolean  @default(false)
+  authorId         String
+  author           User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   games    ArticleGame[]
+  images   ArticleImage[]
   comments Comment[]
   likes    Like[]
 
@@ -133,19 +139,23 @@ model ArticleGame {
 // Review Model - Game reviews with ratings
 // ============================================
 model Review {
-  id            String   @id @default(cuid())
-  title         String
-  content       String   @db.Text
-  rating        Int
-  coverImageUrl String?
-  published     Boolean  @default(false)
-  authorId      String
-  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  gameId        String
-  game          Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String   @id @default(cuid())
+  title            String
+  content          String   @db.Text
+  contentJson      String?  @db.Text // TipTap JSON content
+  rating           Int
+  coverImageUrl    String?
+  coverFileKey     String?  // UploadThing file key for cleanup
+  containsSpoilers Boolean  @default(false)
+  published        Boolean  @default(false)
+  authorId         String
+  author           User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  gameId           String
+  game             Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
+  images   ReviewImage[]
   comments Comment[]
   likes    Like[]
 
@@ -213,4 +223,104 @@ model Like {
   @@unique([userId, reviewId])
   @@unique([userId, commentId])
   @@index([userId])
+}
+
+// ============================================
+// ArticleImage - Track images in published articles
+// ============================================
+model ArticleImage {
+  id        String  @id @default(cuid())
+  url       String
+  fileKey   String  // UploadThing file key for deletion
+  caption   String? // Alt text / caption
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+}
+
+// ============================================
+// ReviewImage - Track images in published reviews
+// ============================================
+model ReviewImage {
+  id       String  @id @default(cuid())
+  url      String
+  fileKey  String  // UploadThing file key for deletion
+  caption  String? // Alt text / caption
+  reviewId String
+  review   Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+}
+
+// ============================================
+// ArticleDraft - Draft articles (max 10 per user)
+// ============================================
+model ArticleDraft {
+  id               String   @id @default(cuid())
+  title            String?
+  content          String?  @db.Text // TipTap JSON content
+  excerpt          String?  @db.VarChar(500)
+  coverImageUrl    String?
+  coverFileKey     String?  // UploadThing file key for cleanup
+  containsSpoilers Boolean  @default(false)
+  gameIds          String[] // Store as array for drafts
+  authorId         String
+  author           User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  images ArticleDraftImage[]
+
+  @@index([authorId, updatedAt(sort: Desc)])
+}
+
+// ============================================
+// ArticleDraftImage - Track images in article drafts
+// ============================================
+model ArticleDraftImage {
+  id      String       @id @default(cuid())
+  url     String
+  fileKey String       // UploadThing file key for deletion
+  caption String?      // Alt text / caption
+  draftId String
+  draft   ArticleDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId])
+}
+
+// ============================================
+// ReviewDraft - Draft reviews (max 10 per user)
+// ============================================
+model ReviewDraft {
+  id               String   @id @default(cuid())
+  title            String?
+  content          String?  @db.Text // TipTap JSON content
+  rating           Int?
+  coverImageUrl    String?
+  coverFileKey     String?  // UploadThing file key for cleanup
+  containsSpoilers Boolean  @default(false)
+  gameId           String?  // Game being reviewed
+  authorId         String
+  author           User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  images ReviewDraftImage[]
+
+  @@index([authorId, updatedAt(sort: Desc)])
+}
+
+// ============================================
+// ReviewDraftImage - Track images in review drafts
+// ============================================
+model ReviewDraftImage {
+  id      String      @id @default(cuid())
+  url     String
+  fileKey String      // UploadThing file key for deletion
+  caption String?     // Alt text / caption
+  draftId String
+  draft   ReviewDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId])
 }

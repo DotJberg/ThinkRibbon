@@ -32,6 +32,8 @@ export interface FeedItem {
 	content: string;
 	title?: string;
 	excerpt?: string;
+	coverImageUrl?: string | null;
+	containsSpoilers?: boolean;
 	rating?: number;
 	game?: {
 		id: string;
@@ -244,6 +246,8 @@ export const getFollowingFeed = createServerFn({
 				author: r.author,
 				content: r.content,
 				title: r.title,
+				coverImageUrl: r.coverImageUrl,
+				containsSpoilers: r.containsSpoilers,
 				rating: r.rating,
 				game: r.game,
 				likeCount: r._count.likes,
@@ -469,6 +473,8 @@ export const getPopularFeed = createServerFn({
 				author: r.author,
 				content: r.content,
 				title: r.title,
+				coverImageUrl: r.coverImageUrl,
+				containsSpoilers: r.containsSpoilers,
 				rating: r.rating,
 				game: r.game,
 				likeCount: r._count.likes,

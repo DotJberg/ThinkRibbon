@@ -12,6 +12,8 @@ export const createArticle = createServerFn({
 			content: string;
 			excerpt?: string;
 			coverImageUrl?: string;
+			coverFileKey?: string;
+			containsSpoilers?: boolean;
 			gameIds?: string[];
 			published?: boolean;
 			authorClerkId: string;
@@ -29,6 +31,8 @@ export const createArticle = createServerFn({
 				content: data.content,
 				excerpt: data.excerpt,
 				coverImageUrl: data.coverImageUrl,
+				coverFileKey: data.coverFileKey,
+				containsSpoilers: data.containsSpoilers ?? false,
 				published: data.published || false,
 				authorId: user.id,
 				games: data.gameIds
@@ -57,6 +61,8 @@ export const updateArticle = createServerFn({
 			content?: string;
 			excerpt?: string;
 			coverImageUrl?: string;
+			coverFileKey?: string;
+			containsSpoilers?: boolean;
 			gameIds?: string[];
 			published?: boolean;
 			clerkId: string;
@@ -92,6 +98,8 @@ export const updateArticle = createServerFn({
 				content: data.content,
 				excerpt: data.excerpt,
 				coverImageUrl: data.coverImageUrl,
+				coverFileKey: data.coverFileKey,
+				containsSpoilers: data.containsSpoilers,
 				published: data.published,
 			},
 			include: {

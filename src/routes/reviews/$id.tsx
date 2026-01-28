@@ -1,8 +1,13 @@
 import { useUser } from "@clerk/clerk-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { RichTextContent } from "../../components/editor/RichTextEditor";
 import { LikeButton } from "../../components/shared/LikeButton";
+import {
+	SpoilerBadge,
+	SpoilerWarning,
+} from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
 import { getReviewById, toggleReviewLike } from "../../lib/server/reviews";
 
@@ -12,11 +17,13 @@ export const Route = createFileRoute("/reviews/$id")({
 
 function ReviewDetailPage() {
 	const { id } = Route.useParams();
+	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
 	const [review, setReview] = useState<Awaited<
 		ReturnType<typeof getReviewById>
 	> | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [spoilerAccepted, setSpoilerAccepted] = useState(false);
 
 	useEffect(() => {
 		const loadReview = async () => {
@@ -32,6 +39,17 @@ function ReviewDetailPage() {
 		};
 		loadReview();
 	}, [id]);
+
+	// Handle escape key for spoiler warning
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && review?.containsSpoilers && !spoilerAccepted) {
+				navigate({ to: "/" });
+			}
+		};
+		window.addEventListener("keydown", handleEscape);
+		return () => window.removeEventListener("keydown", handleEscape);
+	}, [review, spoilerAccepted, navigate]);
 
 	if (isLoading) {
 		return (
@@ -56,11 +74,27 @@ function ReviewDetailPage() {
 		);
 	}
 
+	// Show spoiler warning if content has spoilers and user hasn't accepted
+	if (review.containsSpoilers && !spoilerAccepted) {
+		return (
+			<SpoilerWarning
+				title={review.title}
+				contentType="review"
+				onGoBack={() => navigate({ to: "/" })}
+				onContinue={() => setSpoilerAccepted(true)}
+			/>
+		);
+	}
+
 	const createdAt = new Date(review.createdAt).toLocaleDateString("en-US", {
 		month: "long",
 		day: "numeric",
 		year: "numeric",
 	});
+
+	// Check if content is JSON (TipTap) or plain text
+	const isJsonContent =
+		review.content.startsWith("{") || review.content.startsWith("[");
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
@@ -74,6 +108,17 @@ function ReviewDetailPage() {
 				</Link>
 
 				<article>
+					{/* Cover Image (if uploaded) */}
+					{review.coverImageUrl && (
+						<div className="aspect-video bg-gray-800 rounded-xl overflow-hidden mb-8">
+							<img
+								src={review.coverImageUrl}
+								alt={review.title}
+								className="w-full h-full object-cover"
+							/>
+						</div>
+					)}
+
 					{/* Header */}
 					<div className="flex flex-col md:flex-row gap-6 mb-8">
 						{/* Game Cover */}
@@ -97,9 +142,12 @@ function ReviewDetailPage() {
 							>
 								{review.game.name}
 							</Link>
-							<h1 className="text-3xl font-bold text-white mt-1 mb-4">
-								{review.title}
-							</h1>
+							<div className="flex items-start gap-3 mt-1 mb-4">
+								<h1 className="text-3xl font-bold text-white flex-1">
+									{review.title}
+								</h1>
+								{review.containsSpoilers && <SpoilerBadge />}
+							</div>
 							<StarRating rating={review.rating} size="lg" />
 
 							{/* Author */}
@@ -141,12 +189,16 @@ function ReviewDetailPage() {
 					</div>
 
 					{/* Content */}
-					<div className="prose prose-invert prose-lg max-w-none">
-						<div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-6 md:p-8">
-							<div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-								{review.content}
+					<div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-6 md:p-8">
+						{isJsonContent ? (
+							<RichTextContent content={review.content} />
+						) : (
+							<div className="prose prose-invert prose-lg max-w-none">
+								<div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+									{review.content}
+								</div>
 							</div>
-						</div>
+						)}
 					</div>
 
 					{/* Actions */}

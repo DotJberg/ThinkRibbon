@@ -1,8 +1,13 @@
 import { useUser } from "@clerk/clerk-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, Gamepad2, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { RichTextContent } from "../../components/editor/RichTextEditor";
 import { LikeButton } from "../../components/shared/LikeButton";
+import {
+	SpoilerBadge,
+	SpoilerWarning,
+} from "../../components/shared/SpoilerWarning";
 import { getArticleById, toggleArticleLike } from "../../lib/server/articles";
 
 export const Route = createFileRoute("/articles/$id")({
@@ -11,11 +16,13 @@ export const Route = createFileRoute("/articles/$id")({
 
 function ArticleDetailPage() {
 	const { id } = Route.useParams();
+	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
 	const [article, setArticle] = useState<Awaited<
 		ReturnType<typeof getArticleById>
 	> | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [spoilerAccepted, setSpoilerAccepted] = useState(false);
 
 	useEffect(() => {
 		const loadArticle = async () => {
@@ -31,6 +38,17 @@ function ArticleDetailPage() {
 		};
 		loadArticle();
 	}, [id]);
+
+	// Handle escape key for spoiler warning
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && article?.containsSpoilers && !spoilerAccepted) {
+				navigate({ to: "/" });
+			}
+		};
+		window.addEventListener("keydown", handleEscape);
+		return () => window.removeEventListener("keydown", handleEscape);
+	}, [article, spoilerAccepted, navigate]);
 
 	if (isLoading) {
 		return (
@@ -55,11 +73,27 @@ function ArticleDetailPage() {
 		);
 	}
 
+	// Show spoiler warning if content has spoilers and user hasn't accepted
+	if (article.containsSpoilers && !spoilerAccepted) {
+		return (
+			<SpoilerWarning
+				title={article.title}
+				contentType="article"
+				onGoBack={() => navigate({ to: "/" })}
+				onContinue={() => setSpoilerAccepted(true)}
+			/>
+		);
+	}
+
 	const createdAt = new Date(article.createdAt).toLocaleDateString("en-US", {
 		month: "long",
 		day: "numeric",
 		year: "numeric",
 	});
+
+	// Check if content is JSON (TipTap) or plain text
+	const isJsonContent =
+		article.content.startsWith("{") || article.content.startsWith("[");
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
@@ -86,9 +120,12 @@ function ArticleDetailPage() {
 
 					{/* Header */}
 					<header className="mb-8">
-						<h1 className="text-4xl font-bold text-white mb-4">
-							{article.title}
-						</h1>
+						<div className="flex items-start gap-3 mb-4">
+							<h1 className="text-4xl font-bold text-white flex-1">
+								{article.title}
+							</h1>
+							{article.containsSpoilers && <SpoilerBadge />}
+						</div>
 
 						{/* Author */}
 						<div className="flex items-center gap-3 mb-4">
@@ -153,12 +190,16 @@ function ArticleDetailPage() {
 					</header>
 
 					{/* Content */}
-					<div className="prose prose-invert prose-lg max-w-none">
-						<div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-6 md:p-8">
-							<div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-								{article.content}
+					<div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-6 md:p-8">
+						{isJsonContent ? (
+							<RichTextContent content={article.content} />
+						) : (
+							<div className="prose prose-invert prose-lg max-w-none">
+								<div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+									{article.content}
+								</div>
 							</div>
-						</div>
+						)}
 					</div>
 
 					{/* Actions */}

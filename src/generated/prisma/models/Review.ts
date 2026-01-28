@@ -38,8 +38,11 @@ export type ReviewMinAggregateOutputType = {
   id: string | null
   title: string | null
   content: string | null
+  contentJson: string | null
   rating: number | null
   coverImageUrl: string | null
+  coverFileKey: string | null
+  containsSpoilers: boolean | null
   published: boolean | null
   authorId: string | null
   gameId: string | null
@@ -51,8 +54,11 @@ export type ReviewMaxAggregateOutputType = {
   id: string | null
   title: string | null
   content: string | null
+  contentJson: string | null
   rating: number | null
   coverImageUrl: string | null
+  coverFileKey: string | null
+  containsSpoilers: boolean | null
   published: boolean | null
   authorId: string | null
   gameId: string | null
@@ -64,8 +70,11 @@ export type ReviewCountAggregateOutputType = {
   id: number
   title: number
   content: number
+  contentJson: number
   rating: number
   coverImageUrl: number
+  coverFileKey: number
+  containsSpoilers: number
   published: number
   authorId: number
   gameId: number
@@ -87,8 +96,11 @@ export type ReviewMinAggregateInputType = {
   id?: true
   title?: true
   content?: true
+  contentJson?: true
   rating?: true
   coverImageUrl?: true
+  coverFileKey?: true
+  containsSpoilers?: true
   published?: true
   authorId?: true
   gameId?: true
@@ -100,8 +112,11 @@ export type ReviewMaxAggregateInputType = {
   id?: true
   title?: true
   content?: true
+  contentJson?: true
   rating?: true
   coverImageUrl?: true
+  coverFileKey?: true
+  containsSpoilers?: true
   published?: true
   authorId?: true
   gameId?: true
@@ -113,8 +128,11 @@ export type ReviewCountAggregateInputType = {
   id?: true
   title?: true
   content?: true
+  contentJson?: true
   rating?: true
   coverImageUrl?: true
+  coverFileKey?: true
+  containsSpoilers?: true
   published?: true
   authorId?: true
   gameId?: true
@@ -213,8 +231,11 @@ export type ReviewGroupByOutputType = {
   id: string
   title: string
   content: string
+  contentJson: string | null
   rating: number
   coverImageUrl: string | null
+  coverFileKey: string | null
+  containsSpoilers: boolean
   published: boolean
   authorId: string
   gameId: string
@@ -249,8 +270,11 @@ export type ReviewWhereInput = {
   id?: Prisma.StringFilter<"Review"> | string
   title?: Prisma.StringFilter<"Review"> | string
   content?: Prisma.StringFilter<"Review"> | string
+  contentJson?: Prisma.StringNullableFilter<"Review"> | string | null
   rating?: Prisma.IntFilter<"Review"> | number
   coverImageUrl?: Prisma.StringNullableFilter<"Review"> | string | null
+  coverFileKey?: Prisma.StringNullableFilter<"Review"> | string | null
+  containsSpoilers?: Prisma.BoolFilter<"Review"> | boolean
   published?: Prisma.BoolFilter<"Review"> | boolean
   authorId?: Prisma.StringFilter<"Review"> | string
   gameId?: Prisma.StringFilter<"Review"> | string
@@ -258,6 +282,7 @@ export type ReviewWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Review"> | Date | string
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   game?: Prisma.XOR<Prisma.GameScalarRelationFilter, Prisma.GameWhereInput>
+  images?: Prisma.ReviewImageListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   likes?: Prisma.LikeListRelationFilter
 }
@@ -266,8 +291,11 @@ export type ReviewOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   rating?: Prisma.SortOrder
   coverImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  coverFileKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  containsSpoilers?: Prisma.SortOrder
   published?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   gameId?: Prisma.SortOrder
@@ -275,6 +303,7 @@ export type ReviewOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   author?: Prisma.UserOrderByWithRelationInput
   game?: Prisma.GameOrderByWithRelationInput
+  images?: Prisma.ReviewImageOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
   likes?: Prisma.LikeOrderByRelationAggregateInput
 }
@@ -287,8 +316,11 @@ export type ReviewWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ReviewWhereInput | Prisma.ReviewWhereInput[]
   title?: Prisma.StringFilter<"Review"> | string
   content?: Prisma.StringFilter<"Review"> | string
+  contentJson?: Prisma.StringNullableFilter<"Review"> | string | null
   rating?: Prisma.IntFilter<"Review"> | number
   coverImageUrl?: Prisma.StringNullableFilter<"Review"> | string | null
+  coverFileKey?: Prisma.StringNullableFilter<"Review"> | string | null
+  containsSpoilers?: Prisma.BoolFilter<"Review"> | boolean
   published?: Prisma.BoolFilter<"Review"> | boolean
   authorId?: Prisma.StringFilter<"Review"> | string
   gameId?: Prisma.StringFilter<"Review"> | string
@@ -296,6 +328,7 @@ export type ReviewWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Review"> | Date | string
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   game?: Prisma.XOR<Prisma.GameScalarRelationFilter, Prisma.GameWhereInput>
+  images?: Prisma.ReviewImageListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   likes?: Prisma.LikeListRelationFilter
 }, "id" | "authorId_gameId">
@@ -304,8 +337,11 @@ export type ReviewOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   rating?: Prisma.SortOrder
   coverImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  coverFileKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  containsSpoilers?: Prisma.SortOrder
   published?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   gameId?: Prisma.SortOrder
@@ -325,8 +361,11 @@ export type ReviewScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Review"> | string
   title?: Prisma.StringWithAggregatesFilter<"Review"> | string
   content?: Prisma.StringWithAggregatesFilter<"Review"> | string
+  contentJson?: Prisma.StringNullableWithAggregatesFilter<"Review"> | string | null
   rating?: Prisma.IntWithAggregatesFilter<"Review"> | number
   coverImageUrl?: Prisma.StringNullableWithAggregatesFilter<"Review"> | string | null
+  coverFileKey?: Prisma.StringNullableWithAggregatesFilter<"Review"> | string | null
+  containsSpoilers?: Prisma.BoolWithAggregatesFilter<"Review"> | boolean
   published?: Prisma.BoolWithAggregatesFilter<"Review"> | boolean
   authorId?: Prisma.StringWithAggregatesFilter<"Review"> | string
   gameId?: Prisma.StringWithAggregatesFilter<"Review"> | string
@@ -338,13 +377,17 @@ export type ReviewCreateInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutReviewsInput
   game: Prisma.GameCreateNestedOneWithoutReviewsInput
+  images?: Prisma.ReviewImageCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeCreateNestedManyWithoutReviewInput
 }
@@ -353,13 +396,17 @@ export type ReviewUncheckedCreateInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   authorId: string
   gameId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  images?: Prisma.ReviewImageUncheckedCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutReviewInput
 }
@@ -368,13 +415,17 @@ export type ReviewUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutReviewsNestedInput
   game?: Prisma.GameUpdateOneRequiredWithoutReviewsNestedInput
+  images?: Prisma.ReviewImageUpdateManyWithoutReviewNestedInput
   comments?: Prisma.CommentUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUpdateManyWithoutReviewNestedInput
 }
@@ -383,13 +434,17 @@ export type ReviewUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   gameId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ReviewImageUncheckedUpdateManyWithoutReviewNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutReviewNestedInput
 }
@@ -398,8 +453,11 @@ export type ReviewCreateManyInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   authorId: string
   gameId: string
@@ -411,8 +469,11 @@ export type ReviewUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -422,8 +483,11 @@ export type ReviewUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   gameId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -450,8 +514,11 @@ export type ReviewCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentJson?: Prisma.SortOrder
   rating?: Prisma.SortOrder
   coverImageUrl?: Prisma.SortOrder
+  coverFileKey?: Prisma.SortOrder
+  containsSpoilers?: Prisma.SortOrder
   published?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   gameId?: Prisma.SortOrder
@@ -467,8 +534,11 @@ export type ReviewMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentJson?: Prisma.SortOrder
   rating?: Prisma.SortOrder
   coverImageUrl?: Prisma.SortOrder
+  coverFileKey?: Prisma.SortOrder
+  containsSpoilers?: Prisma.SortOrder
   published?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   gameId?: Prisma.SortOrder
@@ -480,8 +550,11 @@ export type ReviewMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentJson?: Prisma.SortOrder
   rating?: Prisma.SortOrder
   coverImageUrl?: Prisma.SortOrder
+  coverFileKey?: Prisma.SortOrder
+  containsSpoilers?: Prisma.SortOrder
   published?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   gameId?: Prisma.SortOrder
@@ -496,6 +569,11 @@ export type ReviewSumOrderByAggregateInput = {
 export type ReviewNullableScalarRelationFilter = {
   is?: Prisma.ReviewWhereInput | null
   isNot?: Prisma.ReviewWhereInput | null
+}
+
+export type ReviewScalarRelationFilter = {
+  is?: Prisma.ReviewWhereInput
+  isNot?: Prisma.ReviewWhereInput
 }
 
 export type ReviewCreateNestedManyWithoutAuthorInput = {
@@ -614,16 +692,34 @@ export type ReviewUpdateOneWithoutLikesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ReviewUpdateToOneWithWhereWithoutLikesInput, Prisma.ReviewUpdateWithoutLikesInput>, Prisma.ReviewUncheckedUpdateWithoutLikesInput>
 }
 
+export type ReviewCreateNestedOneWithoutImagesInput = {
+  create?: Prisma.XOR<Prisma.ReviewCreateWithoutImagesInput, Prisma.ReviewUncheckedCreateWithoutImagesInput>
+  connectOrCreate?: Prisma.ReviewCreateOrConnectWithoutImagesInput
+  connect?: Prisma.ReviewWhereUniqueInput
+}
+
+export type ReviewUpdateOneRequiredWithoutImagesNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewCreateWithoutImagesInput, Prisma.ReviewUncheckedCreateWithoutImagesInput>
+  connectOrCreate?: Prisma.ReviewCreateOrConnectWithoutImagesInput
+  upsert?: Prisma.ReviewUpsertWithoutImagesInput
+  connect?: Prisma.ReviewWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ReviewUpdateToOneWithWhereWithoutImagesInput, Prisma.ReviewUpdateWithoutImagesInput>, Prisma.ReviewUncheckedUpdateWithoutImagesInput>
+}
+
 export type ReviewCreateWithoutAuthorInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   game: Prisma.GameCreateNestedOneWithoutReviewsInput
+  images?: Prisma.ReviewImageCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeCreateNestedManyWithoutReviewInput
 }
@@ -632,12 +728,16 @@ export type ReviewUncheckedCreateWithoutAuthorInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   gameId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  images?: Prisma.ReviewImageUncheckedCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutReviewInput
 }
@@ -675,8 +775,11 @@ export type ReviewScalarWhereInput = {
   id?: Prisma.StringFilter<"Review"> | string
   title?: Prisma.StringFilter<"Review"> | string
   content?: Prisma.StringFilter<"Review"> | string
+  contentJson?: Prisma.StringNullableFilter<"Review"> | string | null
   rating?: Prisma.IntFilter<"Review"> | number
   coverImageUrl?: Prisma.StringNullableFilter<"Review"> | string | null
+  coverFileKey?: Prisma.StringNullableFilter<"Review"> | string | null
+  containsSpoilers?: Prisma.BoolFilter<"Review"> | boolean
   published?: Prisma.BoolFilter<"Review"> | boolean
   authorId?: Prisma.StringFilter<"Review"> | string
   gameId?: Prisma.StringFilter<"Review"> | string
@@ -688,12 +791,16 @@ export type ReviewCreateWithoutGameInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutReviewsInput
+  images?: Prisma.ReviewImageCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeCreateNestedManyWithoutReviewInput
 }
@@ -702,12 +809,16 @@ export type ReviewUncheckedCreateWithoutGameInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   authorId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  images?: Prisma.ReviewImageUncheckedCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutReviewInput
 }
@@ -742,13 +853,17 @@ export type ReviewCreateWithoutCommentsInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutReviewsInput
   game: Prisma.GameCreateNestedOneWithoutReviewsInput
+  images?: Prisma.ReviewImageCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeCreateNestedManyWithoutReviewInput
 }
 
@@ -756,13 +871,17 @@ export type ReviewUncheckedCreateWithoutCommentsInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   authorId: string
   gameId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  images?: Prisma.ReviewImageUncheckedCreateNestedManyWithoutReviewInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutReviewInput
 }
 
@@ -786,13 +905,17 @@ export type ReviewUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutReviewsNestedInput
   game?: Prisma.GameUpdateOneRequiredWithoutReviewsNestedInput
+  images?: Prisma.ReviewImageUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUpdateManyWithoutReviewNestedInput
 }
 
@@ -800,13 +923,17 @@ export type ReviewUncheckedUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   gameId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ReviewImageUncheckedUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutReviewNestedInput
 }
 
@@ -814,13 +941,17 @@ export type ReviewCreateWithoutLikesInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutReviewsInput
   game: Prisma.GameCreateNestedOneWithoutReviewsInput
+  images?: Prisma.ReviewImageCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentCreateNestedManyWithoutReviewInput
 }
 
@@ -828,13 +959,17 @@ export type ReviewUncheckedCreateWithoutLikesInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   authorId: string
   gameId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  images?: Prisma.ReviewImageUncheckedCreateNestedManyWithoutReviewInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutReviewInput
 }
 
@@ -858,13 +993,17 @@ export type ReviewUpdateWithoutLikesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutReviewsNestedInput
   game?: Prisma.GameUpdateOneRequiredWithoutReviewsNestedInput
+  images?: Prisma.ReviewImageUpdateManyWithoutReviewNestedInput
   comments?: Prisma.CommentUpdateManyWithoutReviewNestedInput
 }
 
@@ -872,22 +1011,117 @@ export type ReviewUncheckedUpdateWithoutLikesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  gameId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ReviewImageUncheckedUpdateManyWithoutReviewNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutReviewNestedInput
+}
+
+export type ReviewCreateWithoutImagesInput = {
+  id?: string
+  title: string
+  content: string
+  contentJson?: string | null
+  rating: number
+  coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
+  published?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  author: Prisma.UserCreateNestedOneWithoutReviewsInput
+  game: Prisma.GameCreateNestedOneWithoutReviewsInput
+  comments?: Prisma.CommentCreateNestedManyWithoutReviewInput
+  likes?: Prisma.LikeCreateNestedManyWithoutReviewInput
+}
+
+export type ReviewUncheckedCreateWithoutImagesInput = {
+  id?: string
+  title: string
+  content: string
+  contentJson?: string | null
+  rating: number
+  coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
+  published?: boolean
+  authorId: string
+  gameId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutReviewInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutReviewInput
+}
+
+export type ReviewCreateOrConnectWithoutImagesInput = {
+  where: Prisma.ReviewWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReviewCreateWithoutImagesInput, Prisma.ReviewUncheckedCreateWithoutImagesInput>
+}
+
+export type ReviewUpsertWithoutImagesInput = {
+  update: Prisma.XOR<Prisma.ReviewUpdateWithoutImagesInput, Prisma.ReviewUncheckedUpdateWithoutImagesInput>
+  create: Prisma.XOR<Prisma.ReviewCreateWithoutImagesInput, Prisma.ReviewUncheckedCreateWithoutImagesInput>
+  where?: Prisma.ReviewWhereInput
+}
+
+export type ReviewUpdateToOneWithWhereWithoutImagesInput = {
+  where?: Prisma.ReviewWhereInput
+  data: Prisma.XOR<Prisma.ReviewUpdateWithoutImagesInput, Prisma.ReviewUncheckedUpdateWithoutImagesInput>
+}
+
+export type ReviewUpdateWithoutImagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.IntFieldUpdateOperationsInput | number
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  author?: Prisma.UserUpdateOneRequiredWithoutReviewsNestedInput
+  game?: Prisma.GameUpdateOneRequiredWithoutReviewsNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutReviewNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutReviewNestedInput
+}
+
+export type ReviewUncheckedUpdateWithoutImagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.IntFieldUpdateOperationsInput | number
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   gameId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutReviewNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutReviewNestedInput
 }
 
 export type ReviewCreateManyAuthorInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   gameId: string
   createdAt?: Date | string
@@ -898,12 +1132,16 @@ export type ReviewUpdateWithoutAuthorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   game?: Prisma.GameUpdateOneRequiredWithoutReviewsNestedInput
+  images?: Prisma.ReviewImageUpdateManyWithoutReviewNestedInput
   comments?: Prisma.CommentUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUpdateManyWithoutReviewNestedInput
 }
@@ -912,12 +1150,16 @@ export type ReviewUncheckedUpdateWithoutAuthorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gameId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ReviewImageUncheckedUpdateManyWithoutReviewNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutReviewNestedInput
 }
@@ -926,8 +1168,11 @@ export type ReviewUncheckedUpdateManyWithoutAuthorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gameId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -938,8 +1183,11 @@ export type ReviewCreateManyGameInput = {
   id?: string
   title: string
   content: string
+  contentJson?: string | null
   rating: number
   coverImageUrl?: string | null
+  coverFileKey?: string | null
+  containsSpoilers?: boolean
   published?: boolean
   authorId: string
   createdAt?: Date | string
@@ -950,12 +1198,16 @@ export type ReviewUpdateWithoutGameInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutReviewsNestedInput
+  images?: Prisma.ReviewImageUpdateManyWithoutReviewNestedInput
   comments?: Prisma.CommentUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUpdateManyWithoutReviewNestedInput
 }
@@ -964,12 +1216,16 @@ export type ReviewUncheckedUpdateWithoutGameInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ReviewImageUncheckedUpdateManyWithoutReviewNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutReviewNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutReviewNestedInput
 }
@@ -978,8 +1234,11 @@ export type ReviewUncheckedUpdateManyWithoutGameInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.IntFieldUpdateOperationsInput | number
   coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  containsSpoilers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -992,11 +1251,13 @@ export type ReviewUncheckedUpdateManyWithoutGameInput = {
  */
 
 export type ReviewCountOutputType = {
+  images: number
   comments: number
   likes: number
 }
 
 export type ReviewCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  images?: boolean | ReviewCountOutputTypeCountImagesArgs
   comments?: boolean | ReviewCountOutputTypeCountCommentsArgs
   likes?: boolean | ReviewCountOutputTypeCountLikesArgs
 }
@@ -1009,6 +1270,13 @@ export type ReviewCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Select specific fields to fetch from the ReviewCountOutputType
    */
   select?: Prisma.ReviewCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ReviewCountOutputType without action
+ */
+export type ReviewCountOutputTypeCountImagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReviewImageWhereInput
 }
 
 /**
@@ -1030,8 +1298,11 @@ export type ReviewSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   id?: boolean
   title?: boolean
   content?: boolean
+  contentJson?: boolean
   rating?: boolean
   coverImageUrl?: boolean
+  coverFileKey?: boolean
+  containsSpoilers?: boolean
   published?: boolean
   authorId?: boolean
   gameId?: boolean
@@ -1039,6 +1310,7 @@ export type ReviewSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   updatedAt?: boolean
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
+  images?: boolean | Prisma.Review$imagesArgs<ExtArgs>
   comments?: boolean | Prisma.Review$commentsArgs<ExtArgs>
   likes?: boolean | Prisma.Review$likesArgs<ExtArgs>
   _count?: boolean | Prisma.ReviewCountOutputTypeDefaultArgs<ExtArgs>
@@ -1048,8 +1320,11 @@ export type ReviewSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   title?: boolean
   content?: boolean
+  contentJson?: boolean
   rating?: boolean
   coverImageUrl?: boolean
+  coverFileKey?: boolean
+  containsSpoilers?: boolean
   published?: boolean
   authorId?: boolean
   gameId?: boolean
@@ -1063,8 +1338,11 @@ export type ReviewSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   title?: boolean
   content?: boolean
+  contentJson?: boolean
   rating?: boolean
   coverImageUrl?: boolean
+  coverFileKey?: boolean
+  containsSpoilers?: boolean
   published?: boolean
   authorId?: boolean
   gameId?: boolean
@@ -1078,8 +1356,11 @@ export type ReviewSelectScalar = {
   id?: boolean
   title?: boolean
   content?: boolean
+  contentJson?: boolean
   rating?: boolean
   coverImageUrl?: boolean
+  coverFileKey?: boolean
+  containsSpoilers?: boolean
   published?: boolean
   authorId?: boolean
   gameId?: boolean
@@ -1087,10 +1368,11 @@ export type ReviewSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "content" | "rating" | "coverImageUrl" | "published" | "authorId" | "gameId" | "createdAt" | "updatedAt", ExtArgs["result"]["review"]>
+export type ReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "content" | "contentJson" | "rating" | "coverImageUrl" | "coverFileKey" | "containsSpoilers" | "published" | "authorId" | "gameId" | "createdAt" | "updatedAt", ExtArgs["result"]["review"]>
 export type ReviewInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
+  images?: boolean | Prisma.Review$imagesArgs<ExtArgs>
   comments?: boolean | Prisma.Review$commentsArgs<ExtArgs>
   likes?: boolean | Prisma.Review$likesArgs<ExtArgs>
   _count?: boolean | Prisma.ReviewCountOutputTypeDefaultArgs<ExtArgs>
@@ -1109,6 +1391,7 @@ export type $ReviewPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   objects: {
     author: Prisma.$UserPayload<ExtArgs>
     game: Prisma.$GamePayload<ExtArgs>
+    images: Prisma.$ReviewImagePayload<ExtArgs>[]
     comments: Prisma.$CommentPayload<ExtArgs>[]
     likes: Prisma.$LikePayload<ExtArgs>[]
   }
@@ -1116,8 +1399,11 @@ export type $ReviewPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     id: string
     title: string
     content: string
+    contentJson: string | null
     rating: number
     coverImageUrl: string | null
+    coverFileKey: string | null
+    containsSpoilers: boolean
     published: boolean
     authorId: string
     gameId: string
@@ -1519,6 +1805,7 @@ export interface Prisma__ReviewClient<T, Null = never, ExtArgs extends runtime.T
   readonly [Symbol.toStringTag]: "PrismaPromise"
   author<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   game<T extends Prisma.GameDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GameDefaultArgs<ExtArgs>>): Prisma.Prisma__GameClient<runtime.Types.Result.GetResult<Prisma.$GamePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  images<T extends Prisma.Review$imagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Review$imagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Review$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Review$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   likes<T extends Prisma.Review$likesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Review$likesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1553,8 +1840,11 @@ export interface ReviewFieldRefs {
   readonly id: Prisma.FieldRef<"Review", 'String'>
   readonly title: Prisma.FieldRef<"Review", 'String'>
   readonly content: Prisma.FieldRef<"Review", 'String'>
+  readonly contentJson: Prisma.FieldRef<"Review", 'String'>
   readonly rating: Prisma.FieldRef<"Review", 'Int'>
   readonly coverImageUrl: Prisma.FieldRef<"Review", 'String'>
+  readonly coverFileKey: Prisma.FieldRef<"Review", 'String'>
+  readonly containsSpoilers: Prisma.FieldRef<"Review", 'Boolean'>
   readonly published: Prisma.FieldRef<"Review", 'Boolean'>
   readonly authorId: Prisma.FieldRef<"Review", 'String'>
   readonly gameId: Prisma.FieldRef<"Review", 'String'>
@@ -1953,6 +2243,30 @@ export type ReviewDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Reviews to delete.
    */
   limit?: number
+}
+
+/**
+ * Review.images
+ */
+export type Review$imagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewImage
+   */
+  select?: Prisma.ReviewImageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewImage
+   */
+  omit?: Prisma.ReviewImageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewImageInclude<ExtArgs> | null
+  where?: Prisma.ReviewImageWhereInput
+  orderBy?: Prisma.ReviewImageOrderByWithRelationInput | Prisma.ReviewImageOrderByWithRelationInput[]
+  cursor?: Prisma.ReviewImageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReviewImageScalarFieldEnum | Prisma.ReviewImageScalarFieldEnum[]
 }
 
 /**

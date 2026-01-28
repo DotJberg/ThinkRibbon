@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Calendar, Gamepad2, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
+import { SpoilerBadge } from "../shared/SpoilerWarning";
 
 interface ArticleCardProps {
 	article: {
@@ -10,6 +11,7 @@ interface ArticleCardProps {
 		excerpt: string | null;
 		content: string;
 		coverImageUrl: string | null;
+		containsSpoilers?: boolean;
 		createdAt: Date | string;
 		author: {
 			id: string;
@@ -45,7 +47,9 @@ export function ArticleCard({
 		typeof article.createdAt === "string"
 			? new Date(article.createdAt)
 			: article.createdAt;
-	const excerpt = article.excerpt || article.content.slice(0, 200);
+
+	// Only use excerpt field, don't slice content (might be JSON)
+	const excerpt = article.excerpt;
 
 	return (
 		<article className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden hover:border-gray-600/50 transition-colors group">
@@ -64,16 +68,21 @@ export function ArticleCard({
 
 			<div className="p-4">
 				{/* Title & Excerpt */}
-				<Link
-					to="/articles/$id"
-					params={{ id: article.id }}
-					className="block mb-2"
-				>
-					<h3 className="text-xl font-bold text-white hover:text-purple-400 transition-colors line-clamp-2">
-						{article.title}
-					</h3>
-				</Link>
-				<p className="text-gray-400 text-sm line-clamp-2 mb-3">{excerpt}...</p>
+				<div className="flex items-start gap-2 mb-2">
+					<Link
+						to="/articles/$id"
+						params={{ id: article.id }}
+						className="block flex-1"
+					>
+						<h3 className="text-xl font-bold text-white hover:text-purple-400 transition-colors line-clamp-2">
+							{article.title}
+						</h3>
+					</Link>
+					{article.containsSpoilers && <SpoilerBadge />}
+				</div>
+				{excerpt && (
+					<p className="text-gray-400 text-sm line-clamp-2 mb-3">{excerpt}</p>
+				)}
 
 				{/* Games */}
 				{article.games.length > 0 && (

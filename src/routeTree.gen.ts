@@ -13,6 +13,7 @@ import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
+import { Route as DraftsIndexRouteImport } from './routes/drafts/index'
 import { Route as ReviewsNewRouteImport } from './routes/reviews/new'
 import { Route as ReviewsIdRouteImport } from './routes/reviews/$id'
 import { Route as ProfileUsernameRouteImport } from './routes/profile/$username'
@@ -21,6 +22,8 @@ import { Route as GamesSlugRouteImport } from './routes/games/$slug'
 import { Route as ArticlesNewRouteImport } from './routes/articles/new'
 import { Route as ArticlesIdRouteImport } from './routes/articles/$id'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as ReviewsEditIdRouteImport } from './routes/reviews/edit.$id'
+import { Route as ArticlesEditIdRouteImport } from './routes/articles/edit.$id'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -40,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
 const GamesIndexRoute = GamesIndexRouteImport.update({
   id: '/games/',
   path: '/games/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DraftsIndexRoute = DraftsIndexRouteImport.update({
+  id: '/drafts/',
+  path: '/drafts/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReviewsNewRoute = ReviewsNewRouteImport.update({
@@ -82,6 +90,16 @@ const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   path: '/api/uploadthing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewsEditIdRoute = ReviewsEditIdRouteImport.update({
+  id: '/reviews/edit/$id',
+  path: '/reviews/edit/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArticlesEditIdRoute = ArticlesEditIdRouteImport.update({
+  id: '/articles/edit/$id',
+  path: '/articles/edit/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,7 +113,10 @@ export interface FileRoutesByFullPath {
   '/profile/$username': typeof ProfileUsernameRoute
   '/reviews/$id': typeof ReviewsIdRoute
   '/reviews/new': typeof ReviewsNewRoute
+  '/drafts/': typeof DraftsIndexRoute
   '/games/': typeof GamesIndexRoute
+  '/articles/edit/$id': typeof ArticlesEditIdRoute
+  '/reviews/edit/$id': typeof ReviewsEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,7 +130,10 @@ export interface FileRoutesByTo {
   '/profile/$username': typeof ProfileUsernameRoute
   '/reviews/$id': typeof ReviewsIdRoute
   '/reviews/new': typeof ReviewsNewRoute
+  '/drafts': typeof DraftsIndexRoute
   '/games': typeof GamesIndexRoute
+  '/articles/edit/$id': typeof ArticlesEditIdRoute
+  '/reviews/edit/$id': typeof ReviewsEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,7 +148,10 @@ export interface FileRoutesById {
   '/profile/$username': typeof ProfileUsernameRoute
   '/reviews/$id': typeof ReviewsIdRoute
   '/reviews/new': typeof ReviewsNewRoute
+  '/drafts/': typeof DraftsIndexRoute
   '/games/': typeof GamesIndexRoute
+  '/articles/edit/$id': typeof ArticlesEditIdRoute
+  '/reviews/edit/$id': typeof ReviewsEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,7 +167,10 @@ export interface FileRouteTypes {
     | '/profile/$username'
     | '/reviews/$id'
     | '/reviews/new'
+    | '/drafts/'
     | '/games/'
+    | '/articles/edit/$id'
+    | '/reviews/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,7 +184,10 @@ export interface FileRouteTypes {
     | '/profile/$username'
     | '/reviews/$id'
     | '/reviews/new'
+    | '/drafts'
     | '/games'
+    | '/articles/edit/$id'
+    | '/reviews/edit/$id'
   id:
     | '__root__'
     | '/'
@@ -168,7 +201,10 @@ export interface FileRouteTypes {
     | '/profile/$username'
     | '/reviews/$id'
     | '/reviews/new'
+    | '/drafts/'
     | '/games/'
+    | '/articles/edit/$id'
+    | '/reviews/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,7 +219,10 @@ export interface RootRouteChildren {
   ProfileUsernameRoute: typeof ProfileUsernameRoute
   ReviewsIdRoute: typeof ReviewsIdRoute
   ReviewsNewRoute: typeof ReviewsNewRoute
+  DraftsIndexRoute: typeof DraftsIndexRoute
   GamesIndexRoute: typeof GamesIndexRoute
+  ArticlesEditIdRoute: typeof ArticlesEditIdRoute
+  ReviewsEditIdRoute: typeof ReviewsEditIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -214,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/games'
       fullPath: '/games/'
       preLoaderRoute: typeof GamesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/drafts/': {
+      id: '/drafts/'
+      path: '/drafts'
+      fullPath: '/drafts/'
+      preLoaderRoute: typeof DraftsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reviews/new': {
@@ -272,6 +318,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadthingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reviews/edit/$id': {
+      id: '/reviews/edit/$id'
+      path: '/reviews/edit/$id'
+      fullPath: '/reviews/edit/$id'
+      preLoaderRoute: typeof ReviewsEditIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/articles/edit/$id': {
+      id: '/articles/edit/$id'
+      path: '/articles/edit/$id'
+      fullPath: '/articles/edit/$id'
+      preLoaderRoute: typeof ArticlesEditIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -287,7 +347,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileUsernameRoute: ProfileUsernameRoute,
   ReviewsIdRoute: ReviewsIdRoute,
   ReviewsNewRoute: ReviewsNewRoute,
+  DraftsIndexRoute: DraftsIndexRoute,
   GamesIndexRoute: GamesIndexRoute,
+  ArticlesEditIdRoute: ArticlesEditIdRoute,
+  ReviewsEditIdRoute: ReviewsEditIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

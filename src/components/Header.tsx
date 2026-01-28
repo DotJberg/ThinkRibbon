@@ -50,7 +50,7 @@ export default function Header() {
 						<>
 							<Link
 								to="/reviews/new"
-								search={{ gameId: undefined }}
+								search={{ gameId: undefined, draftId: undefined }}
 								className="text-gray-300 hover:text-white transition-colors font-medium"
 								activeProps={{ className: "text-white font-medium" }}
 							>
@@ -58,6 +58,7 @@ export default function Header() {
 							</Link>
 							<Link
 								to="/articles/new"
+								search={{ draftId: undefined }}
 								className="text-gray-300 hover:text-white transition-colors font-medium"
 								activeProps={{ className: "text-white font-medium" }}
 							>
@@ -142,7 +143,7 @@ export default function Header() {
 
 							<Link
 								to="/reviews/new"
-								search={{ gameId: undefined }}
+								search={{ gameId: undefined, draftId: undefined }}
 								onClick={() => setIsOpen(false)}
 								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 								activeProps={{
@@ -156,6 +157,7 @@ export default function Header() {
 
 							<Link
 								to="/articles/new"
+								search={{ draftId: undefined }}
 								onClick={() => setIsOpen(false)}
 								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 								activeProps={{

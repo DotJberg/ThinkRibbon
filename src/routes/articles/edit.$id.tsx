@@ -1,44 +1,27 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-	ArrowLeft,
-	Cloud,
-	FileText,
-	Gamepad2,
-	Save,
-	Search,
-	X,
-} from "lucide-react";
+import { ArrowLeft, Cloud, Gamepad2, Save, Search, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
-import { NavigationWarning } from "../../components/editor/NavigationWarning";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
-import { createArticle } from "../../lib/server/articles";
-import {
-	deleteArticleDraft,
-	getArticleDrafts,
-	saveArticleDraft,
-} from "../../lib/server/drafts";
+import { getArticleById, updateArticle } from "../../lib/server/articles";
 import { searchGames } from "../../lib/server/games";
 
-export const Route = createFileRoute("/articles/new")({
-	component: NewArticlePage,
-	validateSearch: (search: Record<string, unknown>) => ({
-		draftId: search.draftId as string | undefined,
-	}),
+export const Route = createFileRoute("/articles/edit/$id")({
+	component: EditArticlePage,
 });
 
-function NewArticlePage() {
+function EditArticlePage() {
+	const { id } = Route.useParams();
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
-	const { draftId: initialDraftId } = Route.useSearch();
-	const id = useId();
+	const formId = useId();
 
 	// Form state
 	const [title, setTitle] = useState("");
-	const [content, setContent] = useState(""); // TipTap JSON string
+	const [content, setContent] = useState(""); // TipTap JSON string or plain text
 	const [excerpt, setExcerpt] = useState("");
 	const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
@@ -54,78 +37,61 @@ function NewArticlePage() {
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
 
-	// Draft state
-	const [draftId, setDraftId] = useState<string | undefined>(initialDraftId);
+	// Loading state
+	const [isLoading, setIsLoading] = useState(true);
 	const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
 		"idle",
 	);
 	const [lastSaved, setLastSaved] = useState<Date | null>(null);
-	const [showDraftPicker, setShowDraftPicker] = useState(false);
-	const [availableDrafts, setAvailableDrafts] = useState<
-		Awaited<ReturnType<typeof getArticleDrafts>>
-	>([]);
-
-	// Submission state
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [hasPublished, setHasPublished] = useState(false);
 
 	// Auto-save debounce ref
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const initialLoadRef = useRef(true);
 
-	// Track if there are unsaved changes (for navigation warning)
-	const hasUnsavedChanges =
-		!hasPublished && (title.trim() !== "" || content.trim() !== "");
-
-	// Load draft if draftId is provided
-	// biome-ignore lint/correctness/useExhaustiveDependencies: loadDraft is defined later and would cause infinite loop if included
+	// Load existing article
 	useEffect(() => {
-		if (initialDraftId && user) {
-			loadDraft(initialDraftId);
-		}
-	}, [initialDraftId, user]);
-
-	// Load available drafts
-	useEffect(() => {
-		if (user && !initialDraftId) {
-			getArticleDrafts({ data: user.id }).then((drafts) => {
-				setAvailableDrafts(drafts);
-				if (drafts.length > 0 && !draftId) {
-					setShowDraftPicker(true);
+		const loadArticle = async () => {
+			setIsLoading(true);
+			try {
+				const article = await getArticleById({ data: id });
+				if (article) {
+					setTitle(article.title);
+					setContent(article.content);
+					setExcerpt(article.excerpt || "");
+					setCoverImageUrl(article.coverImageUrl);
+					setContainsSpoilers(article.containsSpoilers || false);
+					setSelectedGames(
+						article.games.map(({ game }) => ({
+							id: game.id,
+							name: game.name,
+							coverUrl: game.coverUrl,
+						})),
+					);
 				}
-			});
-		}
-	}, [user, initialDraftId, draftId]);
-
-	const loadDraft = async (id: string) => {
-		if (!user) return;
-		try {
-			const drafts = await getArticleDrafts({ data: user.id });
-			const draft = drafts.find((d) => d.id === id);
-			if (draft) {
-				setTitle(draft.title || "");
-				setContent(draft.content || "");
-				setExcerpt(draft.excerpt || "");
-				setCoverImageUrl(draft.coverImageUrl);
-				setCoverFileKey(draft.coverFileKey);
-				setContainsSpoilers(draft.containsSpoilers);
-				setDraftId(draft.id);
-				// Note: Game selection from draft.gameIds would need additional logic to fetch game details
-				toast.success("Draft loaded");
+			} catch (error) {
+				console.error("Failed to load article:", error);
+				toast.error("Failed to load article");
+			} finally {
+				setIsLoading(false);
+				// Mark initial load complete after a short delay
+				setTimeout(() => {
+					initialLoadRef.current = false;
+				}, 100);
 			}
-		} catch (error) {
-			console.error("Failed to load draft:", error);
-		}
-	};
+		};
+		loadArticle();
+	}, [id]);
 
 	// Auto-save function
 	const autoSave = useCallback(async () => {
-		if (!user || !title.trim()) return;
+		if (!user || !title.trim() || initialLoadRef.current) return;
 
 		setSaveStatus("saving");
 		try {
-			const result = await saveArticleDraft({
+			await updateArticle({
 				data: {
-					draftId,
+					articleId: id,
 					title,
 					content,
 					excerpt: excerpt || undefined,
@@ -133,10 +99,9 @@ function NewArticlePage() {
 					coverFileKey: coverFileKey || undefined,
 					containsSpoilers,
 					gameIds: selectedGames.map((g) => g.id),
-					authorClerkId: user.id,
+					clerkId: user.id,
 				},
 			});
-			setDraftId(result.id);
 			setLastSaved(new Date());
 			setSaveStatus("saved");
 		} catch (error) {
@@ -145,7 +110,7 @@ function NewArticlePage() {
 		}
 	}, [
 		user,
-		draftId,
+		id,
 		title,
 		content,
 		excerpt,
@@ -157,7 +122,7 @@ function NewArticlePage() {
 
 	// Debounced auto-save on content changes
 	useEffect(() => {
-		if (!title.trim()) return;
+		if (!title.trim() || initialLoadRef.current) return;
 
 		if (saveTimeoutRef.current) {
 			clearTimeout(saveTimeoutRef.current);
@@ -231,47 +196,28 @@ function NewArticlePage() {
 
 		setIsSubmitting(true);
 		try {
-			const article = await createArticle({
+			await updateArticle({
 				data: {
+					articleId: id,
 					title,
-					content, // This is now JSON string from TipTap
+					content,
 					excerpt: excerpt || undefined,
 					coverImageUrl: coverImageUrl || undefined,
 					coverFileKey: coverFileKey || undefined,
 					containsSpoilers,
 					gameIds: selectedGames.map((g) => g.id),
 					published: true,
-					authorClerkId: user.id,
+					clerkId: user.id,
 				},
 			});
 
-			// Delete the draft if it exists
-			if (draftId) {
-				await deleteArticleDraft({ data: { draftId, clerkId: user.id } });
-			}
-
-			setHasPublished(true);
-			navigate({ to: "/articles/$id", params: { id: article.id } });
+			toast.success("Article updated");
+			navigate({ to: "/articles/$id", params: { id } });
 		} catch (error) {
-			console.error("Failed to create article:", error);
-			toast.error("Failed to publish article");
+			console.error("Failed to update article:", error);
+			toast.error("Failed to update article");
 		} finally {
 			setIsSubmitting(false);
-		}
-	};
-
-	const handleDraftSelect = (selectedDraftId: string) => {
-		loadDraft(selectedDraftId);
-		setShowDraftPicker(false);
-	};
-
-	const handleStartFresh = () => {
-		setShowDraftPicker(false);
-	};
-
-	const handleDeleteDraftOnLeave = async () => {
-		if (draftId && user) {
-			await deleteArticleDraft({ data: { draftId, clerkId: user.id } });
 		}
 	};
 
@@ -280,7 +226,7 @@ function NewArticlePage() {
 			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold text-white mb-4">
-						Sign in to write an article
+						Sign in to edit this article
 					</h1>
 					<Link to="/sign-in" className="text-purple-400 hover:underline">
 						Sign In
@@ -290,52 +236,10 @@ function NewArticlePage() {
 		);
 	}
 
-	// Draft picker modal
-	if (showDraftPicker && availableDrafts.length > 0) {
+	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center p-4">
-				<div className="bg-gray-900 border border-gray-700 rounded-xl max-w-lg w-full p-6">
-					<div className="flex items-center gap-3 mb-6">
-						<FileText className="text-purple-400" size={24} />
-						<h2 className="text-xl font-semibold text-white">
-							Resume a Draft?
-						</h2>
-					</div>
-
-					<p className="text-gray-400 mb-4">
-						You have {availableDrafts.length} saved draft
-						{availableDrafts.length > 1 ? "s" : ""}. Would you like to continue
-						where you left off?
-					</p>
-
-					<div className="space-y-2 mb-6 max-h-64 overflow-y-auto">
-						{availableDrafts.map((draft) => (
-							<button
-								key={draft.id}
-								type="button"
-								onClick={() => handleDraftSelect(draft.id)}
-								className="w-full p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg text-left transition-colors"
-							>
-								<p className="text-white font-medium truncate">
-									{draft.title || "Untitled Draft"}
-								</p>
-								<p className="text-sm text-gray-500">
-									Last edited {new Date(draft.updatedAt).toLocaleDateString()}
-								</p>
-							</button>
-						))}
-					</div>
-
-					<div className="flex gap-3">
-						<button
-							type="button"
-							onClick={handleStartFresh}
-							className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-						>
-							Start Fresh
-						</button>
-					</div>
-				</div>
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+				<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		);
 	}
@@ -343,20 +247,16 @@ function NewArticlePage() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
 			<Toaster position="top-right" theme="dark" />
-			<NavigationWarning
-				hasUnsavedChanges={hasUnsavedChanges}
-				draftId={draftId}
-				onDeleteDraft={handleDeleteDraftOnLeave}
-			/>
 
 			<div className="container mx-auto px-4 py-8 max-w-4xl">
 				<div className="flex items-center justify-between mb-6">
 					<Link
-						to="/"
+						to="/articles/$id"
+						params={{ id }}
 						className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
 					>
 						<ArrowLeft size={20} />
-						Back
+						Back to Article
 					</Link>
 
 					{/* Save status indicator */}
@@ -378,16 +278,7 @@ function NewArticlePage() {
 					</div>
 				</div>
 
-				<div className="flex items-center justify-between mb-8">
-					<h1 className="text-3xl font-bold text-white">Write an Article</h1>
-					<Link
-						to="/drafts"
-						className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300 hover:text-white text-sm font-medium"
-					>
-						<FileText size={16} />
-						My Drafts
-					</Link>
-				</div>
+				<h1 className="text-3xl font-bold text-white mb-8">Edit Article</h1>
 
 				<form onSubmit={handleSubmit} className="space-y-6">
 					{/* Cover Image */}
@@ -401,13 +292,13 @@ function NewArticlePage() {
 					{/* Title */}
 					<div>
 						<label
-							htmlFor={`${id}-title`}
+							htmlFor={`${formId}-title`}
 							className="block text-sm font-medium text-gray-300 mb-2"
 						>
 							Title
 						</label>
 						<input
-							id={`${id}-title`}
+							id={`${formId}-title`}
 							type="text"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
@@ -420,13 +311,13 @@ function NewArticlePage() {
 					{/* Excerpt */}
 					<div>
 						<label
-							htmlFor={`${id}-excerpt`}
+							htmlFor={`${formId}-excerpt`}
 							className="block text-sm font-medium text-gray-300 mb-2"
 						>
 							Excerpt (optional)
 						</label>
 						<textarea
-							id={`${id}-excerpt`}
+							id={`${formId}-excerpt`}
 							value={excerpt}
 							onChange={(e) => setExcerpt(e.target.value)}
 							placeholder="A brief summary for previews..."
@@ -439,7 +330,7 @@ function NewArticlePage() {
 					{/* Game Tags */}
 					<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4">
 						<label
-							htmlFor={`${id}-game-search`}
+							htmlFor={`${formId}-game-search`}
 							className="block text-sm font-medium text-gray-300 mb-3"
 						>
 							Related Games (optional)
@@ -480,7 +371,7 @@ function NewArticlePage() {
 								size={18}
 							/>
 							<input
-								id={`${id}-game-search`}
+								id={`${formId}-game-search`}
 								type="text"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
@@ -540,13 +431,22 @@ function NewArticlePage() {
 						/>
 					</div>
 
-					<button
-						type="submit"
-						disabled={isSubmitting || !title.trim() || !content.trim()}
-						className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{isSubmitting ? "Publishing..." : "Publish Article"}
-					</button>
+					<div className="flex gap-4">
+						<Link
+							to="/articles/$id"
+							params={{ id }}
+							className="flex-1 py-3 text-center bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-all"
+						>
+							Cancel
+						</Link>
+						<button
+							type="submit"
+							disabled={isSubmitting || !title.trim() || !content.trim()}
+							className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							{isSubmitting ? "Saving..." : "Save Changes"}
+						</button>
+					</div>
 				</form>
 			</div>
 		</div>

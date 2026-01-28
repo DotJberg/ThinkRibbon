@@ -1,6 +1,14 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Calendar, Edit, Star, UserMinus, UserPlus, Users } from "lucide-react";
+import {
+	Calendar,
+	Edit,
+	FileText,
+	Star,
+	UserMinus,
+	UserPlus,
+	Users,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { ArticleCard } from "../../components/articles/ArticleCard";
 import { PostCard } from "../../components/posts/PostCard";
@@ -192,21 +200,23 @@ function ProfilePage() {
 									{profile.displayName || profile.username}
 								</h1>
 								{isOwnProfile ? (
-									// TODO: Implement settings page
-									// <Link
-									// 	to="/settings/profile"
-									// 	className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-									// >
-									// 	<Settings size={18} className="text-gray-400" />
-									// </Link>
-									<button
-										type="button"
-										onClick={() => setIsEditModalOpen(true)}
-										className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
-										title="Edit Profile"
-									>
-										<Edit size={18} className="text-gray-400" />
-									</button>
+									<div className="flex items-center gap-2">
+										<Link
+											to="/drafts"
+											className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300 hover:text-white text-sm font-medium"
+										>
+											<FileText size={16} />
+											Drafts
+										</Link>
+										<button
+											type="button"
+											onClick={() => setIsEditModalOpen(true)}
+											className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+											title="Edit Profile"
+										>
+											<Edit size={18} className="text-gray-400" />
+										</button>
+									</div>
 								) : (
 									isSignedIn && (
 										<button

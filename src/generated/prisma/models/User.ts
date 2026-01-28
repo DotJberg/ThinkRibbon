@@ -229,6 +229,8 @@ export type UserWhereInput = {
   likes?: Prisma.LikeListRelationFilter
   followers?: Prisma.FollowListRelationFilter
   following?: Prisma.FollowListRelationFilter
+  articleDrafts?: Prisma.ArticleDraftListRelationFilter
+  reviewDrafts?: Prisma.ReviewDraftListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -249,6 +251,8 @@ export type UserOrderByWithRelationInput = {
   likes?: Prisma.LikeOrderByRelationAggregateInput
   followers?: Prisma.FollowOrderByRelationAggregateInput
   following?: Prisma.FollowOrderByRelationAggregateInput
+  articleDrafts?: Prisma.ArticleDraftOrderByRelationAggregateInput
+  reviewDrafts?: Prisma.ReviewDraftOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -272,6 +276,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   likes?: Prisma.LikeListRelationFilter
   followers?: Prisma.FollowListRelationFilter
   following?: Prisma.FollowListRelationFilter
+  articleDrafts?: Prisma.ArticleDraftListRelationFilter
+  reviewDrafts?: Prisma.ReviewDraftListRelationFilter
 }, "id" | "clerkId" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -324,6 +330,8 @@ export type UserCreateInput = {
   likes?: Prisma.LikeCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -344,6 +352,8 @@ export type UserUncheckedCreateInput = {
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUpdateInput = {
@@ -364,6 +374,8 @@ export type UserUpdateInput = {
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -384,6 +396,8 @@ export type UserUncheckedUpdateInput = {
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -579,6 +593,34 @@ export type UserUpdateOneRequiredWithoutLikesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLikesInput, Prisma.UserUpdateWithoutLikesInput>, Prisma.UserUncheckedUpdateWithoutLikesInput>
 }
 
+export type UserCreateNestedOneWithoutArticleDraftsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutArticleDraftsInput, Prisma.UserUncheckedCreateWithoutArticleDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutArticleDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutArticleDraftsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutArticleDraftsInput, Prisma.UserUncheckedCreateWithoutArticleDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutArticleDraftsInput
+  upsert?: Prisma.UserUpsertWithoutArticleDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutArticleDraftsInput, Prisma.UserUpdateWithoutArticleDraftsInput>, Prisma.UserUncheckedUpdateWithoutArticleDraftsInput>
+}
+
+export type UserCreateNestedOneWithoutReviewDraftsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewDraftsInput, Prisma.UserUncheckedCreateWithoutReviewDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutReviewDraftsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewDraftsInput, Prisma.UserUncheckedCreateWithoutReviewDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewDraftsInput
+  upsert?: Prisma.UserUpsertWithoutReviewDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewDraftsInput, Prisma.UserUpdateWithoutReviewDraftsInput>, Prisma.UserUncheckedUpdateWithoutReviewDraftsInput>
+}
+
 export type UserCreateWithoutFollowingInput = {
   id?: string
   clerkId: string
@@ -596,6 +638,8 @@ export type UserCreateWithoutFollowingInput = {
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
   likes?: Prisma.LikeCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutFollowingInput = {
@@ -615,6 +659,8 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutFollowingInput = {
@@ -639,6 +685,8 @@ export type UserCreateWithoutFollowersInput = {
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
   likes?: Prisma.LikeCreateNestedManyWithoutUserInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutFollowersInput = {
@@ -658,6 +706,8 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutFollowersInput = {
@@ -693,6 +743,8 @@ export type UserUpdateWithoutFollowingInput = {
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -712,6 +764,8 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUpsertWithoutFollowersInput = {
@@ -742,6 +796,8 @@ export type UserUpdateWithoutFollowersInput = {
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -761,6 +817,8 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateWithoutPostsInput = {
@@ -780,6 +838,8 @@ export type UserCreateWithoutPostsInput = {
   likes?: Prisma.LikeCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutPostsInput = {
@@ -799,6 +859,8 @@ export type UserUncheckedCreateWithoutPostsInput = {
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutPostsInput = {
@@ -834,6 +896,8 @@ export type UserUpdateWithoutPostsInput = {
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPostsInput = {
@@ -853,6 +917,8 @@ export type UserUncheckedUpdateWithoutPostsInput = {
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateWithoutArticlesInput = {
@@ -872,6 +938,8 @@ export type UserCreateWithoutArticlesInput = {
   likes?: Prisma.LikeCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutArticlesInput = {
@@ -891,6 +959,8 @@ export type UserUncheckedCreateWithoutArticlesInput = {
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutArticlesInput = {
@@ -926,6 +996,8 @@ export type UserUpdateWithoutArticlesInput = {
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutArticlesInput = {
@@ -945,6 +1017,8 @@ export type UserUncheckedUpdateWithoutArticlesInput = {
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateWithoutReviewsInput = {
@@ -964,6 +1038,8 @@ export type UserCreateWithoutReviewsInput = {
   likes?: Prisma.LikeCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutReviewsInput = {
@@ -983,6 +1059,8 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutReviewsInput = {
@@ -1018,6 +1096,8 @@ export type UserUpdateWithoutReviewsInput = {
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsInput = {
@@ -1037,6 +1117,8 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateWithoutCommentsInput = {
@@ -1056,6 +1138,8 @@ export type UserCreateWithoutCommentsInput = {
   likes?: Prisma.LikeCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutCommentsInput = {
@@ -1075,6 +1159,8 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutCommentsInput = {
@@ -1110,6 +1196,8 @@ export type UserUpdateWithoutCommentsInput = {
   likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -1129,6 +1217,8 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateWithoutLikesInput = {
@@ -1148,6 +1238,8 @@ export type UserCreateWithoutLikesInput = {
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutLikesInput = {
@@ -1167,6 +1259,8 @@ export type UserUncheckedCreateWithoutLikesInput = {
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutLikesInput = {
@@ -1202,6 +1296,8 @@ export type UserUpdateWithoutLikesInput = {
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLikesInput = {
@@ -1221,6 +1317,208 @@ export type UserUncheckedUpdateWithoutLikesInput = {
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserCreateWithoutArticleDraftsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  username: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  bannerUrl?: string | null
+  bio?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
+  articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+}
+
+export type UserUncheckedCreateWithoutArticleDraftsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  username: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  bannerUrl?: string | null
+  bio?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
+  articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+}
+
+export type UserCreateOrConnectWithoutArticleDraftsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutArticleDraftsInput, Prisma.UserUncheckedCreateWithoutArticleDraftsInput>
+}
+
+export type UserUpsertWithoutArticleDraftsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutArticleDraftsInput, Prisma.UserUncheckedUpdateWithoutArticleDraftsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutArticleDraftsInput, Prisma.UserUncheckedCreateWithoutArticleDraftsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutArticleDraftsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutArticleDraftsInput, Prisma.UserUncheckedUpdateWithoutArticleDraftsInput>
+}
+
+export type UserUpdateWithoutArticleDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bannerUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
+  articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutAuthorNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutArticleDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bannerUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
+  articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutAuthorNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserCreateWithoutReviewDraftsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  username: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  bannerUrl?: string | null
+  bio?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
+  articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+}
+
+export type UserUncheckedCreateWithoutReviewDraftsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  username: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  bannerUrl?: string | null
+  bio?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
+  articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+}
+
+export type UserCreateOrConnectWithoutReviewDraftsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewDraftsInput, Prisma.UserUncheckedCreateWithoutReviewDraftsInput>
+}
+
+export type UserUpsertWithoutReviewDraftsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewDraftsInput, Prisma.UserUncheckedUpdateWithoutReviewDraftsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewDraftsInput, Prisma.UserUncheckedCreateWithoutReviewDraftsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewDraftsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewDraftsInput, Prisma.UserUncheckedUpdateWithoutReviewDraftsInput>
+}
+
+export type UserUpdateWithoutReviewDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bannerUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
+  articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutAuthorNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bannerUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
+  articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutAuthorNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 
@@ -1236,6 +1534,8 @@ export type UserCountOutputType = {
   likes: number
   followers: number
   following: number
+  articleDrafts: number
+  reviewDrafts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1246,6 +1546,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   likes?: boolean | UserCountOutputTypeCountLikesArgs
   followers?: boolean | UserCountOutputTypeCountFollowersArgs
   following?: boolean | UserCountOutputTypeCountFollowingArgs
+  articleDrafts?: boolean | UserCountOutputTypeCountArticleDraftsArgs
+  reviewDrafts?: boolean | UserCountOutputTypeCountReviewDraftsArgs
 }
 
 /**
@@ -1307,6 +1609,20 @@ export type UserCountOutputTypeCountFollowingArgs<ExtArgs extends runtime.Types.
   where?: Prisma.FollowWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountArticleDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ArticleDraftWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReviewDraftWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1326,6 +1642,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   likes?: boolean | Prisma.User$likesArgs<ExtArgs>
   followers?: boolean | Prisma.User$followersArgs<ExtArgs>
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
+  articleDrafts?: boolean | Prisma.User$articleDraftsArgs<ExtArgs>
+  reviewDrafts?: boolean | Prisma.User$reviewDraftsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1377,6 +1695,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   likes?: boolean | Prisma.User$likesArgs<ExtArgs>
   followers?: boolean | Prisma.User$followersArgs<ExtArgs>
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
+  articleDrafts?: boolean | Prisma.User$articleDraftsArgs<ExtArgs>
+  reviewDrafts?: boolean | Prisma.User$reviewDraftsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1392,6 +1712,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     likes: Prisma.$LikePayload<ExtArgs>[]
     followers: Prisma.$FollowPayload<ExtArgs>[]
     following: Prisma.$FollowPayload<ExtArgs>[]
+    articleDrafts: Prisma.$ArticleDraftPayload<ExtArgs>[]
+    reviewDrafts: Prisma.$ReviewDraftPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1805,6 +2127,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   likes<T extends Prisma.User$likesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$likesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   followers<T extends Prisma.User$followersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   following<T extends Prisma.User$followingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  articleDrafts<T extends Prisma.User$articleDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$articleDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ArticleDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewDrafts<T extends Prisma.User$reviewDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2397,6 +2721,54 @@ export type User$followingArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.FollowScalarFieldEnum | Prisma.FollowScalarFieldEnum[]
+}
+
+/**
+ * User.articleDrafts
+ */
+export type User$articleDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ArticleDraft
+   */
+  select?: Prisma.ArticleDraftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ArticleDraft
+   */
+  omit?: Prisma.ArticleDraftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ArticleDraftInclude<ExtArgs> | null
+  where?: Prisma.ArticleDraftWhereInput
+  orderBy?: Prisma.ArticleDraftOrderByWithRelationInput | Prisma.ArticleDraftOrderByWithRelationInput[]
+  cursor?: Prisma.ArticleDraftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ArticleDraftScalarFieldEnum | Prisma.ArticleDraftScalarFieldEnum[]
+}
+
+/**
+ * User.reviewDrafts
+ */
+export type User$reviewDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewDraft
+   */
+  select?: Prisma.ReviewDraftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewDraft
+   */
+  omit?: Prisma.ReviewDraftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewDraftInclude<ExtArgs> | null
+  where?: Prisma.ReviewDraftWhereInput
+  orderBy?: Prisma.ReviewDraftOrderByWithRelationInput | Prisma.ReviewDraftOrderByWithRelationInput[]
+  cursor?: Prisma.ReviewDraftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReviewDraftScalarFieldEnum | Prisma.ReviewDraftScalarFieldEnum[]
 }
 
 /**

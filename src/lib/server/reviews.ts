@@ -13,6 +13,8 @@ export const createReview = createServerFn({
 			rating: number;
 			gameId: string;
 			coverImageUrl?: string;
+			coverFileKey?: string;
+			containsSpoilers?: boolean;
 			published?: boolean;
 			authorClerkId: string;
 		}) => data,
@@ -41,6 +43,8 @@ export const createReview = createServerFn({
 				rating: data.rating,
 				gameId: data.gameId,
 				coverImageUrl: data.coverImageUrl,
+				coverFileKey: data.coverFileKey,
+				containsSpoilers: data.containsSpoilers ?? false,
 				published: data.published || false,
 				authorId: user.id,
 			},
@@ -63,6 +67,8 @@ export const updateReview = createServerFn({
 			content?: string;
 			rating?: number;
 			coverImageUrl?: string;
+			coverFileKey?: string;
+			containsSpoilers?: boolean;
 			published?: boolean;
 			clerkId: string;
 		}) => data,
@@ -88,6 +94,8 @@ export const updateReview = createServerFn({
 				content: data.content,
 				rating: data.rating,
 				coverImageUrl: data.coverImageUrl,
+				coverFileKey: data.coverFileKey,
+				containsSpoilers: data.containsSpoilers,
 				published: data.published,
 			},
 			include: {

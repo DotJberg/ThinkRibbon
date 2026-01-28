@@ -21,7 +21,9 @@ export default function HeaderUser() {
 
 	// Fetch user's custom avatar from database
 	useEffect(() => {
-		if (user?.id) {
+		if (!user?.id) return;
+
+		const fetchUser = () => {
 			getUserByClerkId({ data: user.id })
 				.then((userData) => {
 					if (userData) {
@@ -29,7 +31,14 @@ export default function HeaderUser() {
 					}
 				})
 				.catch(console.error);
-		}
+		};
+
+		// Fetch immediately
+		fetchUser();
+
+		// Re-fetch after a short delay to catch any sync that might be in progress
+		const timer = setTimeout(fetchUser, 1000);
+		return () => clearTimeout(timer);
 	}, [user?.id]);
 
 	// Close dropdown when clicking outside

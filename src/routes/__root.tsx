@@ -19,7 +19,11 @@ export const Route = createRootRoute({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "TanStack Start Starter",
+				title: "Think Ribbon",
+			},
+			{
+				name: "description",
+				content: "A video game social platform for reviews, articles, and community.",
 			},
 		],
 		links: [

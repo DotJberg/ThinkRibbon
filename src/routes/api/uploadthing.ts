@@ -6,6 +6,13 @@ const handler = createRouteHandler({
 	router: uploadRouter,
 	config: {
 		token: process.env.UPLOADTHING_TOKEN,
+		// Callback URL for UploadThing to notify after upload completes
+		// In production, this must be your public URL
+		callbackUrl:
+			process.env.UPLOADTHING_CALLBACK_URL ||
+			(process.env.NODE_ENV === "production"
+				? "https://www.thinkribbon.com/api/uploadthing"
+				: undefined),
 	},
 });
 

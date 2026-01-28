@@ -16,30 +16,59 @@ export const syncUser = createServerFn({
 		}) => data,
 	)
 	.handler(async ({ data }) => {
-		// Check if user already exists and has a custom avatar
-		const existingUser = await prisma.user.findUnique({
+		// First, check if user exists by clerkId
+		const existingByClerkId = await prisma.user.findUnique({
 			where: { clerkId: data.clerkId },
-			select: { avatarUrl: true },
+			select: { id: true, avatarUrl: true },
 		});
 
-		// Only use Clerk's avatar if user doesn't have a custom one
-		// Custom avatars are from UploadThing (ufs.sh domain)
-		const shouldUpdateAvatar =
-			!existingUser?.avatarUrl ||
-			existingUser.avatarUrl.includes("clerk.com") ||
-			existingUser.avatarUrl.includes("clerk.dev");
+		// If user exists by clerkId, just update them
+		if (existingByClerkId) {
+			const shouldUpdateAvatar =
+				!existingByClerkId.avatarUrl ||
+				existingByClerkId.avatarUrl.includes("clerk.com") ||
+				existingByClerkId.avatarUrl.includes("clerk.dev");
 
-		const user = await prisma.user.upsert({
-			where: { clerkId: data.clerkId },
-			update: {
-				email: data.email,
-				displayName: data.displayName,
-				// Only update avatar if user doesn't have a custom one
-				...(shouldUpdateAvatar && data.avatarUrl
-					? { avatarUrl: data.avatarUrl }
-					: {}),
-			},
-			create: {
+			return prisma.user.update({
+				where: { clerkId: data.clerkId },
+				data: {
+					email: data.email,
+					displayName: data.displayName,
+					...(shouldUpdateAvatar && data.avatarUrl
+						? { avatarUrl: data.avatarUrl }
+						: {}),
+				},
+			});
+		}
+
+		// Check if user exists by email (could happen if Clerk account was recreated)
+		const existingByEmail = await prisma.user.findUnique({
+			where: { email: data.email },
+			select: { id: true, avatarUrl: true },
+		});
+
+		if (existingByEmail) {
+			// Update existing user with new clerkId
+			const shouldUpdateAvatar =
+				!existingByEmail.avatarUrl ||
+				existingByEmail.avatarUrl.includes("clerk.com") ||
+				existingByEmail.avatarUrl.includes("clerk.dev");
+
+			return prisma.user.update({
+				where: { email: data.email },
+				data: {
+					clerkId: data.clerkId,
+					displayName: data.displayName,
+					...(shouldUpdateAvatar && data.avatarUrl
+						? { avatarUrl: data.avatarUrl }
+						: {}),
+				},
+			});
+		}
+
+		// No existing user, create new one
+		return prisma.user.create({
+			data: {
 				clerkId: data.clerkId,
 				email: data.email,
 				username: data.username,
@@ -47,7 +76,6 @@ export const syncUser = createServerFn({
 				avatarUrl: data.avatarUrl,
 			},
 		});
-		return user;
 	});
 
 // Get user by Clerk ID

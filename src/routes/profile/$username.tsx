@@ -192,12 +192,16 @@ function ProfilePage() {
 									{profile.displayName || profile.username}
 								</h1>
 								{isOwnProfile ? (
-									<Link
-										to="/settings/profile"
-										className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<Settings size={18} className="text-gray-400" />
-									</Link>
+									// TODO: Implement settings page
+									// <Link
+									// 	to="/settings/profile"
+									// 	className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+									// >
+									// 	<Settings size={18} className="text-gray-400" />
+									// </Link>
+									<div className="p-2 bg-gray-800 rounded-lg">
+										<Settings size={18} className="text-gray-600" />
+									</div>
 								) : (
 									isSignedIn && (
 										<button

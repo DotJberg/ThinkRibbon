@@ -17,7 +17,7 @@ export const Route = createFileRoute("/games/$slug")({
 
 function GameDetailPage() {
 	const { slug } = Route.useParams();
-	const { user, isSignedIn } = useUser();
+	const { isSignedIn } = useUser();
 	const [game, setGame] = useState<Awaited<
 		ReturnType<typeof getGameBySlug>
 	> | null>(null);

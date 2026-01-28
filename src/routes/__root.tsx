@@ -1,12 +1,36 @@
+import { useUser } from "@clerk/clerk-react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect } from "react";
 
 import Header from "../components/Header";
 
 import ClerkProvider from "../integrations/clerk/provider";
+import { syncUser } from "../lib/server/users";
 
 import appCss from "../styles.css?url";
+
+// Component to sync user with database when signed in
+function UserSync() {
+	const { user, isSignedIn } = useUser();
+
+	useEffect(() => {
+		if (isSignedIn && user) {
+			syncUser({
+				data: {
+					clerkId: user.id,
+					email: user.primaryEmailAddress?.emailAddress || "",
+					username: user.username || user.id,
+					displayName: user.fullName || undefined,
+					avatarUrl: user.imageUrl || undefined,
+				},
+			}).catch(console.error);
+		}
+	}, [isSignedIn, user]);
+
+	return null;
+}
 
 export const Route = createRootRoute({
 	head: () => ({
@@ -46,6 +70,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<ClerkProvider>
+					<UserSync />
 					<Header />
 					{children}
 					<TanStackDevtools

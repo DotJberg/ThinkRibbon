@@ -10,7 +10,6 @@ import {
 	getPopularFeed,
 } from "../lib/server/feed";
 import { createPost } from "../lib/server/posts";
-import { syncUser } from "../lib/server/users";
 
 export const Route = createFileRoute("/")({
 	component: HomePage,
@@ -32,21 +31,6 @@ function HomePage() {
 			setActiveTab(isSignedIn ? "following" : "popular");
 		}
 	}, [isLoaded, isSignedIn]);
-
-	// Sync user on sign in
-	useEffect(() => {
-		if (user) {
-			syncUser({
-				data: {
-					clerkId: user.id,
-					email: user.primaryEmailAddress?.emailAddress || "",
-					username: user.username || user.id,
-					displayName: user.fullName || undefined,
-					avatarUrl: user.imageUrl || undefined,
-				},
-			}).catch(console.error);
-		}
-	}, [user]);
 
 	// Load feed
 	useEffect(() => {

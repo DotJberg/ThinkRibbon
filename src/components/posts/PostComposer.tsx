@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getUserByClerkId } from "../../lib/server/users";
 
 interface PostComposerProps {
 	onSubmit: (content: string) => Promise<void>;
@@ -10,6 +11,30 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 	const { user } = useUser();
 	const [content, setContent] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+	// Fetch user's custom avatar from database
+	useEffect(() => {
+		if (!user?.id) return;
+
+		const fetchUser = () => {
+			getUserByClerkId({ data: user.id })
+				.then((userData) => {
+					if (userData?.avatarUrl) {
+						setAvatarUrl(userData.avatarUrl);
+					}
+				})
+				.catch(console.error);
+		};
+
+		fetchUser();
+		// Re-fetch after a short delay to catch sync in progress
+		const timer = setTimeout(fetchUser, 1000);
+		return () => clearTimeout(timer);
+	}, [user?.id]);
+
+	// Use database avatar if available, otherwise fall back to Clerk avatar
+	const displayAvatarUrl = avatarUrl || user?.imageUrl;
 
 	const remaining = maxLength - content.length;
 	const isOverLimit = remaining < 0;
@@ -46,9 +71,9 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 			<div className="flex gap-3">
 				{/* Avatar */}
 				<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden flex-shrink-0">
-					{user.imageUrl ? (
+					{displayAvatarUrl ? (
 						<img
-							src={user.imageUrl}
+							src={displayAvatarUrl}
 							alt={user.username || ""}
 							className="w-full h-full object-cover"
 						/>

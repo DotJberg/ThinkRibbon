@@ -2,15 +2,16 @@ import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Calendar,
-	Settings,
 	Star,
 	UserMinus,
 	UserPlus,
 	Users,
+	Edit,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ArticleCard } from "../../components/articles/ArticleCard";
 import { PostCard } from "../../components/posts/PostCard";
+import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import { getArticlesByUser } from "../../lib/server/articles";
 import { getPostsByUser } from "../../lib/server/posts";
 import { getReviewsByUser } from "../../lib/server/reviews";
@@ -51,6 +52,7 @@ function ProfilePage() {
 		following: 0,
 	});
 	const [isFollowingLoading, setIsFollowingLoading] = useState(false);
+	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
 	const isOwnProfile = isSignedIn && currentUser?.username === username;
 
@@ -199,9 +201,14 @@ function ProfilePage() {
 									// >
 									// 	<Settings size={18} className="text-gray-400" />
 									// </Link>
-									<div className="p-2 bg-gray-800 rounded-lg">
-										<Settings size={18} className="text-gray-600" />
-									</div>
+									<button
+										type="button"
+										onClick={() => setIsEditModalOpen(true)}
+										className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+										title="Edit Profile"
+									>
+										<Edit size={18} className="text-gray-400" />
+									</button>
 								) : (
 									isSignedIn && (
 										<button
@@ -358,6 +365,14 @@ function ProfilePage() {
 						))}
 				</div>
 			</div>
+
+			{profile && (
+				<EditProfileModal
+					isOpen={isEditModalOpen}
+					onClose={() => setIsEditModalOpen(false)}
+					user={profile}
+				/>
+			)}
 		</div>
 	);
 }

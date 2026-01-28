@@ -1,0 +1,24 @@
+{
+  "projectName": "thinkribbon",
+  "mode": "file-router",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "npm",
+  "git": true,
+  "install": true,
+  "addOnOptions": {
+    "prisma": {
+      "database": "postgres"
+    }
+  },
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "start",
+    "clerk",
+    "prisma",
+    "shadcn",
+    "biome",
+    "nitro"
+  ]
+}

@@ -1,0 +1,54 @@
+import { Heart } from "lucide-react";
+import { useState } from "react";
+
+interface LikeButtonProps {
+	initialLiked?: boolean;
+	likeCount: number;
+	onToggle: () => Promise<{ liked: boolean }>;
+	disabled?: boolean;
+}
+
+export function LikeButton({
+	initialLiked = false,
+	likeCount,
+	onToggle,
+	disabled,
+}: LikeButtonProps) {
+	const [liked, setLiked] = useState(initialLiked);
+	const [count, setCount] = useState(likeCount);
+	const [isLoading, setIsLoading] = useState(false);
+
+	const handleClick = async () => {
+		if (disabled || isLoading) return;
+
+		setIsLoading(true);
+		try {
+			const result = await onToggle();
+			setLiked(result.liked);
+			setCount((prev) => (result.liked ? prev + 1 : prev - 1));
+		} catch (error) {
+			console.error("Failed to toggle like:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	return (
+		<button
+			type="button"
+			onClick={handleClick}
+			disabled={disabled || isLoading}
+			className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+				liked
+					? "bg-pink-500/20 text-pink-400 hover:bg-pink-500/30"
+					: "bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-gray-300"
+			} ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+		>
+			<Heart
+				size={16}
+				className={`transition-transform duration-200 ${liked ? "fill-current scale-110" : ""}`}
+			/>
+			<span>{count}</span>
+		</button>
+	);
+}

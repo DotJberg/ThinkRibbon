@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, Edit, Star, UserMinus, UserPlus, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArticleCard } from "../../components/articles/ArticleCard";
 import { PostCard } from "../../components/posts/PostCard";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
@@ -49,9 +49,9 @@ function ProfilePage() {
 
 	const isOwnProfile = isSignedIn && currentUser?.username === username;
 
-	useEffect(() => {
-		const loadProfile = async () => {
-			setIsLoading(true);
+	const loadProfile = useCallback(
+		async (showLoading = true) => {
+			if (showLoading) setIsLoading(true);
 			try {
 				const profileData = await getUserByUsername({ data: username });
 				if (profileData) {
@@ -83,11 +83,15 @@ function ProfilePage() {
 			} catch (error) {
 				console.error("Failed to load profile:", error);
 			} finally {
-				setIsLoading(false);
+				if (showLoading) setIsLoading(false);
 			}
-		};
+		},
+		[username, isOwnProfile, isSignedIn, currentUser],
+	);
+
+	useEffect(() => {
 		loadProfile();
-	}, [username, isOwnProfile, isSignedIn, currentUser]);
+	}, [loadProfile]);
 
 	const handleFollowToggle = async () => {
 		if (!currentUser || !profile || isOwnProfile) return;
@@ -364,19 +368,9 @@ function ProfilePage() {
 				<EditProfileModal
 					isOpen={isEditModalOpen}
 					onClose={() => setIsEditModalOpen(false)}
-					onSave={(updatedData) => {
-						// Update local profile state with new data
-						setProfile((prev) =>
-							prev
-								? {
-										...prev,
-										displayName: updatedData.displayName,
-										bio: updatedData.bio,
-										avatarUrl: updatedData.avatarUrl,
-										bannerUrl: updatedData.bannerUrl,
-									}
-								: null,
-						);
+					onSave={() => {
+						// Reload profile data from server to get fresh data
+						loadProfile(false);
 					}}
 					user={profile}
 				/>

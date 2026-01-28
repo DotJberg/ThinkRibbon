@@ -3,10 +3,31 @@ import {
 	createUploadthing,
 	type FileRouter,
 	UploadThingError,
+	UTApi,
 } from "uploadthing/server";
 import { prisma } from "@/db";
 
 const f = createUploadthing();
+const utapi = new UTApi();
+
+// Helper to extract file key from UploadThing URL and delete the file
+async function deleteOldUploadThingFile(url: string | null): Promise<void> {
+	if (!url) return;
+
+	// Only delete UploadThing files (ufs.sh or utfs.io domains)
+	if (!url.includes("ufs.sh") && !url.includes("utfs.io")) return;
+
+	try {
+		// Extract file key from URL
+		// Format: https://<appId>.ufs.sh/f/<fileKey> or https://utfs.io/f/<fileKey>
+		const match = url.match(/\/f\/([^/?]+)/);
+		if (match?.[1]) {
+			await utapi.deleteFiles(match[1]);
+		}
+	} catch {
+		// Silently fail - don't block upload if deletion fails
+	}
+}
 
 // Helper to extract cookie value
 function getCookie(cookieHeader: string, name: string): string | null {
@@ -48,10 +69,22 @@ export const uploadRouter = {
 		.middleware(authMiddleware)
 		.onUploadComplete(async ({ metadata, file }) => {
 			const url = file.ufsUrl;
+
+			// Get current avatar URL to delete old file
+			const user = await prisma.user.findUnique({
+				where: { clerkId: metadata.userId },
+				select: { avatarUrl: true },
+			});
+
+			// Delete old avatar if it exists
+			await deleteOldUploadThingFile(user?.avatarUrl ?? null);
+
+			// Save new avatar URL
 			await prisma.user.update({
 				where: { clerkId: metadata.userId },
 				data: { avatarUrl: url },
 			});
+
 			return { uploadedBy: metadata.userId, url };
 		}),
 
@@ -59,10 +92,22 @@ export const uploadRouter = {
 		.middleware(authMiddleware)
 		.onUploadComplete(async ({ metadata, file }) => {
 			const url = file.ufsUrl;
+
+			// Get current banner URL to delete old file
+			const user = await prisma.user.findUnique({
+				where: { clerkId: metadata.userId },
+				select: { bannerUrl: true },
+			});
+
+			// Delete old banner if it exists
+			await deleteOldUploadThingFile(user?.bannerUrl ?? null);
+
+			// Save new banner URL
 			await prisma.user.update({
 				where: { clerkId: metadata.userId },
 				data: { bannerUrl: url },
 			});
+
 			return { uploadedBy: metadata.userId, url };
 		}),
 } satisfies FileRouter;

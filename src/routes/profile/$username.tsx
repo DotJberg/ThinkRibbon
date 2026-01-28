@@ -205,6 +205,7 @@ function ProfilePage() {
 								) : (
 									isSignedIn && (
 										<button
+											type="button"
 											onClick={handleFollowToggle}
 											disabled={isFollowingLoading}
 											className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
@@ -263,6 +264,7 @@ function ProfilePage() {
 					{tabs.map((tab) => (
 						<button
 							key={tab.id}
+							type="button"
 							onClick={() => setActiveTab(tab.id)}
 							className={`flex-1 py-2 px-3 rounded-lg font-medium text-sm transition-all ${
 								activeTab === tab.id
@@ -320,6 +322,7 @@ function ProfilePage() {
 											<div className="flex items-center gap-1 mt-1">
 												{[...Array(5)].map((_, i) => (
 													<Star
+														// biome-ignore lint/suspicious/noArrayIndexKey: Static array
 														key={i}
 														size={14}
 														className={

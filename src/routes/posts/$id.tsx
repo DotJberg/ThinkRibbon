@@ -199,6 +199,7 @@ function PostDetailPage() {
 									}
 								/>
 								<button
+									type="button"
 									onClick={handleCreateComment}
 									disabled={!commentText.trim() || isSubmitting}
 									className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-white disabled:opacity-50 hover:opacity-90 transition-opacity"

@@ -129,7 +129,7 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 		}
 		setIsLiking(true);
 		try {
-			let result;
+			let result: { liked: boolean } | undefined;
 			console.log("Calling toggle function for", item.type);
 			if (item.type === "post") {
 				result = await togglePostLike({
@@ -272,7 +272,7 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 							key={star}
 							size={16}
 							className={
-								star <= item.rating!
+								star <= (item.rating || 0)
 									? "text-yellow-400 fill-yellow-400"
 									: "text-gray-600"
 							}

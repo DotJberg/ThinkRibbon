@@ -7,7 +7,8 @@ import { createComment } from "../../lib/server/comments";
 import { toggleCommentLike } from "../../lib/server/likes";
 
 interface CommentItemProps {
-	comment: any; // Type this properly if possible, or infer
+	// biome-ignore lint/suspicious/noExplicitAny: Complex nested comment type
+	comment: any;
 	depth?: number;
 	onReplySuccess?: () => void;
 	postId?: string;
@@ -46,7 +47,7 @@ export function CommentItem({
 			await toggleCommentLike({
 				data: { commentId: comment.id, clerkId: user.id },
 			});
-		} catch (error) {
+		} catch (_error) {
 			// Revert
 			setHasLiked(prevLiked);
 			setLikeCount(prevLiked ? likeCount : likeCount); // simplistic revert
@@ -166,6 +167,7 @@ export function CommentItem({
 				{/* Nested Replies */}
 				{comment.replies && comment.replies.length > 0 && (
 					<div className="mt-2">
+						{/* biome-ignore lint/suspicious/noExplicitAny: Complex nested reply type */}
 						{comment.replies.map((reply: any) => (
 							<CommentItem
 								key={reply.id}

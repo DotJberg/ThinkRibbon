@@ -66,7 +66,10 @@ export async function getTwitchToken(): Promise<string> {
 
 async function igdbRequest<T>(endpoint: string, query: string): Promise<T> {
 	const token = await getTwitchToken();
-	const clientId = process.env.TWITCH_CLIENT_ID!;
+	const clientId = process.env.TWITCH_CLIENT_ID;
+	if (!clientId) {
+		throw new Error("TWITCH_CLIENT_ID is not defined");
+	}
 
 	const response = await fetch(`https://api.igdb.com/v4/${endpoint}`, {
 		method: "POST",

@@ -35,6 +35,7 @@ export function StarRating({
 				const filled = i < rating;
 				return (
 					<button
+						// biome-ignore lint/suspicious/noArrayIndexKey: Static array of stars
 						key={i}
 						type="button"
 						onClick={() => handleClick(i)}

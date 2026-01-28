@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Gamepad2, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { StarRating } from "../../components/shared/StarRating";
 import { searchGames } from "../../lib/server/games";
 import { createReview } from "../../lib/server/reviews";
@@ -17,6 +17,7 @@ function NewReviewPage() {
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
 	const { gameId } = Route.useSearch();
+	const id = useId();
 
 	const [selectedGame, setSelectedGame] = useState<{
 		id: string;
@@ -132,7 +133,7 @@ function NewReviewPage() {
 					{!selectedGame ? (
 						<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
 							<label
-								htmlFor="game-search"
+								htmlFor={`${id}-game-search`}
 								className="block text-sm font-medium text-gray-300 mb-4"
 							>
 								Select a Game
@@ -143,7 +144,7 @@ function NewReviewPage() {
 									size={20}
 								/>
 								<input
-									id="game-search"
+									id={`${id}-game-search`}
 									type="text"
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
@@ -231,13 +232,13 @@ function NewReviewPage() {
 					{/* Title */}
 					<div>
 						<label
-							htmlFor="review-title"
+							htmlFor={`${id}-title`}
 							className="block text-sm font-medium text-gray-300 mb-2"
 						>
 							Review Title
 						</label>
 						<input
-							id="review-title"
+							id={`${id}-title`}
 							type="text"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
@@ -250,13 +251,13 @@ function NewReviewPage() {
 					{/* Content */}
 					<div>
 						<label
-							htmlFor="review-content"
+							htmlFor={`${id}-content`}
 							className="block text-sm font-medium text-gray-300 mb-2"
 						>
 							Your Review
 						</label>
 						<textarea
-							id="review-content"
+							id={`${id}-content`}
 							value={content}
 							onChange={(e) => setContent(e.target.value)}
 							placeholder="Write your thoughts about this game..."

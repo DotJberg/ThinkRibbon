@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Gamepad2, Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { createArticle } from "../../lib/server/articles";
 import { searchGames } from "../../lib/server/games";
 
@@ -12,6 +12,7 @@ export const Route = createFileRoute("/articles/new")({
 function NewArticlePage() {
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
+	const id = useId();
 
 	const [title, setTitle] = useState("");
 	const [content, setContent] = useState("");
@@ -123,13 +124,13 @@ function NewArticlePage() {
 					{/* Title */}
 					<div>
 						<label
-							htmlFor="article-title"
+							htmlFor={`${id}-title`}
 							className="block text-sm font-medium text-gray-300 mb-2"
 						>
 							Title
 						</label>
 						<input
-							id="article-title"
+							id={`${id}-title`}
 							type="text"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
@@ -142,13 +143,13 @@ function NewArticlePage() {
 					{/* Excerpt */}
 					<div>
 						<label
-							htmlFor="article-excerpt"
+							htmlFor={`${id}-excerpt`}
 							className="block text-sm font-medium text-gray-300 mb-2"
 						>
 							Excerpt (optional)
 						</label>
 						<textarea
-							id="article-excerpt"
+							id={`${id}-excerpt`}
 							value={excerpt}
 							onChange={(e) => setExcerpt(e.target.value)}
 							placeholder="A brief summary for previews..."
@@ -161,7 +162,7 @@ function NewArticlePage() {
 					{/* Game Tags */}
 					<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4">
 						<label
-							htmlFor="game-search"
+							htmlFor={`${id}-game-search`}
 							className="block text-sm font-medium text-gray-300 mb-3"
 						>
 							Related Games (optional)
@@ -202,7 +203,7 @@ function NewArticlePage() {
 								size={18}
 							/>
 							<input
-								id="game-search"
+								id={`${id}-game-search`}
 								type="text"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
@@ -246,13 +247,13 @@ function NewArticlePage() {
 					{/* Content */}
 					<div>
 						<label
-							htmlFor="article-content"
+							htmlFor={`${id}-content`}
 							className="block text-sm font-medium text-gray-300 mb-2"
 						>
 							Content
 						</label>
 						<textarea
-							id="article-content"
+							id={`${id}-content`}
 							value={content}
 							onChange={(e) => setContent(e.target.value)}
 							placeholder="Write your article..."

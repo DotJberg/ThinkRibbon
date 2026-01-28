@@ -1,13 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-	Calendar,
-	Star,
-	UserMinus,
-	UserPlus,
-	Users,
-	Edit,
-} from "lucide-react";
+import { Calendar, Edit, Star, UserMinus, UserPlus, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ArticleCard } from "../../components/articles/ArticleCard";
 import { PostCard } from "../../components/posts/PostCard";

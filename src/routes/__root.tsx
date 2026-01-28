@@ -23,7 +23,8 @@ export const Route = createRootRoute({
 			},
 			{
 				name: "description",
-				content: "A video game social platform for reviews, articles, and community.",
+				content:
+					"A video game social platform for reviews, articles, and community.",
 			},
 		],
 		links: [

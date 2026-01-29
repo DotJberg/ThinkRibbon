@@ -4,6 +4,7 @@ import {
 	Calendar,
 	Edit,
 	FileText,
+	Gamepad2,
 	Star,
 	UserMinus,
 	UserPlus,
@@ -13,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArticleCard } from "../../components/articles/ArticleCard";
 import { PostCard } from "../../components/posts/PostCard";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
+import { SafeImage } from "../../components/shared/SafeImage";
 import { getArticlesByUser } from "../../lib/server/articles";
 import { getPostsByUser } from "../../lib/server/posts";
 import { getReviewsByUser } from "../../lib/server/reviews";
@@ -180,17 +182,16 @@ function ProfilePage() {
 					<div className="flex flex-col md:flex-row items-start md:items-end gap-4">
 						{/* Avatar */}
 						<div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 border-4 border-gray-900 overflow-hidden">
-							{profile.avatarUrl ? (
-								<img
-									src={profile.avatarUrl}
-									alt={profile.username}
-									className="w-full h-full object-cover"
-								/>
-							) : (
-								<div className="w-full h-full flex items-center justify-center text-4xl text-white font-bold">
-									{(profile.displayName || profile.username)[0].toUpperCase()}
-								</div>
-							)}
+							<SafeImage
+								src={profile.avatarUrl || undefined}
+								alt={profile.username}
+								className="w-full h-full object-cover"
+								fallback={
+									<div className="w-full h-full flex items-center justify-center text-4xl text-white font-bold">
+										{(profile.displayName || profile.username)[0].toUpperCase()}
+									</div>
+								}
+							/>
 						</div>
 
 						{/* Info */}
@@ -316,13 +317,12 @@ function ProfilePage() {
 									className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4"
 								>
 									<div className="flex items-start gap-4">
-										{review.game.coverUrl && (
-											<img
-												src={review.game.coverUrl}
-												alt=""
-												className="w-16 h-20 object-cover rounded"
-											/>
-										)}
+										<SafeImage
+											src={review.game.coverUrl || undefined}
+											alt=""
+											className="w-16 h-20 object-cover rounded"
+											fallback={<Gamepad2 className="w-8 h-8 text-gray-500" />}
+										/>
 										<div>
 											<Link
 												to="/reviews/$id"

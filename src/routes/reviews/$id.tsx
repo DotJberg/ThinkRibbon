@@ -1,9 +1,10 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Calendar, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Gamepad2, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
 import { LikeButton } from "../../components/shared/LikeButton";
+import { SafeImage } from "../../components/shared/SafeImage";
 import {
 	SpoilerBadge,
 	SpoilerWarning,
@@ -111,10 +112,15 @@ function ReviewDetailPage() {
 					{/* Cover Image (if uploaded) */}
 					{review.coverImageUrl && (
 						<div className="aspect-video bg-gray-800 rounded-xl overflow-hidden mb-8">
-							<img
+							<SafeImage
 								src={review.coverImageUrl}
 								alt={review.title}
 								className="w-full h-full object-cover"
+								fallback={
+									<div className="w-full h-full flex items-center justify-center bg-gray-800">
+										<Gamepad2 className="text-gray-600" size={48} />
+									</div>
+								}
 							/>
 						</div>
 					)}
@@ -124,13 +130,16 @@ function ReviewDetailPage() {
 						{/* Game Cover */}
 						<Link to="/games/$slug" params={{ slug: review.game.slug }}>
 							<div className="w-32 md:w-40 aspect-[3/4] bg-gray-800 rounded-xl overflow-hidden flex-shrink-0">
-								{review.game.coverUrl ? (
-									<img
-										src={review.game.coverUrl}
-										alt={review.game.name}
-										className="w-full h-full object-cover"
-									/>
-								) : null}
+								<SafeImage
+									src={review.game.coverUrl || undefined}
+									alt={review.game.name}
+									className="w-full h-full object-cover"
+									fallback={
+										<div className="w-full h-full flex items-center justify-center bg-gray-800">
+											<Gamepad2 className="text-gray-600" size={32} />
+										</div>
+									}
+								/>
 							</div>
 						</Link>
 
@@ -157,18 +166,17 @@ function ReviewDetailPage() {
 									params={{ username: review.author.username }}
 								>
 									<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
-										{review.author.avatarUrl ? (
-											<img
-												src={review.author.avatarUrl}
-												alt=""
-												className="w-full h-full object-cover"
-											/>
-										) : (
-											<span className="w-full h-full flex items-center justify-center text-white font-bold">
-												{(review.author.displayName ||
-													review.author.username)[0].toUpperCase()}
-											</span>
-										)}
+										<SafeImage
+											src={review.author.avatarUrl || undefined}
+											alt=""
+											className="w-full h-full object-cover"
+											fallback={
+												<span className="w-full h-full flex items-center justify-center text-white font-bold">
+													{(review.author.displayName ||
+														review.author.username)[0].toUpperCase()}
+												</span>
+											}
+										/>
 									</div>
 								</Link>
 								<div>

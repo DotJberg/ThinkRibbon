@@ -19,6 +19,7 @@ import {
 	togglePostLike,
 	toggleReviewLike,
 } from "../../lib/server/likes";
+import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
 
 function formatDistanceToNow(date: Date): string {
@@ -193,18 +194,17 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 						className="flex-shrink-0"
 					>
 						<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
-							{item.author.avatarUrl ? (
-								<img
-									src={item.author.avatarUrl}
-									alt=""
-									className="w-full h-full object-cover"
-								/>
-							) : (
-								<span className="w-full h-full flex items-center justify-center text-white font-bold">
-									{(item.author.displayName ||
-										item.author.username)[0].toUpperCase()}
-								</span>
-							)}
+							<SafeImage
+								src={item.author.avatarUrl || undefined}
+								alt=""
+								className="w-full h-full object-cover"
+								fallback={
+									<span className="w-full h-full flex items-center justify-center text-white font-bold">
+										{(item.author.displayName ||
+											item.author.username)[0].toUpperCase()}
+									</span>
+								}
+							/>
 						</div>
 					</Link>
 					<div>
@@ -278,10 +278,15 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 			{item.type === "review" && item.coverImageUrl && (
 				<Link to="/reviews/$id" params={{ id: item.id }} className="block mb-3">
 					<div className="h-32 bg-gray-700 rounded-lg overflow-hidden">
-						<img
+						<SafeImage
 							src={item.coverImageUrl}
 							alt={item.title || "Review cover"}
 							className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+							fallback={
+								<div className="w-full h-full flex items-center justify-center bg-gray-800">
+									<Gamepad2 className="text-gray-600" size={32} />
+								</div>
+							}
 						/>
 					</div>
 				</Link>
@@ -294,15 +299,12 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 					params={{ slug: item.game.slug }}
 					className="flex items-center gap-2 mb-3 px-2 py-1.5 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors w-fit"
 				>
-					{item.game.coverUrl ? (
-						<img
-							src={item.game.coverUrl}
-							alt=""
-							className="w-6 h-8 rounded object-cover"
-						/>
-					) : (
-						<Gamepad2 size={16} className="text-gray-400" />
-					)}
+					<SafeImage
+						src={item.game.coverUrl || undefined}
+						alt=""
+						className="w-6 h-8 rounded object-cover"
+						fallback={<Gamepad2 size={16} className="text-gray-400" />}
+					/>
 					<span className="text-sm text-gray-300">{item.game.name}</span>
 				</Link>
 			)}
@@ -317,15 +319,12 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 							params={{ slug: game.slug }}
 							className="inline-flex items-center gap-1 px-2 py-1 bg-gray-700/50 hover:bg-gray-700 rounded-full text-xs transition-colors"
 						>
-							{game.coverUrl ? (
-								<img
-									src={game.coverUrl}
-									alt=""
-									className="w-3 h-4 rounded object-cover"
-								/>
-							) : (
-								<Gamepad2 size={10} className="text-gray-400" />
-							)}
+							<SafeImage
+								src={game.coverUrl || undefined}
+								alt=""
+								className="w-3 h-4 rounded object-cover"
+								fallback={<Gamepad2 size={10} className="text-gray-400" />}
+							/>
 							<span className="text-gray-300">{game.name}</span>
 						</Link>
 					))}
@@ -370,18 +369,17 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 							className="flex-shrink-0"
 						>
 							<div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
-								{localTopComment.author.avatarUrl ? (
-									<img
-										src={localTopComment.author.avatarUrl}
-										alt=""
-										className="w-full h-full object-cover"
-									/>
-								) : (
-									<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
-										{(localTopComment.author.displayName ||
-											localTopComment.author.username)[0].toUpperCase()}
-									</span>
-								)}
+								<SafeImage
+									src={localTopComment.author.avatarUrl || undefined}
+									alt=""
+									className="w-full h-full object-cover"
+									fallback={
+										<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
+											{(localTopComment.author.displayName ||
+												localTopComment.author.username)[0].toUpperCase()}
+										</span>
+									}
+								/>
 							</div>
 						</Link>
 						<div className="flex-1 min-w-0">
@@ -499,17 +497,16 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 			{showCommentInput && isSignedIn && (
 				<div className="mt-3 flex items-center gap-2">
 					<div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
-						{user?.imageUrl ? (
-							<img
-								src={user.imageUrl}
-								alt=""
-								className="w-full h-full object-cover"
-							/>
-						) : (
-							<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
-								{(user?.fullName || user?.username || "U")[0].toUpperCase()}
-							</span>
-						)}
+						<SafeImage
+							src={user?.imageUrl}
+							alt=""
+							className="w-full h-full object-cover"
+							fallback={
+								<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
+									{(user?.fullName || user?.username || "U")[0].toUpperCase()}
+								</span>
+							}
+						/>
 					</div>
 					<div className="flex-1 flex items-center gap-2 bg-gray-700/50 rounded-full pl-4 pr-2 py-2">
 						<input

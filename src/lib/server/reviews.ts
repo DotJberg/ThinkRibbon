@@ -29,13 +29,6 @@ export const createReview = createServerFn({
 			throw new Error("Rating must be between 1 and 5");
 		}
 
-		const existingReview = await prisma.review.findUnique({
-			where: { authorId_gameId: { authorId: user.id, gameId: data.gameId } },
-		});
-		if (existingReview) {
-			throw new Error("You have already reviewed this game");
-		}
-
 		return prisma.review.create({
 			data: {
 				title: data.title,

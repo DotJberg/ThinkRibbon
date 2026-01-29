@@ -159,7 +159,7 @@ model Review {
   comments Comment[]
   likes    Like[]
 
-  @@unique([authorId, gameId])
+  @@index([authorId, gameId])
   @@index([gameId])
   @@index([published, createdAt(sort: Desc)])
 }

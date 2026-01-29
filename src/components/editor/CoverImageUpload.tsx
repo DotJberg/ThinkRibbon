@@ -97,6 +97,12 @@ export function CoverImageUpload({
 		}
 	}, [onRemove]);
 
+	const handleImageError = (
+		e: React.SyntheticEvent<HTMLImageElement, Event>,
+	) => {
+		e.currentTarget.style.display = "none";
+	};
+
 	return (
 		<div className="space-y-3">
 			<span className="block text-sm font-medium text-gray-300">
@@ -110,6 +116,8 @@ export function CoverImageUpload({
 							src={currentUrl}
 							alt="Cover"
 							className="w-full h-full object-cover"
+							crossOrigin="anonymous"
+							onError={handleImageError}
 						/>
 					</div>
 					<button

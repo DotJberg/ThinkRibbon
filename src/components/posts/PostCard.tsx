@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
+import { SafeImage } from "../shared/SafeImage";
 
 interface PostCardProps {
 	post: {
@@ -44,18 +45,17 @@ export function PostCard({
 					params={{ username: post.author.username }}
 				>
 					<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden flex-shrink-0">
-						{post.author.avatarUrl ? (
-							<img
-								src={post.author.avatarUrl}
-								alt={post.author.username}
-								className="w-full h-full object-cover"
-							/>
-						) : (
-							<span className="text-white font-bold text-sm">
-								{(post.author.displayName ||
-									post.author.username)[0].toUpperCase()}
-							</span>
-						)}
+						<SafeImage
+							src={post.author.avatarUrl || undefined}
+							alt={post.author.username}
+							className="w-full h-full object-cover"
+							fallback={
+								<span className="text-white font-bold text-sm">
+									{(post.author.displayName ||
+										post.author.username)[0].toUpperCase()}
+								</span>
+							}
+						/>
 					</div>
 				</Link>
 

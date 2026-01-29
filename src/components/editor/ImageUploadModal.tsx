@@ -226,6 +226,12 @@ export function ImageUploadModal({
 							type="text"
 							value={caption}
 							onChange={(e) => setCaption(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.preventDefault();
+									handleUpload();
+								}
+							}}
 							placeholder="Describe the image..."
 							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500"
 						/>

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Calendar, Gamepad2, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
+import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
 
 interface ArticleCardProps {
@@ -57,10 +58,15 @@ export function ArticleCard({
 			{article.coverImageUrl && (
 				<Link to="/articles/$id" params={{ id: article.id }}>
 					<div className="aspect-video bg-gray-700 overflow-hidden">
-						<img
+						<SafeImage
 							src={article.coverImageUrl}
 							alt={article.title}
 							className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+							fallback={
+								<div className="w-full h-full flex items-center justify-center bg-gray-800">
+									<Gamepad2 className="text-gray-600" size={32} />
+								</div>
+							}
 						/>
 					</div>
 				</Link>
@@ -95,10 +101,11 @@ export function ArticleCard({
 								className="flex items-center gap-1.5 px-2 py-1 bg-gray-700/50 rounded-full text-xs text-gray-300 hover:bg-gray-700 transition-colors"
 							>
 								{game.coverUrl ? (
-									<img
+									<SafeImage
 										src={game.coverUrl}
 										alt=""
 										className="w-4 h-4 rounded object-cover"
+										fallback={<Gamepad2 size={12} />}
 									/>
 								) : (
 									<Gamepad2 size={12} />
@@ -122,18 +129,17 @@ export function ArticleCard({
 							params={{ username: article.author.username }}
 						>
 							<div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
-								{article.author.avatarUrl ? (
-									<img
-										src={article.author.avatarUrl}
-										alt=""
-										className="w-full h-full object-cover"
-									/>
-								) : (
-									<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
-										{(article.author.displayName ||
-											article.author.username)[0].toUpperCase()}
-									</span>
-								)}
+								<SafeImage
+									src={article.author.avatarUrl || undefined}
+									alt=""
+									className="w-full h-full object-cover"
+									fallback={
+										<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
+											{(article.author.displayName ||
+												article.author.username)[0].toUpperCase()}
+										</span>
+									}
+								/>
 							</div>
 						</Link>
 						<Link

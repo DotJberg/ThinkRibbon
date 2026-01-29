@@ -71,6 +71,9 @@ function NewReviewPage() {
 	// Submission state
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [hasPublished, setHasPublished] = useState(false);
+	const [publishedReviewId, setPublishedReviewId] = useState<string | null>(
+		null,
+	);
 
 	// Auto-save debounce ref
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -231,6 +234,11 @@ function NewReviewPage() {
 		)
 			return;
 
+		// Cancel any pending auto-save
+		if (saveTimeoutRef.current) {
+			clearTimeout(saveTimeoutRef.current);
+		}
+
 		setIsSubmitting(true);
 		try {
 			const review = await createReview({
@@ -249,11 +257,13 @@ function NewReviewPage() {
 
 			// Delete the draft if it exists
 			if (draftId) {
-				await deleteReviewDraft({ data: { draftId, clerkId: user.id } });
+				await deleteReviewDraft({
+					data: { draftId, clerkId: user.id, preserveImages: true },
+				});
 			}
 
 			setHasPublished(true);
-			navigate({ to: "/reviews/$id", params: { id: review.id } });
+			setPublishedReviewId(review.id);
 		} catch (error) {
 			console.error("Failed to create review:", error);
 			toast.error(
@@ -263,6 +273,13 @@ function NewReviewPage() {
 			setIsSubmitting(false);
 		}
 	};
+
+	// Handle successful publish navigation
+	useEffect(() => {
+		if (hasPublished && publishedReviewId) {
+			navigate({ to: "/reviews/$id", params: { id: publishedReviewId } });
+		}
+	}, [hasPublished, publishedReviewId, navigate]);
 
 	const handleDraftSelect = (selectedDraftId: string) => {
 		loadDraft(selectedDraftId);
@@ -277,6 +294,12 @@ function NewReviewPage() {
 		if (draftId && user) {
 			await deleteReviewDraft({ data: { draftId, clerkId: user.id } });
 		}
+	};
+
+	const handleImageError = (
+		e: React.SyntheticEvent<HTMLImageElement, Event>,
+	) => {
+		e.currentTarget.style.display = "none";
 	};
 
 	if (!isSignedIn) {
@@ -442,6 +465,8 @@ function NewReviewPage() {
 													src={game.coverUrl}
 													alt=""
 													className="w-10 h-14 object-cover rounded"
+													crossOrigin="anonymous"
+													onError={handleImageError}
 												/>
 											) : (
 												<Gamepad2 className="w-10 h-14 text-gray-500" />
@@ -461,6 +486,8 @@ function NewReviewPage() {
 									src={selectedGame.coverUrl}
 									alt=""
 									className="w-16 h-20 object-cover rounded"
+									crossOrigin="anonymous"
+									onError={handleImageError}
 								/>
 							) : (
 								<div className="w-16 h-20 bg-gray-700 rounded flex items-center justify-center">

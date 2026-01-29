@@ -68,6 +68,9 @@ function NewArticlePage() {
 	// Submission state
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [hasPublished, setHasPublished] = useState(false);
+	const [publishedArticleId, setPublishedArticleId] = useState<string | null>(
+		null,
+	);
 
 	// Auto-save debounce ref
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -229,6 +232,11 @@ function NewArticlePage() {
 		e.preventDefault();
 		if (!user || !title.trim() || !content.trim()) return;
 
+		// Cancel any pending auto-save
+		if (saveTimeoutRef.current) {
+			clearTimeout(saveTimeoutRef.current);
+		}
+
 		setIsSubmitting(true);
 		try {
 			const article = await createArticle({
@@ -247,11 +255,13 @@ function NewArticlePage() {
 
 			// Delete the draft if it exists
 			if (draftId) {
-				await deleteArticleDraft({ data: { draftId, clerkId: user.id } });
+				await deleteArticleDraft({
+					data: { draftId, clerkId: user.id, preserveImages: true },
+				});
 			}
 
 			setHasPublished(true);
-			navigate({ to: "/articles/$id", params: { id: article.id } });
+			setPublishedArticleId(article.id);
 		} catch (error) {
 			console.error("Failed to create article:", error);
 			toast.error("Failed to publish article");
@@ -259,6 +269,13 @@ function NewArticlePage() {
 			setIsSubmitting(false);
 		}
 	};
+
+	// Handle successful publish navigation
+	useEffect(() => {
+		if (hasPublished && publishedArticleId) {
+			navigate({ to: "/articles/$id", params: { id: publishedArticleId } });
+		}
+	}, [hasPublished, publishedArticleId, navigate]);
 
 	const handleDraftSelect = (selectedDraftId: string) => {
 		loadDraft(selectedDraftId);

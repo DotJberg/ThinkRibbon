@@ -148,7 +148,10 @@ export const getArticleDraftById = createServerFn({
 export const deleteArticleDraft = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { draftId: string; clerkId: string }) => data)
+	.inputValidator(
+		(data: { draftId: string; clerkId: string; preserveImages?: boolean }) =>
+			data,
+	)
 	.handler(async ({ data }) => {
 		const user = await prisma.user.findUnique({
 			where: { clerkId: data.clerkId },
@@ -164,17 +167,20 @@ export const deleteArticleDraft = createServerFn({
 			throw new Error("Draft not found or unauthorized");
 		}
 
-		// Collect URLs to delete
-		const urlsToDelete: string[] = [];
-		if (draft.coverImageUrl) {
-			urlsToDelete.push(draft.coverImageUrl);
-		}
-		for (const img of draft.images) {
-			urlsToDelete.push(img.url);
-		}
+		// Only delete images if preserveImages is false (default)
+		if (!data.preserveImages) {
+			// Collect URLs to delete
+			const urlsToDelete: string[] = [];
+			if (draft.coverImageUrl) {
+				urlsToDelete.push(draft.coverImageUrl);
+			}
+			for (const img of draft.images) {
+				urlsToDelete.push(img.url);
+			}
 
-		// Delete images from UploadThing
-		await deleteUploadThingFiles(urlsToDelete);
+			// Delete images from UploadThing
+			await deleteUploadThingFiles(urlsToDelete);
+		}
 
 		// Delete the draft
 		await prisma.articleDraft.delete({
@@ -370,7 +376,10 @@ export const getReviewDraftById = createServerFn({
 export const deleteReviewDraft = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { draftId: string; clerkId: string }) => data)
+	.inputValidator(
+		(data: { draftId: string; clerkId: string; preserveImages?: boolean }) =>
+			data,
+	)
 	.handler(async ({ data }) => {
 		const user = await prisma.user.findUnique({
 			where: { clerkId: data.clerkId },
@@ -386,17 +395,20 @@ export const deleteReviewDraft = createServerFn({
 			throw new Error("Draft not found or unauthorized");
 		}
 
-		// Collect URLs to delete
-		const urlsToDelete: string[] = [];
-		if (draft.coverImageUrl) {
-			urlsToDelete.push(draft.coverImageUrl);
-		}
-		for (const img of draft.images) {
-			urlsToDelete.push(img.url);
-		}
+		// Only delete images if preserveImages is false (default)
+		if (!data.preserveImages) {
+			// Collect URLs to delete
+			const urlsToDelete: string[] = [];
+			if (draft.coverImageUrl) {
+				urlsToDelete.push(draft.coverImageUrl);
+			}
+			for (const img of draft.images) {
+				urlsToDelete.push(img.url);
+			}
 
-		// Delete images from UploadThing
-		await deleteUploadThingFiles(urlsToDelete);
+			// Delete images from UploadThing
+			await deleteUploadThingFiles(urlsToDelete);
+		}
 
 		// Delete the draft
 		await prisma.reviewDraft.delete({

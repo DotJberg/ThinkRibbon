@@ -180,9 +180,19 @@ export const getArticlesByUser = createServerFn({
 	method: "GET",
 })
 	.inputValidator(
-		(data: { username: string; includeUnpublished?: boolean }) => data,
+		(data: {
+			username: string;
+			includeUnpublished?: boolean;
+			clerkId?: string;
+		}) => data,
 	)
 	.handler(async ({ data }) => {
+		// Get the current user's ID for like status check
+		const currentUser = data.clerkId
+			? await prisma.user.findUnique({ where: { clerkId: data.clerkId } })
+			: null;
+		const userId = currentUser?.id ?? "___dummy___";
+
 		return prisma.article.findMany({
 			where: {
 				author: { username: data.username },
@@ -206,6 +216,7 @@ export const getArticlesByUser = createServerFn({
 					},
 				},
 				_count: { select: { likes: true, comments: true } },
+				likes: { where: { userId }, select: { id: true } },
 			},
 		});
 	});

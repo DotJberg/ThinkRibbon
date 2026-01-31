@@ -64,10 +64,21 @@ export const getPostsByUser = createServerFn({
 	method: "GET",
 })
 	.inputValidator(
-		(data: { username: string; cursor?: string; limit?: number }) => data,
+		(data: {
+			username: string;
+			cursor?: string;
+			limit?: number;
+			clerkId?: string;
+		}) => data,
 	)
 	.handler(async ({ data }) => {
 		const limit = data.limit || 20;
+
+		// Get the current user's ID for like status check
+		const currentUser = data.clerkId
+			? await prisma.user.findUnique({ where: { clerkId: data.clerkId } })
+			: null;
+		const userId = currentUser?.id ?? "___dummy___";
 
 		const posts = await prisma.post.findMany({
 			where: { author: { username: data.username } },
@@ -84,6 +95,7 @@ export const getPostsByUser = createServerFn({
 					},
 				},
 				_count: { select: { likes: true, comments: true } },
+				likes: { where: { userId }, select: { id: true } },
 			},
 		});
 

@@ -1,11 +1,16 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Gamepad2, TrendingUp, Users } from "lucide-react";
+import { Compass, Gamepad2, TrendingUp, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FeedItemCard } from "../components/feed/FeedItem";
+import {
+	type DiscoverFeedType,
+	FeedSelector,
+} from "../components/feed/FeedSelector";
 import { PostComposer } from "../components/posts/PostComposer";
 import {
 	type FeedItem,
+	getDiscoverFeed,
 	getFollowingFeed,
 	getPopularFeed,
 } from "../lib/server/feed";
@@ -17,9 +22,11 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
 	const { user, isSignedIn, isLoaded } = useUser();
-	const [activeTab, setActiveTab] = useState<"following" | "popular">(
-		"following",
+	const [activeTab, setActiveTab] = useState<"following" | "discover">(
+		"discover",
 	);
+	const [discoverFeedType, setDiscoverFeedType] =
+		useState<DiscoverFeedType>("discover");
 	const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasMore, setHasMore] = useState(false);
@@ -28,30 +35,34 @@ function HomePage() {
 	// Set default tab based on auth state
 	useEffect(() => {
 		if (isLoaded) {
-			setActiveTab(isSignedIn ? "following" : "popular");
+			setActiveTab(isSignedIn ? "following" : "discover");
 		}
 	}, [isLoaded, isSignedIn]);
 
-	// Load feed
+	// Load feed based on active tab and discover feed type
 	useEffect(() => {
 		const loadFeed = async () => {
 			setIsLoading(true);
 			try {
+				let result: { items: FeedItem[]; nextCursor?: string };
+
 				if (activeTab === "following" && isSignedIn && user) {
-					const result = await getFollowingFeed({
+					result = await getFollowingFeed({
 						data: { clerkId: user.id, limit: 20 },
 					});
-					setFeedItems(result.items);
-					setHasMore(!!result.nextCursor);
-					setCursor(result.nextCursor);
-				} else {
-					const result = await getPopularFeed({
-						data: { limit: 20 },
+				} else if (discoverFeedType === "popular") {
+					result = await getPopularFeed({
+						data: { clerkId: user?.id, limit: 20 },
 					});
-					setFeedItems(result.items);
-					setHasMore(!!result.nextCursor);
-					setCursor(result.nextCursor);
+				} else {
+					result = await getDiscoverFeed({
+						data: { clerkId: user?.id, limit: 20 },
+					});
 				}
+
+				setFeedItems(result.items);
+				setHasMore(!!result.nextCursor);
+				setCursor(result.nextCursor);
 			} catch (error) {
 				console.error("Failed to load feed:", error);
 			} finally {
@@ -62,7 +73,7 @@ function HomePage() {
 		if (isLoaded) {
 			loadFeed();
 		}
-	}, [activeTab, isSignedIn, user, isLoaded]);
+	}, [activeTab, discoverFeedType, isSignedIn, user, isLoaded]);
 
 	const handleCreatePost = async (content: string) => {
 		if (!user) return;
@@ -71,10 +82,20 @@ function HomePage() {
 				data: { content, authorClerkId: user.id },
 			});
 			// Refresh feed
-			const result =
-				activeTab === "following" && isSignedIn
-					? await getFollowingFeed({ data: { clerkId: user.id, limit: 20 } })
-					: await getPopularFeed({ data: { limit: 20 } });
+			let result: { items: FeedItem[]; nextCursor?: string };
+			if (activeTab === "following" && isSignedIn) {
+				result = await getFollowingFeed({
+					data: { clerkId: user.id, limit: 20 },
+				});
+			} else if (discoverFeedType === "popular") {
+				result = await getPopularFeed({
+					data: { clerkId: user.id, limit: 20 },
+				});
+			} else {
+				result = await getDiscoverFeed({
+					data: { clerkId: user.id, limit: 20 },
+				});
+			}
 			setFeedItems(result.items);
 		} catch (error) {
 			console.error("Failed to create post:", error);
@@ -84,12 +105,20 @@ function HomePage() {
 	const loadMore = async () => {
 		if (!cursor) return;
 		try {
-			const result =
-				activeTab === "following" && isSignedIn && user
-					? await getFollowingFeed({
-							data: { clerkId: user.id, cursor, limit: 20 },
-						})
-					: await getPopularFeed({ data: { cursor, limit: 20 } });
+			let result: { items: FeedItem[]; nextCursor?: string };
+			if (activeTab === "following" && isSignedIn && user) {
+				result = await getFollowingFeed({
+					data: { clerkId: user.id, cursor, limit: 20 },
+				});
+			} else if (discoverFeedType === "popular") {
+				result = await getPopularFeed({
+					data: { clerkId: user?.id, cursor, limit: 20 },
+				});
+			} else {
+				result = await getDiscoverFeed({
+					data: { clerkId: user?.id, cursor, limit: 20 },
+				});
+			}
 			setFeedItems((prev) => [...prev, ...result.items]);
 			setHasMore(!!result.nextCursor);
 			setCursor(result.nextCursor);
@@ -128,18 +157,14 @@ function HomePage() {
 								Following
 							</button>
 						)}
-						<button
-							type="button"
-							onClick={() => setActiveTab("popular")}
-							className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-								activeTab === "popular"
-									? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-									: "bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700"
-							}`}
-						>
-							<TrendingUp size={18} />
-							Popular
-						</button>
+						<FeedSelector
+							selectedFeed={discoverFeedType}
+							onFeedChange={(feed) => {
+								setDiscoverFeedType(feed);
+								setActiveTab("discover");
+							}}
+							isActive={activeTab === "discover"}
+						/>
 					</div>
 
 					{/* Post Composer (signed in only) */}
@@ -177,19 +202,23 @@ function HomePage() {
 								<div className="w-16 h-16 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
 									{activeTab === "following" ? (
 										<Users className="text-gray-600" size={32} />
-									) : (
+									) : discoverFeedType === "popular" ? (
 										<TrendingUp className="text-gray-600" size={32} />
+									) : (
+										<Compass className="text-gray-600" size={32} />
 									)}
 								</div>
 								<h3 className="text-lg font-medium text-gray-300 mb-2">
 									{activeTab === "following"
 										? "Your timeline is empty"
-										: "No trending content yet"}
+										: discoverFeedType === "popular"
+											? "No trending content yet"
+											: "Nothing to discover yet"}
 								</h3>
 								<p className="text-gray-500 mb-4">
 									{activeTab === "following"
 										? "Follow some users to see their posts, reviews, and articles here!"
-										: "Be the first to share something today!"}
+										: "Be the first to share something!"}
 								</p>
 								{activeTab === "following" && (
 									<Link

@@ -4,18 +4,16 @@ import {
 	Calendar,
 	Edit,
 	FileText,
-	Gamepad2,
-	Star,
 	UserMinus,
 	UserPlus,
 	Users,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { ArticleCard } from "../../components/articles/ArticleCard";
-import { PostCard } from "../../components/posts/PostCard";
+import { FeedItemCard } from "../../components/feed/FeedItem";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import { SafeImage } from "../../components/shared/SafeImage";
 import { getArticlesByUser } from "../../lib/server/articles";
+import type { FeedItem } from "../../lib/server/feed";
 import { getPostsByUser } from "../../lib/server/posts";
 import { getReviewsByUser } from "../../lib/server/reviews";
 import {
@@ -46,9 +44,6 @@ function ProfilePage() {
 		Awaited<ReturnType<typeof getArticlesByUser>>
 	>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [activeTab, setActiveTab] = useState<"posts" | "reviews" | "articles">(
-		"posts",
-	);
 	const [following, setFollowing] = useState(false);
 	const [followCounts, setFollowCounts] = useState({
 		followers: 0,
@@ -68,12 +63,20 @@ function ProfilePage() {
 					setProfile(profileData);
 					const [postsData, reviewsData, articlesData, counts] =
 						await Promise.all([
-							getPostsByUser({ data: { username } }),
+							getPostsByUser({ data: { username, clerkId: currentUser?.id } }),
 							getReviewsByUser({
-								data: { username, includeUnpublished: isOwnProfile },
+								data: {
+									username,
+									includeUnpublished: isOwnProfile,
+									clerkId: currentUser?.id,
+								},
 							}),
 							getArticlesByUser({
-								data: { username, includeUnpublished: isOwnProfile },
+								data: {
+									username,
+									includeUnpublished: isOwnProfile,
+									clerkId: currentUser?.id,
+								},
 							}),
 							getFollowCounts({ data: profileData.id }),
 						]);
@@ -153,11 +156,49 @@ function ProfilePage() {
 		year: "numeric",
 	});
 
-	const tabs = [
-		{ id: "posts", label: "Posts", count: profile._count.posts },
-		{ id: "reviews", label: "Reviews", count: profile._count.reviews },
-		{ id: "articles", label: "Articles", count: profile._count.articles },
-	] as const;
+	// Create unified feed by combining and sorting all content chronologically
+	const feedItems: FeedItem[] = [
+		...posts.map((post) => ({
+			type: "post" as const,
+			id: post.id,
+			createdAt: new Date(post.createdAt),
+			author: post.author,
+			content: post.content,
+			likeCount: post._count.likes,
+			commentCount: post._count.comments,
+			hasLiked: post.likes.length > 0,
+		})),
+		...reviews.map((review) => ({
+			type: "review" as const,
+			id: review.id,
+			createdAt: new Date(review.createdAt),
+			author: review.author,
+			content: review.content,
+			title: review.title,
+			rating: review.rating,
+			coverImageUrl: review.coverImageUrl,
+			containsSpoilers: review.containsSpoilers,
+			game: review.game,
+			likeCount: review._count.likes,
+			commentCount: review._count.comments,
+			hasLiked: review.likes.length > 0,
+		})),
+		...articles.map((article) => ({
+			type: "article" as const,
+			id: article.id,
+			createdAt: new Date(article.createdAt),
+			author: article.author,
+			content: article.content,
+			title: article.title,
+			excerpt: article.excerpt ?? undefined,
+			coverImageUrl: article.coverImageUrl,
+			containsSpoilers: article.containsSpoilers,
+			games: article.games.map((g) => g.game),
+			likeCount: article._count.likes,
+			commentCount: article._count.comments,
+			hasLiked: article.likes.length > 0,
+		})),
+	].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
@@ -275,102 +316,17 @@ function ProfilePage() {
 					)}
 				</div>
 
-				{/* Tabs */}
-				<div className="flex gap-2 mb-6 p-1 bg-gray-800/50 rounded-xl max-w-md">
-					{tabs.map((tab) => (
-						<button
-							key={tab.id}
-							type="button"
-							onClick={() => setActiveTab(tab.id)}
-							className={`flex-1 py-2 px-3 rounded-lg font-medium text-sm transition-all ${
-								activeTab === tab.id
-									? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-									: "text-gray-400 hover:text-white"
-							}`}
-						>
-							{tab.label} ({tab.count})
-						</button>
-					))}
-				</div>
-
-				{/* Content */}
+				{/* Content Feed */}
 				<div className="pb-8 space-y-4">
-					{activeTab === "posts" &&
-						(posts.length > 0 ? (
-							posts.map((post) => (
-								<PostCard
-									key={post.id}
-									post={post}
-									isAuthenticated={isSignedIn}
-								/>
-							))
-						) : (
-							<div className="text-center py-12 text-gray-500">
-								No posts yet
-							</div>
-						))}
-					{activeTab === "reviews" &&
-						(reviews.length > 0 ? (
-							reviews.map((review) => (
-								<div
-									key={review.id}
-									className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4"
-								>
-									<div className="flex items-start gap-4">
-										<SafeImage
-											src={review.game.coverUrl || undefined}
-											alt=""
-											className="w-16 h-20 object-cover rounded"
-											fallback={<Gamepad2 className="w-8 h-8 text-gray-500" />}
-										/>
-										<div>
-											<Link
-												to="/reviews/$id"
-												params={{ id: review.id }}
-												className="text-lg font-semibold text-white hover:text-purple-400"
-											>
-												{review.title}
-											</Link>
-											<p className="text-sm text-gray-400">
-												{review.game.name}
-											</p>
-											<div className="flex items-center gap-1 mt-1">
-												{[...Array(5)].map((_, i) => (
-													<Star
-														// biome-ignore lint/suspicious/noArrayIndexKey: Static array
-														key={i}
-														size={14}
-														className={
-															i < review.rating
-																? "fill-yellow-400 text-yellow-400"
-																: "text-gray-600"
-														}
-													/>
-												))}
-											</div>
-										</div>
-									</div>
-								</div>
-							))
-						) : (
-							<div className="text-center py-12 text-gray-500">
-								No reviews yet
-							</div>
-						))}
-					{activeTab === "articles" &&
-						(articles.length > 0 ? (
-							articles.map((article) => (
-								<ArticleCard
-									key={article.id}
-									article={article}
-									isAuthenticated={isSignedIn}
-								/>
-							))
-						) : (
-							<div className="text-center py-12 text-gray-500">
-								No articles yet
-							</div>
-						))}
+					{feedItems.length > 0 ? (
+						feedItems.map((item) => (
+							<FeedItemCard key={`${item.type}-${item.id}`} item={item} />
+						))
+					) : (
+						<div className="text-center py-12 text-gray-500">
+							No content yet
+						</div>
+					)}
 				</div>
 			</div>
 

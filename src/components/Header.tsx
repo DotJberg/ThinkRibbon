@@ -1,8 +1,28 @@
 import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
-import { FileText, Gamepad2, Home, Menu, Star, User, X } from "lucide-react";
+import {
+	BookOpen,
+	FileText,
+	Gamepad2,
+	Home,
+	Menu,
+	Star,
+	User,
+	X,
+} from "lucide-react";
 import { useState } from "react";
+import guidelinesMd from "../../user_guideline.md?raw";
 import ClerkHeader from "../integrations/clerk/header-user.tsx";
+
+const firstLine = guidelinesMd.split("\n")[0];
+const dateStr = firstLine?.split(" - ")[1]?.trim();
+const now = new Date();
+const currentMonthYear = now.toLocaleString("default", {
+	month: "long",
+	year: "numeric",
+});
+
+const isNew = dateStr === currentMonthYear;
 
 export default function Header() {
 	const { user, isSignedIn } = useUser();
@@ -25,7 +45,7 @@ export default function Header() {
 							<Gamepad2 size={18} className="text-white" />
 						</div>
 						<span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent hidden sm:inline">
-							ThinkRibbon
+							Think Ribbon
 						</span>
 					</Link>
 				</div>
@@ -46,6 +66,7 @@ export default function Header() {
 					>
 						Games
 					</Link>
+
 					{isSignedIn && (
 						<>
 							<Link
@@ -66,6 +87,20 @@ export default function Header() {
 							</Link>
 						</>
 					)}
+					<Link
+						to="/guidelines"
+						className="text-gray-300 hover:text-white transition-colors font-medium flex items-center gap-1.5"
+						activeProps={{
+							className: "text-white font-medium flex items-center gap-1.5",
+						}}
+					>
+						Guidelines
+						{isNew && (
+							<span className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[9px] font-bold px-1 py-0.5 rounded-full animate-pulse">
+								NEW
+							</span>
+						)}
+					</Link>
 				</nav>
 
 				<div className="flex items-center gap-3">
@@ -182,6 +217,25 @@ export default function Header() {
 							</Link>
 						</>
 					)}
+					<Link
+						to="/guidelines"
+						onClick={() => setIsOpen(false)}
+						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+						activeProps={{
+							className:
+								"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+						}}
+					>
+						<BookOpen size={20} />
+						<div className="flex items-center gap-2">
+							<span className="font-medium">Guidelines</span>
+							{isNew && (
+								<span className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg shadow-purple-500/20">
+									NEW
+								</span>
+							)}
+						</div>
+					</Link>
 				</nav>
 
 				<div className="p-4 border-t border-gray-800 bg-gray-800/50">

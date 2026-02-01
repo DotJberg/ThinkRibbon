@@ -10,6 +10,7 @@ const handler = createStartHandler({
 	getRouterManifest: () => {
 		return import("./routeTree.gen").then((d) => d.routeTree);
 	},
+	// biome-ignore lint/suspicious/noExplicitAny: mismatch in beta types
 } as any);
 
 // @ts-expect-error - mismatch in beta types

@@ -92,9 +92,12 @@ export async function searchGames(
 	searchQuery: string,
 	limit = 10,
 ): Promise<IGDBGame[]> {
+	// Use version_parent = null to exclude editions (special editions, collector's editions, etc.)
+	// These have a version_parent pointing to the main game
 	const query = `
     search "${searchQuery}";
     fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating;
+    where version_parent = null;
     limit ${limit};
   `;
 

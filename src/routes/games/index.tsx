@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Clock, Gamepad2, Search, TrendingUp } from "lucide-react";
+import { Gamepad2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { GameCard } from "../../components/games/GameCard";
 import {
-	fetchPopularGames,
-	fetchRecentGames,
+	GamesFeedSelector,
+	type GamesFeedType,
+} from "../../components/games/GamesFeedSelector";
+import {
 	getGamesWithReviews,
+	getHighestRatedGames,
 	searchGames,
 } from "../../lib/server/games";
 
@@ -18,34 +21,28 @@ function GamesPage() {
 	const [searchResults, setSearchResults] = useState<
 		Awaited<ReturnType<typeof searchGames>>
 	>([]);
-	const [popularGames, setPopularGames] = useState<
-		Awaited<ReturnType<typeof fetchPopularGames>>
-	>([]);
-	const [recentGames, setRecentGames] = useState<
-		Awaited<ReturnType<typeof fetchRecentGames>>
-	>([]);
-	const [reviewedGames, setReviewedGames] = useState<
+	const [latestReviewedGames, setLatestReviewedGames] = useState<
 		Awaited<ReturnType<typeof getGamesWithReviews>>["games"]
+	>([]);
+	const [highestRatedGames, setHighestRatedGames] = useState<
+		Awaited<ReturnType<typeof getHighestRatedGames>>["games"]
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
-	const [activeTab, setActiveTab] = useState<"popular" | "recent" | "reviewed">(
-		"popular",
-	);
+	const [selectedFeed, setSelectedFeed] =
+		useState<GamesFeedType>("latest-reviewed");
 
 	// Load initial data
 	useEffect(() => {
 		const loadGames = async () => {
 			setIsLoading(true);
 			try {
-				const [popular, recent, reviewed] = await Promise.all([
-					fetchPopularGames({ data: 12 }),
-					fetchRecentGames({ data: 12 }),
+				const [latestReviewed, highestRated] = await Promise.all([
 					getGamesWithReviews({ data: { limit: 12 } }),
+					getHighestRatedGames({ data: { limit: 12 } }),
 				]);
-				setPopularGames(popular);
-				setRecentGames(recent);
-				setReviewedGames(reviewed.games);
+				setLatestReviewedGames(latestReviewed.games);
+				setHighestRatedGames(highestRated.games);
 			} catch (error) {
 				console.error("Failed to load games:", error);
 			} finally {
@@ -79,19 +76,11 @@ function GamesPage() {
 		return () => clearTimeout(timeoutId);
 	}, [searchQuery]);
 
-	const tabs = [
-		{ id: "popular", label: "Popular", icon: TrendingUp },
-		{ id: "recent", label: "Recent", icon: Clock },
-		{ id: "reviewed", label: "Community Picks", icon: Gamepad2 },
-	] as const;
-
 	const currentGames = searchQuery.trim()
 		? searchResults
-		: activeTab === "popular"
-			? popularGames
-			: activeTab === "recent"
-				? recentGames
-				: reviewedGames;
+		: selectedFeed === "latest-reviewed"
+			? latestReviewedGames
+			: highestRatedGames;
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
@@ -124,24 +113,13 @@ function GamesPage() {
 					</div>
 				</div>
 
-				{/* Tab Navigation (hidden when searching) */}
+				{/* Feed Selector (hidden when searching) */}
 				{!searchQuery.trim() && (
-					<div className="flex justify-center gap-2 mb-8">
-						{tabs.map((tab) => (
-							<button
-								key={tab.id}
-								type="button"
-								onClick={() => setActiveTab(tab.id)}
-								className={`flex items-center gap-2 py-2 px-4 rounded-lg font-medium transition-all ${
-									activeTab === tab.id
-										? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-										: "bg-gray-800/50 text-gray-400 hover:text-white hover:bg-gray-700/50"
-								}`}
-							>
-								<tab.icon size={18} />
-								{tab.label}
-							</button>
-						))}
+					<div className="flex justify-center mb-8">
+						<GamesFeedSelector
+							selectedFeed={selectedFeed}
+							onFeedChange={setSelectedFeed}
+						/>
 					</div>
 				)}
 

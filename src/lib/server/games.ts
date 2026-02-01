@@ -71,6 +71,60 @@ export const getGamesWithReviews = createServerFn({
 		return { games: gamesWithRatings, nextCursor };
 	});
 
+// Get highest rated games on the site (sorted by average review rating)
+export const getHighestRatedGames = createServerFn({
+	method: "GET",
+})
+	.inputValidator((data: { cursor?: string; limit?: number }) => data)
+	.handler(async ({ data }) => {
+		const limit = data.limit || 20;
+
+		// Get all games with at least one published review
+		const games = await prisma.game.findMany({
+			where: {
+				reviews: { some: { published: true } },
+			},
+			include: {
+				_count: { select: { reviews: { where: { published: true } } } },
+			},
+		});
+
+		// Calculate average ratings for all games
+		const gamesWithRatings = await Promise.all(
+			games.map(async (game) => {
+				const avg = await prisma.review.aggregate({
+					where: { gameId: game.id, published: true },
+					_avg: { rating: true },
+				});
+				return {
+					...game,
+					averageRating: avg._avg.rating || 0,
+				};
+			}),
+		);
+
+		// Sort by average rating descending
+		gamesWithRatings.sort((a, b) => b.averageRating - a.averageRating);
+
+		// Apply cursor-based pagination
+		let startIndex = 0;
+		if (data.cursor) {
+			const cursorIndex = gamesWithRatings.findIndex((g) => g.id === data.cursor);
+			if (cursorIndex !== -1) {
+				startIndex = cursorIndex + 1;
+			}
+		}
+
+		const paginatedGames = gamesWithRatings.slice(startIndex, startIndex + limit + 1);
+		let nextCursor: string | undefined;
+		if (paginatedGames.length > limit) {
+			const nextItem = paginatedGames.pop();
+			nextCursor = nextItem?.id;
+		}
+
+		return { games: paginatedGames, nextCursor };
+	});
+
 // Get popular games from IGDB
 export const fetchPopularGames = createServerFn({
 	method: "GET",

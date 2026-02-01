@@ -2,7 +2,8 @@ import { useUser } from "@clerk/clerk-react";
 import { BookOpen, Check, Loader2, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import { addToQuestLog, getQuestLogEntry } from "../../lib/server/questlog";
+import { getQuestLogEntry } from "../../lib/server/questlog";
+import { AddEntryModal } from "./AddEntryModal";
 import { StatusChangeModal } from "./StatusChangeModal";
 
 interface QuestLogButtonProps {
@@ -37,8 +38,8 @@ export function QuestLogButton({
 	const { user, isSignedIn } = useUser();
 	const [entry, setEntry] = useState<QuestLogEntry>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isAdding, setIsAdding] = useState(false);
-	const [showModal, setShowModal] = useState(false);
+	const [showAddModal, setShowAddModal] = useState(false);
+	const [showStatusModal, setShowStatusModal] = useState(false);
 
 	useEffect(() => {
 		const load = async () => {
@@ -60,27 +61,18 @@ export function QuestLogButton({
 		load();
 	}, [user?.id, gameId]);
 
-	const handleAdd = async () => {
-		if (!user?.id) return;
-		setIsAdding(true);
-		try {
-			const newEntry = await addToQuestLog({
-				data: {
-					clerkId: user.id,
-					gameId,
-					status: "Playing",
-				},
+	const handleAddSuccess = async () => {
+		// Refresh the entry
+		if (user?.id) {
+			const updated = await getQuestLogEntry({
+				data: { clerkId: user.id, gameId },
 			});
-			setEntry(newEntry);
-			onUpdate?.();
-		} catch (error) {
-			console.error("Failed to add to quest log:", error);
-		} finally {
-			setIsAdding(false);
+			setEntry(updated);
 		}
+		onUpdate?.();
 	};
 
-	const handleModalSuccess = async () => {
+	const handleStatusSuccess = async () => {
 		// Refresh the entry
 		if (user?.id) {
 			const updated = await getQuestLogEntry({
@@ -111,52 +103,83 @@ export function QuestLogButton({
 	// Not in quest log - show add button
 	if (!entry) {
 		return (
-			<button
-				type="button"
-				onClick={handleAdd}
-				disabled={isAdding}
-				className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg shadow-lg transition-all disabled:opacity-50"
-			>
-				{isAdding ? (
-					<Loader2 size={18} className="animate-spin" />
-				) : (
+			<>
+				<button
+					type="button"
+					onClick={() => setShowAddModal(true)}
+					className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg shadow-lg transition-all"
+				>
 					<Plus size={18} />
-				)}
-				Add to Quest Log
-			</button>
+					Add to Quest Log
+				</button>
+
+				<AddEntryModal
+					isOpen={showAddModal}
+					onClose={() => setShowAddModal(false)}
+					onSuccess={handleAddSuccess}
+					clerkId={user.id}
+					gameId={gameId}
+					gameName={gameName}
+				/>
+			</>
 		);
 	}
 
-	// In quest log - show status with click to change
+	// In quest log - show status with click to change + add new entry button
 	return (
 		<>
-			<button
-				type="button"
-				onClick={() => setShowModal(true)}
-				className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${statusColors[entry.status]} text-white font-medium rounded-lg shadow-lg hover:opacity-90 transition-all`}
-			>
-				{entry.status === "Completed" ? (
-					<Check size={18} />
-				) : (
-					<BookOpen size={18} />
-				)}
-				{statusLabels[entry.status]}
-				{entry.quickRating && (
-					<span className="ml-1 text-yellow-300">
-						{"⭐".repeat(Math.floor(entry.quickRating / 2))}
-					</span>
-				)}
-			</button>
+			<div className="flex items-center gap-2">
+				<button
+					type="button"
+					onClick={() => setShowStatusModal(true)}
+					className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${statusColors[entry.status]} text-white font-medium rounded-lg shadow-lg hover:opacity-90 transition-all`}
+				>
+					{entry.status === "Completed" ? (
+						<Check size={18} />
+					) : (
+						<BookOpen size={18} />
+					)}
+					{statusLabels[entry.status]}
+					{entry.quickRating && (
+						<span className="ml-1 text-yellow-300">
+							{"⭐".repeat(entry.quickRating)}
+						</span>
+					)}
+				</button>
+
+				{/* Add New Entry button for diary-style logging */}
+				<button
+					type="button"
+					onClick={() => setShowAddModal(true)}
+					className="flex items-center gap-1 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-medium rounded-lg transition-all"
+					title="Log another playthrough"
+				>
+					<Plus size={16} />
+				</button>
+			</div>
 
 			<StatusChangeModal
-				isOpen={showModal}
-				onClose={() => setShowModal(false)}
-				onSuccess={handleModalSuccess}
+				isOpen={showStatusModal}
+				onClose={() => setShowStatusModal(false)}
+				onSuccess={handleStatusSuccess}
 				clerkId={user.id}
 				gameId={gameId}
 				gameName={gameName}
 				currentStatus={entry.status}
+				questLogId={entry.id}
+				currentStartedAt={entry.startedAt}
+				currentCompletedAt={entry.completedAt}
+			/>
+
+			<AddEntryModal
+				isOpen={showAddModal}
+				onClose={() => setShowAddModal(false)}
+				onSuccess={handleAddSuccess}
+				clerkId={user.id}
+				gameId={gameId}
+				gameName={gameName}
 			/>
 		</>
 	);
 }
+

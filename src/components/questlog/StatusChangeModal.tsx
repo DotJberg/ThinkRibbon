@@ -1,7 +1,7 @@
-import { Loader2, Share2, Star, X } from "lucide-react";
+import { Calendar, Loader2, Share2, Star, X } from "lucide-react";
 import { useState } from "react";
 import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import { updateQuestLogStatus } from "../../lib/server/questlog";
+import { updateQuestLog, updateQuestLogStatus } from "../../lib/server/questlog";
 
 interface StatusChangeModalProps {
 	isOpen: boolean;
@@ -11,6 +11,9 @@ interface StatusChangeModalProps {
 	gameId: string;
 	gameName: string;
 	currentStatus: QuestLogStatus;
+	questLogId: string;
+	currentStartedAt?: Date | null;
+	currentCompletedAt?: Date | null;
 }
 
 type ReviewOption = "none" | "quick" | "full";
@@ -24,6 +27,12 @@ const statusOptions: { value: QuestLogStatus; label: string; emoji: string }[] =
 		{ value: "Playing", label: "Playing", emoji: "🎮" },
 	];
 
+function formatDateForInput(date: Date | null | undefined): string {
+	if (!date) return "";
+	const d = new Date(date);
+	return d.toISOString().split("T")[0];
+}
+
 export function StatusChangeModal({
 	isOpen,
 	onClose,
@@ -32,6 +41,9 @@ export function StatusChangeModal({
 	gameId,
 	gameName,
 	currentStatus,
+	questLogId,
+	currentStartedAt,
+	currentCompletedAt,
 }: StatusChangeModalProps) {
 	const [newStatus, setNewStatus] = useState<QuestLogStatus>(
 		currentStatus === "Playing" ? "Completed" : currentStatus,
@@ -41,6 +53,12 @@ export function StatusChangeModal({
 	const [shareAsPost, setShareAsPost] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [hoverRating, setHoverRating] = useState<number>(0);
+	const [startedAt, setStartedAt] = useState<string>(
+		formatDateForInput(currentStartedAt),
+	);
+	const [completedAt, setCompletedAt] = useState<string>(
+		formatDateForInput(currentCompletedAt),
+	);
 
 	if (!isOpen) return null;
 
@@ -52,7 +70,7 @@ export function StatusChangeModal({
 		Backlog: "added to backlog",
 	}[newStatus];
 
-	const previewPost = `I just ${statusText} ${gameName}! ${"⭐".repeat(Math.floor(quickRating / 2))}${quickRating % 2 ? "½" : ""}`;
+	const previewPost = `I just ${statusText} ${gameName}! ${"⭐".repeat(quickRating)}`;
 
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
@@ -63,15 +81,29 @@ export function StatusChangeModal({
 				return;
 			}
 
-			await updateQuestLogStatus({
-				data: {
-					clerkId,
-					gameId,
-					newStatus,
-					quickRating: reviewOption === "quick" ? quickRating : undefined,
-					shareAsPost: reviewOption === "quick" && shareAsPost,
-				},
-			});
+			// If using quick rating, use the status update function
+			if (reviewOption === "quick" && quickRating > 0) {
+				await updateQuestLogStatus({
+					data: {
+						clerkId,
+						gameId,
+						newStatus,
+						quickRating,
+						shareAsPost,
+					},
+				});
+			} else {
+				// Use updateQuestLog to update status and dates
+				await updateQuestLog({
+					data: {
+						clerkId,
+						questLogId,
+						status: newStatus,
+						startedAt: startedAt ? new Date(startedAt) : undefined,
+						completedAt: completedAt ? new Date(completedAt) : undefined,
+					},
+				});
+			}
 
 			onSuccess?.();
 			onClose();
@@ -84,7 +116,7 @@ export function StatusChangeModal({
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-			<div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+			<div className="w-full max-w-md max-h-[90vh] bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
 				{/* Header */}
 				<div className="flex items-center justify-between p-5 border-b border-gray-800">
 					<h2 className="text-lg font-bold text-white">Update Status</h2>
@@ -97,7 +129,7 @@ export function StatusChangeModal({
 					</button>
 				</div>
 
-				<div className="p-5 space-y-5">
+				<div className="p-5 space-y-5 overflow-y-auto flex-1">
 					{/* Game Name */}
 					<div className="text-center">
 						<p className="text-gray-400 text-sm">Updating status for</p>
@@ -130,6 +162,42 @@ export function StatusChangeModal({
 					</div>
 
 					{/* Review Options */}
+					<div className="space-y-3 mb-4">
+						<span className="text-sm font-medium text-gray-400 flex items-center gap-2">
+							<Calendar size={14} />
+							Edit Dates
+						</span>
+						
+						{/* Started Date */}
+						<div className="space-y-1">
+							<label className="text-xs text-gray-500">Started Date</label>
+							<input
+								type="date"
+								value={startedAt}
+								onChange={(e) => setStartedAt(e.target.value)}
+								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+							/>
+						</div>
+
+						{/* Completed/Dropped Date */}
+						{(newStatus === "Completed" || newStatus === "Dropped") && (
+							<div className="space-y-1">
+								<label className="text-xs text-gray-500">
+									{newStatus === "Completed" ? "Completed" : "Dropped"} Date
+								</label>
+								<input
+									type="date"
+									value={completedAt}
+									onChange={(e) => setCompletedAt(e.target.value)}
+									className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+								/>
+							</div>
+						)}
+					</div>
+
+					{/* Review Options - only show when moving from Playing status */}
+					{currentStatus === "Playing" && (
+					<>
 					<div className="space-y-2">
 						<span className="text-sm font-medium text-gray-400">
 							Add a Review?
@@ -189,8 +257,8 @@ export function StatusChangeModal({
 								Your Rating
 							</span>
 							{/* Star Rating */}
-							<div className="flex justify-center gap-1">
-								{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+								<div className="flex justify-center gap-2">
+								{[1, 2, 3, 4, 5].map((rating) => (
 									<button
 										key={rating}
 										type="button"
@@ -199,8 +267,8 @@ export function StatusChangeModal({
 										onMouseLeave={() => setHoverRating(0)}
 										className="p-1 transition-transform hover:scale-110"
 									>
-										<Star
-											size={24}
+									<Star
+										size={28}
 											className={`transition-colors ${
 												rating <= (hoverRating || quickRating)
 													? "text-yellow-400 fill-yellow-400"
@@ -211,7 +279,7 @@ export function StatusChangeModal({
 								))}
 							</div>
 							<p className="text-center text-sm text-gray-400">
-								{quickRating > 0 ? `${quickRating}/10` : "Select a rating"}
+								{quickRating > 0 ? `${quickRating}/5` : "Select a rating"}
 							</p>
 
 							{/* Share as Post Toggle */}
@@ -240,6 +308,8 @@ export function StatusChangeModal({
 								</div>
 							)}
 						</div>
+					)}
+					</>
 					)}
 				</div>
 

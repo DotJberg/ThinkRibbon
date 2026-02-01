@@ -7,8 +7,12 @@ import {
 	Gamepad2,
 	Grid,
 	List,
+	Pencil,
+	Plus,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { GameSearchModal } from "../../components/questlog/GameSearchModal";
+import { StatusChangeModal } from "../../components/questlog/StatusChangeModal";
 import type { QuestLogStatus } from "../../generated/prisma/client.js";
 import {
 	getQuestLogTimeline,
@@ -54,39 +58,41 @@ function QuestLogPage() {
 		ReturnType<typeof getUserByUsername>
 	> | null>(null);
 
-	// Note: isOwnProfile could be used later for edit functionality
-	// const isOwnProfile = isSignedIn && currentUser?.username === username;
-	// Suppress unused variable warning
-	void isSignedIn;
-	void currentUser;
+	// Modal state
+	const [showGameSearch, setShowGameSearch] = useState(false);
+	const [editingEntry, setEditingEntry] = useState<QuestLogEntry | null>(null);
+
+	// Check if viewing own profile
+	const isOwnProfile = isSignedIn && currentUser?.username === username;
+
+	const loadEntries = useCallback(async () => {
+		setIsLoading(true);
+		try {
+			const profileData = await getUserByUsername({ data: username });
+			setProfile(profileData);
+
+			if (viewMode === "timeline") {
+				const data = await getQuestLogTimeline({ data: { username } });
+				setEntries(data.entries);
+			} else {
+				const data = await getUserQuestLog({
+					data: {
+						username,
+						status: statusFilter === "all" ? undefined : statusFilter,
+					},
+				});
+				setEntries(data.entries);
+			}
+		} catch (error) {
+			console.error("Failed to load quest log:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [username, viewMode, statusFilter]);
 
 	useEffect(() => {
-		const load = async () => {
-			setIsLoading(true);
-			try {
-				const profileData = await getUserByUsername({ data: username });
-				setProfile(profileData);
-
-				if (viewMode === "timeline") {
-					const data = await getQuestLogTimeline({ data: { username } });
-					setEntries(data.entries);
-				} else {
-					const data = await getUserQuestLog({
-						data: {
-							username,
-							status: statusFilter === "all" ? undefined : statusFilter,
-						},
-					});
-					setEntries(data.entries);
-				}
-			} catch (error) {
-				console.error("Failed to load quest log:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		load();
-	}, [username, viewMode, statusFilter]);
+		loadEntries();
+	}, [loadEntries]);
 
 	const filteredEntries =
 		statusFilter === "all"
@@ -116,6 +122,18 @@ function QuestLogPage() {
 							</p>
 						</div>
 					</div>
+
+					{/* Add Game Button (own profile only) */}
+					{isOwnProfile && currentUser && (
+						<button
+							type="button"
+							onClick={() => setShowGameSearch(true)}
+							className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg shadow-lg transition-all"
+						>
+							<Plus size={18} />
+							Add Game
+						</button>
+					)}
 
 					{/* View Toggle */}
 					<div className="flex items-center gap-2">
@@ -213,27 +231,74 @@ function QuestLogPage() {
 							: `No games with status "${statusLabels[statusFilter]}"`}
 					</div>
 				) : viewMode === "timeline" ? (
-					<TimelineView entries={filteredEntries} />
+					<TimelineView
+						entries={filteredEntries}
+						isOwnProfile={isOwnProfile}
+						onEditEntry={setEditingEntry}
+					/>
 				) : (
-					<GridView entries={filteredEntries} />
+					<GridView
+						entries={filteredEntries}
+						isOwnProfile={isOwnProfile}
+						onEditEntry={setEditingEntry}
+					/>
 				)}
 			</div>
+
+			{/* Game Search Modal */}
+			{isOwnProfile && currentUser && (
+				<GameSearchModal
+					isOpen={showGameSearch}
+					onClose={() => setShowGameSearch(false)}
+					onSuccess={loadEntries}
+					clerkId={currentUser.id}
+				/>
+			)}
+
+			{/* Status Edit Modal */}
+			{editingEntry && currentUser && (
+				<StatusChangeModal
+					isOpen={true}
+					onClose={() => setEditingEntry(null)}
+					onSuccess={() => {
+						setEditingEntry(null);
+						loadEntries();
+					}}
+					clerkId={currentUser.id}
+					gameId={editingEntry.gameId}
+					gameName={editingEntry.game.name}
+					currentStatus={editingEntry.status}
+					questLogId={editingEntry.id}
+					currentStartedAt={editingEntry.startedAt}
+					currentCompletedAt={editingEntry.completedAt}
+				/>
+			)}
 		</div>
 	);
 }
 
 // Timeline View Component
-function TimelineView({ entries }: { entries: QuestLogEntry[] }) {
+function TimelineView({
+	entries,
+	isOwnProfile,
+	onEditEntry,
+}: {
+	entries: QuestLogEntry[];
+	isOwnProfile?: boolean;
+	onEditEntry?: (entry: QuestLogEntry) => void;
+}) {
 	return (
 		<div className="space-y-4">
 			{entries.map((entry) => (
-				<Link
+				<div
 					key={entry.id}
-					to="/games/$slug"
-					params={{ slug: entry.game.slug }}
-					className="block bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-purple-500/50 transition-all"
+					className="relative bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-purple-500/50 transition-all"
 				>
-					<div className="flex gap-4">
+					<Link
+						to="/games/$slug"
+						params={{ slug: entry.game.slug }}
+						className="flex gap-4"
+					>
 						{/* Game Cover */}
 						<div className="w-16 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-700">
 							{entry.game.coverUrl ? (
@@ -264,8 +329,7 @@ function TimelineView({ entries }: { entries: QuestLogEntry[] }) {
 
 							{entry.quickRating && (
 								<div className="text-yellow-400 text-sm mb-1">
-									{"⭐".repeat(Math.floor(entry.quickRating / 2))}
-									{entry.quickRating % 2 ? "½" : ""} ({entry.quickRating}/10)
+									{"⭐".repeat(entry.quickRating)} ({entry.quickRating}/5)
 								</div>
 							)}
 
@@ -292,59 +356,100 @@ function TimelineView({ entries }: { entries: QuestLogEntry[] }) {
 								)}
 							</div>
 						</div>
-					</div>
-				</Link>
+					</Link>
+
+					{/* Edit Button */}
+					{isOwnProfile && onEditEntry && (
+						<button
+							type="button"
+							onClick={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								onEditEntry(entry);
+							}}
+							className="absolute top-3 right-3 p-2 bg-gray-900/80 hover:bg-purple-600 text-gray-400 hover:text-white rounded-lg transition-all"
+							title="Edit entry"
+						>
+							<Pencil size={16} />
+						</button>
+					)}
+				</div>
 			))}
 		</div>
 	);
 }
 
 // Grid View Component
-function GridView({ entries }: { entries: QuestLogEntry[] }) {
+function GridView({
+	entries,
+	isOwnProfile,
+	onEditEntry,
+}: {
+	entries: QuestLogEntry[];
+	isOwnProfile?: boolean;
+	onEditEntry?: (entry: QuestLogEntry) => void;
+}) {
 	return (
 		<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
 			{entries.map((entry) => (
-				<Link
-					key={entry.id}
-					to="/games/$slug"
-					params={{ slug: entry.game.slug }}
-					className="group relative"
-				>
-					<div className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-800 border-2 border-transparent group-hover:border-purple-500 transition-all">
-						{entry.game.coverUrl ? (
-							<img
-								src={entry.game.coverUrl}
-								alt={entry.game.name}
-								className="w-full h-full object-cover"
-							/>
-						) : (
-							<div className="w-full h-full flex items-center justify-center text-gray-600">
-								<Gamepad2 size={48} />
-							</div>
-						)}
-
-						{/* Status Badge */}
-						<div
-							className={`absolute top-2 right-2 w-3 h-3 rounded-full ${statusColors[entry.status]} border-2 border-gray-900`}
-							title={statusLabels[entry.status]}
-						/>
-
-						{/* Hover Overlay */}
-						<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-							<h3 className="font-semibold text-white text-sm line-clamp-2">
-								{entry.game.name}
-							</h3>
-							<span className="text-xs text-gray-300">
-								{statusLabels[entry.status]}
-							</span>
-							{entry.quickRating && (
-								<span className="text-yellow-400 text-xs">
-									{entry.quickRating}/10
-								</span>
+				<div key={entry.id} className="group relative">
+					<Link
+						to="/games/$slug"
+						params={{ slug: entry.game.slug }}
+						className="block"
+					>
+						<div className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-800 border-2 border-transparent group-hover:border-purple-500 transition-all">
+							{entry.game.coverUrl ? (
+								<img
+									src={entry.game.coverUrl}
+									alt={entry.game.name}
+									className="w-full h-full object-cover"
+								/>
+							) : (
+								<div className="w-full h-full flex items-center justify-center text-gray-600">
+									<Gamepad2 size={48} />
+								</div>
 							)}
+
+							{/* Status Badge */}
+							<div
+								className={`absolute top-2 right-2 w-3 h-3 rounded-full ${statusColors[entry.status]} border-2 border-gray-900`}
+								title={statusLabels[entry.status]}
+							/>
+
+							{/* Hover Overlay */}
+							<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
+								<h3 className="font-semibold text-white text-sm line-clamp-2">
+									{entry.game.name}
+								</h3>
+								<span className="text-xs text-gray-300">
+									{statusLabels[entry.status]}
+								</span>
+								{entry.quickRating && (
+									<span className="text-yellow-400 text-xs">
+										{entry.quickRating}/5
+									</span>
+								)}
+							</div>
 						</div>
-					</div>
-				</Link>
+					</Link>
+
+					{/* Edit Button */}
+					{isOwnProfile && onEditEntry && (
+						<button
+							type="button"
+							onClick={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								onEditEntry(entry);
+							}}
+							className="absolute top-2 left-2 p-1.5 bg-gray-900/80 hover:bg-purple-600 text-gray-400 hover:text-white rounded-lg transition-all opacity-0 group-hover:opacity-100"
+							title="Edit entry"
+						>
+							<Pencil size={14} />
+						</button>
+					)}
+				</div>
 			))}
 		</div>
 	);

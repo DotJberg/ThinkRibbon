@@ -353,7 +353,7 @@ model QuestLog {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, gameId])  // One log entry per game per user
+  @@index([userId, gameId])  // Support looking up entries by user+game
   @@index([userId, status])
   @@index([userId, displayOnProfile])
   @@index([userId, createdAt(sort: Desc)])

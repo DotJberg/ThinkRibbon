@@ -22,6 +22,7 @@ export const addToQuestLog = createServerFn({
 			gameId: string;
 			status?: QuestLogStatus;
 			startedAt?: Date;
+			completedAt?: Date;
 			notes?: string;
 		}) => data,
 	)
@@ -48,6 +49,7 @@ export const addToQuestLog = createServerFn({
 				gameId: data.gameId,
 				status: data.status || "Playing",
 				startedAt: data.startedAt || new Date(),
+				completedAt: data.completedAt,
 				notes: data.notes,
 				displayOnProfile: true,
 				displayOrder: Math.min(displayCount, 4), // 0-4 for display
@@ -69,10 +71,12 @@ export const getQuestLogEntry = createServerFn({
 		});
 		if (!user) return null;
 
-		return prisma.questLog.findUnique({
+		return prisma.questLog.findFirst({
 			where: {
-				userId_gameId: { userId: user.id, gameId: data.gameId },
+				userId: user.id,
+				gameId: data.gameId,
 			},
+			orderBy: { createdAt: "desc" },
 			include: {
 				game: true,
 			},
@@ -90,6 +94,8 @@ export const updateQuestLog = createServerFn({
 			status?: QuestLogStatus;
 			notes?: string;
 			hoursPlayed?: number;
+			startedAt?: Date;
+			completedAt?: Date;
 			displayOnProfile?: boolean;
 			displayOrder?: number;
 		}) => data,
@@ -113,13 +119,19 @@ export const updateQuestLog = createServerFn({
 		if (data.notes !== undefined) updateData.notes = data.notes;
 		if (data.hoursPlayed !== undefined)
 			updateData.hoursPlayed = data.hoursPlayed;
+		if (data.startedAt !== undefined) updateData.startedAt = data.startedAt;
+		if (data.completedAt !== undefined)
+			updateData.completedAt = data.completedAt;
 		if (data.displayOnProfile !== undefined)
 			updateData.displayOnProfile = data.displayOnProfile;
 		if (data.displayOrder !== undefined)
 			updateData.displayOrder = data.displayOrder;
 
-		// Set completedAt if status is Completed or Dropped
-		if (data.status === "Completed" || data.status === "Dropped") {
+		// Auto-set completedAt if status changes to Completed/Dropped and no explicit date provided
+		if (
+			(data.status === "Completed" || data.status === "Dropped") &&
+			data.completedAt === undefined
+		) {
 			updateData.completedAt = new Date();
 		}
 
@@ -216,6 +228,7 @@ export const getNowPlaying = createServerFn({
 			where: {
 				userId: user.id,
 				displayOnProfile: true,
+				status: "Playing",
 			},
 			orderBy: { displayOrder: "asc" },
 			take: 5,
@@ -383,10 +396,7 @@ function getStatusText(status: QuestLogStatus): string {
 	}
 }
 
-// Helper function to generate star emoji from rating (1-10)
+// Helper function to generate star emoji from rating (1-5)
 function getStarEmoji(rating: number): string {
-	// Convert 1-10 to half stars (0.5 = half, 1 = full)
-	const fullStars = Math.floor(rating / 2);
-	const halfStar = rating % 2 >= 1;
-	return "⭐".repeat(fullStars) + (halfStar ? "½" : "");
+	return "⭐".repeat(rating);
 }

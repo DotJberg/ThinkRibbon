@@ -90,7 +90,6 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 	}
 
 	if (entries.length === 0) {
-		if (!isOwnProfile) return null;
 		return (
 			<div className="mb-6 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
 				<div className="flex items-center justify-between mb-4">
@@ -98,9 +97,18 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 						<Gamepad2 size={20} className="text-purple-400" />
 						<h3 className="font-semibold text-white">Now Playing</h3>
 					</div>
+					<a
+						href={`/questlog/${username}`}
+						className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+					>
+						View Quest Log
+						<ChevronRight size={16} />
+					</a>
 				</div>
 				<p className="text-gray-500 text-sm">
-					No games in your quest log yet. Visit a game page to add it!
+					{isOwnProfile
+						? "No games currently playing. Visit a game page to add one!"
+						: "No games currently playing."}
 				</p>
 			</div>
 		);
@@ -198,6 +206,9 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 					gameId={selectedEntry.gameId}
 					gameName={selectedEntry.game.name}
 					currentStatus={selectedEntry.status}
+					questLogId={selectedEntry.id}
+					currentStartedAt={selectedEntry.startedAt}
+					currentCompletedAt={selectedEntry.completedAt}
 				/>
 			)}
 		</>

@@ -109,13 +109,18 @@ export const getHighestRatedGames = createServerFn({
 		// Apply cursor-based pagination
 		let startIndex = 0;
 		if (data.cursor) {
-			const cursorIndex = gamesWithRatings.findIndex((g) => g.id === data.cursor);
+			const cursorIndex = gamesWithRatings.findIndex(
+				(g) => g.id === data.cursor,
+			);
 			if (cursorIndex !== -1) {
 				startIndex = cursorIndex + 1;
 			}
 		}
 
-		const paginatedGames = gamesWithRatings.slice(startIndex, startIndex + limit + 1);
+		const paginatedGames = gamesWithRatings.slice(
+			startIndex,
+			startIndex + limit + 1,
+		);
 		let nextCursor: string | undefined;
 		if (paginatedGames.length > limit) {
 			const nextItem = paginatedGames.pop();

@@ -9,7 +9,12 @@
 * 🟢 You can import this file directly.
 */
 
+export const QuestLogStatus = {
+  Playing: 'Playing',
+  Completed: 'Completed',
+  OnHold: 'OnHold',
+  Dropped: 'Dropped',
+  Backlog: 'Backlog'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type QuestLogStatus = (typeof QuestLogStatus)[keyof typeof QuestLogStatus]

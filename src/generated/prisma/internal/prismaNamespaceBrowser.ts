@@ -65,7 +65,8 @@ export const ModelName = {
   ArticleDraft: 'ArticleDraft',
   ArticleDraftImage: 'ArticleDraftImage',
   ReviewDraft: 'ReviewDraft',
-  ReviewDraftImage: 'ReviewDraftImage'
+  ReviewDraftImage: 'ReviewDraftImage',
+  QuestLog: 'QuestLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -288,6 +289,25 @@ export const ReviewDraftImageScalarFieldEnum = {
 } as const
 
 export type ReviewDraftImageScalarFieldEnum = (typeof ReviewDraftImageScalarFieldEnum)[keyof typeof ReviewDraftImageScalarFieldEnum]
+
+
+export const QuestLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  gameId: 'gameId',
+  status: 'status',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  hoursPlayed: 'hoursPlayed',
+  notes: 'notes',
+  quickRating: 'quickRating',
+  displayOnProfile: 'displayOnProfile',
+  displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuestLogScalarFieldEnum = (typeof QuestLogScalarFieldEnum)[keyof typeof QuestLogScalarFieldEnum]
 
 
 export const SortOrder = {

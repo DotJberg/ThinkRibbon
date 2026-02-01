@@ -229,6 +229,23 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type EnumQuestLogStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuestLogStatus | Prisma.EnumQuestLogStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQuestLogStatusFilter<$PrismaModel> | $Enums.QuestLogStatus
+}
+
+export type EnumQuestLogStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuestLogStatus | Prisma.EnumQuestLogStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQuestLogStatusWithAggregatesFilter<$PrismaModel> | $Enums.QuestLogStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQuestLogStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQuestLogStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -444,6 +461,23 @@ export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumQuestLogStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuestLogStatus | Prisma.EnumQuestLogStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQuestLogStatusFilter<$PrismaModel> | $Enums.QuestLogStatus
+}
+
+export type NestedEnumQuestLogStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuestLogStatus | Prisma.EnumQuestLogStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QuestLogStatus[] | Prisma.ListEnumQuestLogStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQuestLogStatusWithAggregatesFilter<$PrismaModel> | $Enums.QuestLogStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQuestLogStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQuestLogStatusFilter<$PrismaModel>
 }
 
 

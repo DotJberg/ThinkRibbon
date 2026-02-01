@@ -2,6 +2,7 @@ import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, FileText, Gamepad2, Star } from "lucide-react";
 import { useEffect, useState } from "react";
+import { QuestLogButton } from "../../components/questlog/QuestLogButton";
 import { ReviewCard } from "../../components/reviews/ReviewCard";
 import { StarRatingDisplay } from "../../components/shared/StarRating";
 import { getArticlesByGame } from "../../lib/server/articles";
@@ -158,14 +159,17 @@ function GameDetailPage() {
 							)}
 
 							{isSignedIn && (
-								<Link
-									to="/reviews/new"
-									search={{ gameId: game.id, draftId: undefined }}
-									className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-lg transition-all"
-								>
-									<Star size={20} />
-									Write a Review
-								</Link>
+								<div className="flex flex-wrap gap-3">
+									<QuestLogButton gameId={game.id} gameName={game.name} />
+									<Link
+										to="/reviews/new"
+										search={{ gameId: game.id, draftId: undefined }}
+										className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all border border-gray-700"
+									>
+										<Star size={20} />
+										Write a Review
+									</Link>
+								</div>
 							)}
 						</div>
 					</div>

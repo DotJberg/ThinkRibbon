@@ -231,6 +231,7 @@ export type UserWhereInput = {
   following?: Prisma.FollowListRelationFilter
   articleDrafts?: Prisma.ArticleDraftListRelationFilter
   reviewDrafts?: Prisma.ReviewDraftListRelationFilter
+  questLogs?: Prisma.QuestLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -253,6 +254,7 @@ export type UserOrderByWithRelationInput = {
   following?: Prisma.FollowOrderByRelationAggregateInput
   articleDrafts?: Prisma.ArticleDraftOrderByRelationAggregateInput
   reviewDrafts?: Prisma.ReviewDraftOrderByRelationAggregateInput
+  questLogs?: Prisma.QuestLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -278,6 +280,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   following?: Prisma.FollowListRelationFilter
   articleDrafts?: Prisma.ArticleDraftListRelationFilter
   reviewDrafts?: Prisma.ReviewDraftListRelationFilter
+  questLogs?: Prisma.QuestLogListRelationFilter
 }, "id" | "clerkId" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -332,6 +335,7 @@ export type UserCreateInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -354,6 +358,7 @@ export type UserUncheckedCreateInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -376,6 +381,7 @@ export type UserUpdateInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -398,6 +404,7 @@ export type UserUncheckedUpdateInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -621,6 +628,20 @@ export type UserUpdateOneRequiredWithoutReviewDraftsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewDraftsInput, Prisma.UserUpdateWithoutReviewDraftsInput>, Prisma.UserUncheckedUpdateWithoutReviewDraftsInput>
 }
 
+export type UserCreateNestedOneWithoutQuestLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQuestLogsInput, Prisma.UserUncheckedCreateWithoutQuestLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuestLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutQuestLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQuestLogsInput, Prisma.UserUncheckedCreateWithoutQuestLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuestLogsInput
+  upsert?: Prisma.UserUpsertWithoutQuestLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutQuestLogsInput, Prisma.UserUpdateWithoutQuestLogsInput>, Prisma.UserUncheckedUpdateWithoutQuestLogsInput>
+}
+
 export type UserCreateWithoutFollowingInput = {
   id?: string
   clerkId: string
@@ -640,6 +661,7 @@ export type UserCreateWithoutFollowingInput = {
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowingInput = {
@@ -661,6 +683,7 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowingInput = {
@@ -687,6 +710,7 @@ export type UserCreateWithoutFollowersInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowersInput = {
@@ -708,6 +732,7 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowersInput = {
@@ -745,6 +770,7 @@ export type UserUpdateWithoutFollowingInput = {
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -766,6 +792,7 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutFollowersInput = {
@@ -798,6 +825,7 @@ export type UserUpdateWithoutFollowersInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -819,6 +847,7 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPostsInput = {
@@ -840,6 +869,7 @@ export type UserCreateWithoutPostsInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPostsInput = {
@@ -861,6 +891,7 @@ export type UserUncheckedCreateWithoutPostsInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPostsInput = {
@@ -898,6 +929,7 @@ export type UserUpdateWithoutPostsInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPostsInput = {
@@ -919,6 +951,7 @@ export type UserUncheckedUpdateWithoutPostsInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutArticlesInput = {
@@ -940,6 +973,7 @@ export type UserCreateWithoutArticlesInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutArticlesInput = {
@@ -961,6 +995,7 @@ export type UserUncheckedCreateWithoutArticlesInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutArticlesInput = {
@@ -998,6 +1033,7 @@ export type UserUpdateWithoutArticlesInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutArticlesInput = {
@@ -1019,6 +1055,7 @@ export type UserUncheckedUpdateWithoutArticlesInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReviewsInput = {
@@ -1040,6 +1077,7 @@ export type UserCreateWithoutReviewsInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewsInput = {
@@ -1061,6 +1099,7 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewsInput = {
@@ -1098,6 +1137,7 @@ export type UserUpdateWithoutReviewsInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsInput = {
@@ -1119,6 +1159,7 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommentsInput = {
@@ -1140,6 +1181,7 @@ export type UserCreateWithoutCommentsInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommentsInput = {
@@ -1161,6 +1203,7 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommentsInput = {
@@ -1198,6 +1241,7 @@ export type UserUpdateWithoutCommentsInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -1219,6 +1263,7 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLikesInput = {
@@ -1240,6 +1285,7 @@ export type UserCreateWithoutLikesInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLikesInput = {
@@ -1261,6 +1307,7 @@ export type UserUncheckedCreateWithoutLikesInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLikesInput = {
@@ -1298,6 +1345,7 @@ export type UserUpdateWithoutLikesInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLikesInput = {
@@ -1319,6 +1367,7 @@ export type UserUncheckedUpdateWithoutLikesInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutArticleDraftsInput = {
@@ -1340,6 +1389,7 @@ export type UserCreateWithoutArticleDraftsInput = {
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutArticleDraftsInput = {
@@ -1361,6 +1411,7 @@ export type UserUncheckedCreateWithoutArticleDraftsInput = {
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutArticleDraftsInput = {
@@ -1398,6 +1449,7 @@ export type UserUpdateWithoutArticleDraftsInput = {
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutArticleDraftsInput = {
@@ -1419,6 +1471,7 @@ export type UserUncheckedUpdateWithoutArticleDraftsInput = {
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReviewDraftsInput = {
@@ -1440,6 +1493,7 @@ export type UserCreateWithoutReviewDraftsInput = {
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewDraftsInput = {
@@ -1461,6 +1515,7 @@ export type UserUncheckedCreateWithoutReviewDraftsInput = {
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewDraftsInput = {
@@ -1498,6 +1553,7 @@ export type UserUpdateWithoutReviewDraftsInput = {
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewDraftsInput = {
@@ -1519,6 +1575,111 @@ export type UserUncheckedUpdateWithoutReviewDraftsInput = {
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutQuestLogsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  username: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  bannerUrl?: string | null
+  bio?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
+  articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
+  likes?: Prisma.LikeCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftCreateNestedManyWithoutAuthorInput
+}
+
+export type UserUncheckedCreateWithoutQuestLogsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  username: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  bannerUrl?: string | null
+  bio?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
+  articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedCreateNestedManyWithoutAuthorInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedCreateNestedManyWithoutAuthorInput
+}
+
+export type UserCreateOrConnectWithoutQuestLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutQuestLogsInput, Prisma.UserUncheckedCreateWithoutQuestLogsInput>
+}
+
+export type UserUpsertWithoutQuestLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutQuestLogsInput, Prisma.UserUncheckedUpdateWithoutQuestLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutQuestLogsInput, Prisma.UserUncheckedCreateWithoutQuestLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutQuestLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutQuestLogsInput, Prisma.UserUncheckedUpdateWithoutQuestLogsInput>
+}
+
+export type UserUpdateWithoutQuestLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bannerUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
+  articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutAuthorNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutQuestLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bannerUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
+  articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutAuthorNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  articleDrafts?: Prisma.ArticleDraftUncheckedUpdateManyWithoutAuthorNestedInput
+  reviewDrafts?: Prisma.ReviewDraftUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 
@@ -1536,6 +1697,7 @@ export type UserCountOutputType = {
   following: number
   articleDrafts: number
   reviewDrafts: number
+  questLogs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1548,6 +1710,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   following?: boolean | UserCountOutputTypeCountFollowingArgs
   articleDrafts?: boolean | UserCountOutputTypeCountArticleDraftsArgs
   reviewDrafts?: boolean | UserCountOutputTypeCountReviewDraftsArgs
+  questLogs?: boolean | UserCountOutputTypeCountQuestLogsArgs
 }
 
 /**
@@ -1623,6 +1786,13 @@ export type UserCountOutputTypeCountReviewDraftsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ReviewDraftWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountQuestLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuestLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1644,6 +1814,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   articleDrafts?: boolean | Prisma.User$articleDraftsArgs<ExtArgs>
   reviewDrafts?: boolean | Prisma.User$reviewDraftsArgs<ExtArgs>
+  questLogs?: boolean | Prisma.User$questLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1697,6 +1868,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   articleDrafts?: boolean | Prisma.User$articleDraftsArgs<ExtArgs>
   reviewDrafts?: boolean | Prisma.User$reviewDraftsArgs<ExtArgs>
+  questLogs?: boolean | Prisma.User$questLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1714,6 +1886,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     following: Prisma.$FollowPayload<ExtArgs>[]
     articleDrafts: Prisma.$ArticleDraftPayload<ExtArgs>[]
     reviewDrafts: Prisma.$ReviewDraftPayload<ExtArgs>[]
+    questLogs: Prisma.$QuestLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2129,6 +2302,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   following<T extends Prisma.User$followingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   articleDrafts<T extends Prisma.User$articleDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$articleDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ArticleDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewDrafts<T extends Prisma.User$reviewDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  questLogs<T extends Prisma.User$questLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$questLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuestLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2769,6 +2943,30 @@ export type User$reviewDraftsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ReviewDraftScalarFieldEnum | Prisma.ReviewDraftScalarFieldEnum[]
+}
+
+/**
+ * User.questLogs
+ */
+export type User$questLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuestLog
+   */
+  select?: Prisma.QuestLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuestLog
+   */
+  omit?: Prisma.QuestLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestLogInclude<ExtArgs> | null
+  where?: Prisma.QuestLogWhereInput
+  orderBy?: Prisma.QuestLogOrderByWithRelationInput | Prisma.QuestLogOrderByWithRelationInput[]
+  cursor?: Prisma.QuestLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuestLogScalarFieldEnum | Prisma.QuestLogScalarFieldEnum[]
 }
 
 /**

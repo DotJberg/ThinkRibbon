@@ -31,6 +31,7 @@ model User {
   following      Follow[]        @relation("followers")
   articleDrafts  ArticleDraft[]
   reviewDrafts   ReviewDraft[]
+  questLogs      QuestLog[]
 
   @@index([clerkId])
   @@index([username])
@@ -70,8 +71,9 @@ model Game {
   cachedAt    DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  reviews  Review[]
-  articles ArticleGame[]
+  reviews   Review[]
+  articles  ArticleGame[]
+  questLogs QuestLog[]
 
   @@index([igdbId])
   @@index([slug])
@@ -323,4 +325,45 @@ model ReviewDraftImage {
   draft   ReviewDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
 
   @@index([draftId])
+}
+
+// ============================================
+// QuestLog Model - Game tracking/play log
+// ============================================
+model QuestLog {
+  id               String          @id @default(cuid())
+  userId           String
+  gameId           String
+  status           QuestLogStatus  @default(Playing)
+  startedAt        DateTime?       // When user started playing
+  completedAt      DateTime?       // When user finished/dropped
+  hoursPlayed      Float?          // Optional: track playtime
+  notes            String?         @db.Text  // Personal notes
+  
+  // Quick Review (optional rating without full review)
+  quickRating      Int?            // 1-10 rating (like full reviews)
+  
+  // Profile display settings
+  displayOnProfile Boolean         @default(true)  // Show in "Now Playing"
+  displayOrder     Int             @default(0)     // Order for Now Playing (0-4)
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])  // One log entry per game per user
+  @@index([userId, status])
+  @@index([userId, displayOnProfile])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([gameId])  // For aggregating ratings
+}
+
+enum QuestLogStatus {
+  Playing     // Currently playing
+  Completed   // Finished the game
+  OnHold      // Paused/taking a break
+  Dropped     // Stopped playing, won't return
+  Backlog     // Plan to play
 }

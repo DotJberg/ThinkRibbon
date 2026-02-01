@@ -310,7 +310,6 @@ export type ReviewOrderByWithRelationInput = {
 
 export type ReviewWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  authorId_gameId?: Prisma.ReviewAuthorIdGameIdCompoundUniqueInput
   AND?: Prisma.ReviewWhereInput | Prisma.ReviewWhereInput[]
   OR?: Prisma.ReviewWhereInput[]
   NOT?: Prisma.ReviewWhereInput | Prisma.ReviewWhereInput[]
@@ -331,7 +330,7 @@ export type ReviewWhereUniqueInput = Prisma.AtLeast<{
   images?: Prisma.ReviewImageListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   likes?: Prisma.LikeListRelationFilter
-}, "id" | "authorId_gameId">
+}, "id">
 
 export type ReviewOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -503,11 +502,6 @@ export type ReviewListRelationFilter = {
 
 export type ReviewOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ReviewAuthorIdGameIdCompoundUniqueInput = {
-  authorId: string
-  gameId: string
 }
 
 export type ReviewCountOrderByAggregateInput = {

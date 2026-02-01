@@ -398,7 +398,8 @@ export const ModelName = {
   ArticleDraft: 'ArticleDraft',
   ArticleDraftImage: 'ArticleDraftImage',
   ReviewDraft: 'ReviewDraft',
-  ReviewDraftImage: 'ReviewDraftImage'
+  ReviewDraftImage: 'ReviewDraftImage',
+  QuestLog: 'QuestLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "follow" | "game" | "post" | "article" | "articleGame" | "review" | "comment" | "like" | "articleImage" | "reviewImage" | "articleDraft" | "articleDraftImage" | "reviewDraft" | "reviewDraftImage"
+    modelProps: "user" | "follow" | "game" | "post" | "article" | "articleGame" | "review" | "comment" | "like" | "articleImage" | "reviewImage" | "articleDraft" | "articleDraftImage" | "reviewDraft" | "reviewDraftImage" | "questLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1528,6 +1529,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    QuestLog: {
+      payload: Prisma.$QuestLogPayload<ExtArgs>
+      fields: Prisma.QuestLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QuestLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QuestLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>
+        }
+        findFirst: {
+          args: Prisma.QuestLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QuestLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>
+        }
+        findMany: {
+          args: Prisma.QuestLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>[]
+        }
+        create: {
+          args: Prisma.QuestLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>
+        }
+        createMany: {
+          args: Prisma.QuestLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.QuestLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>[]
+        }
+        delete: {
+          args: Prisma.QuestLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>
+        }
+        update: {
+          args: Prisma.QuestLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.QuestLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QuestLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.QuestLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.QuestLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestLogPayload>
+        }
+        aggregate: {
+          args: Prisma.QuestLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQuestLog>
+        }
+        groupBy: {
+          args: Prisma.QuestLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuestLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QuestLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuestLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1773,6 +1848,25 @@ export const ReviewDraftImageScalarFieldEnum = {
 export type ReviewDraftImageScalarFieldEnum = (typeof ReviewDraftImageScalarFieldEnum)[keyof typeof ReviewDraftImageScalarFieldEnum]
 
 
+export const QuestLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  gameId: 'gameId',
+  status: 'status',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  hoursPlayed: 'hoursPlayed',
+  notes: 'notes',
+  quickRating: 'quickRating',
+  displayOnProfile: 'displayOnProfile',
+  displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuestLogScalarFieldEnum = (typeof QuestLogScalarFieldEnum)[keyof typeof QuestLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1863,6 +1957,20 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'QuestLogStatus'
+ */
+export type EnumQuestLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestLogStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'QuestLogStatus[]'
+ */
+export type ListEnumQuestLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestLogStatus[]'>
     
 
 /**
@@ -1975,6 +2083,7 @@ export type GlobalOmitConfig = {
   articleDraftImage?: Prisma.ArticleDraftImageOmit
   reviewDraft?: Prisma.ReviewDraftOmit
   reviewDraftImage?: Prisma.ReviewDraftImageOmit
+  questLog?: Prisma.QuestLogOmit
 }
 
 /* Types for Logging */

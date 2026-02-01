@@ -270,6 +270,7 @@ export type GameWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   reviews?: Prisma.ReviewListRelationFilter
   articles?: Prisma.ArticleGameListRelationFilter
+  questLogs?: Prisma.QuestLogListRelationFilter
 }
 
 export type GameOrderByWithRelationInput = {
@@ -287,6 +288,7 @@ export type GameOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   reviews?: Prisma.ReviewOrderByRelationAggregateInput
   articles?: Prisma.ArticleGameOrderByRelationAggregateInput
+  questLogs?: Prisma.QuestLogOrderByRelationAggregateInput
 }
 
 export type GameWhereUniqueInput = Prisma.AtLeast<{
@@ -307,6 +309,7 @@ export type GameWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   reviews?: Prisma.ReviewListRelationFilter
   articles?: Prisma.ArticleGameListRelationFilter
+  questLogs?: Prisma.QuestLogListRelationFilter
 }, "id" | "igdbId">
 
 export type GameOrderByWithAggregationInput = {
@@ -362,6 +365,7 @@ export type GameCreateInput = {
   updatedAt?: Date | string
   reviews?: Prisma.ReviewCreateNestedManyWithoutGameInput
   articles?: Prisma.ArticleGameCreateNestedManyWithoutGameInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutGameInput
 }
 
 export type GameUncheckedCreateInput = {
@@ -379,6 +383,7 @@ export type GameUncheckedCreateInput = {
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutGameInput
   articles?: Prisma.ArticleGameUncheckedCreateNestedManyWithoutGameInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutGameInput
 }
 
 export type GameUpdateInput = {
@@ -396,6 +401,7 @@ export type GameUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUpdateManyWithoutGameNestedInput
   articles?: Prisma.ArticleGameUpdateManyWithoutGameNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutGameNestedInput
 }
 
 export type GameUncheckedUpdateInput = {
@@ -413,6 +419,7 @@ export type GameUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutGameNestedInput
   articles?: Prisma.ArticleGameUncheckedUpdateManyWithoutGameNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutGameNestedInput
 }
 
 export type GameCreateManyInput = {
@@ -590,6 +597,20 @@ export type GameUpdateOneRequiredWithoutReviewsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.GameUpdateToOneWithWhereWithoutReviewsInput, Prisma.GameUpdateWithoutReviewsInput>, Prisma.GameUncheckedUpdateWithoutReviewsInput>
 }
 
+export type GameCreateNestedOneWithoutQuestLogsInput = {
+  create?: Prisma.XOR<Prisma.GameCreateWithoutQuestLogsInput, Prisma.GameUncheckedCreateWithoutQuestLogsInput>
+  connectOrCreate?: Prisma.GameCreateOrConnectWithoutQuestLogsInput
+  connect?: Prisma.GameWhereUniqueInput
+}
+
+export type GameUpdateOneRequiredWithoutQuestLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.GameCreateWithoutQuestLogsInput, Prisma.GameUncheckedCreateWithoutQuestLogsInput>
+  connectOrCreate?: Prisma.GameCreateOrConnectWithoutQuestLogsInput
+  upsert?: Prisma.GameUpsertWithoutQuestLogsInput
+  connect?: Prisma.GameWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.GameUpdateToOneWithWhereWithoutQuestLogsInput, Prisma.GameUpdateWithoutQuestLogsInput>, Prisma.GameUncheckedUpdateWithoutQuestLogsInput>
+}
+
 export type GameCreateWithoutArticlesInput = {
   id?: string
   igdbId: number
@@ -604,6 +625,7 @@ export type GameCreateWithoutArticlesInput = {
   cachedAt?: Date | string
   updatedAt?: Date | string
   reviews?: Prisma.ReviewCreateNestedManyWithoutGameInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutGameInput
 }
 
 export type GameUncheckedCreateWithoutArticlesInput = {
@@ -620,6 +642,7 @@ export type GameUncheckedCreateWithoutArticlesInput = {
   cachedAt?: Date | string
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutGameInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutGameInput
 }
 
 export type GameCreateOrConnectWithoutArticlesInput = {
@@ -652,6 +675,7 @@ export type GameUpdateWithoutArticlesInput = {
   cachedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUpdateManyWithoutGameNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutGameNestedInput
 }
 
 export type GameUncheckedUpdateWithoutArticlesInput = {
@@ -668,6 +692,7 @@ export type GameUncheckedUpdateWithoutArticlesInput = {
   cachedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutGameNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutGameNestedInput
 }
 
 export type GameCreateWithoutReviewsInput = {
@@ -684,6 +709,7 @@ export type GameCreateWithoutReviewsInput = {
   cachedAt?: Date | string
   updatedAt?: Date | string
   articles?: Prisma.ArticleGameCreateNestedManyWithoutGameInput
+  questLogs?: Prisma.QuestLogCreateNestedManyWithoutGameInput
 }
 
 export type GameUncheckedCreateWithoutReviewsInput = {
@@ -700,6 +726,7 @@ export type GameUncheckedCreateWithoutReviewsInput = {
   cachedAt?: Date | string
   updatedAt?: Date | string
   articles?: Prisma.ArticleGameUncheckedCreateNestedManyWithoutGameInput
+  questLogs?: Prisma.QuestLogUncheckedCreateNestedManyWithoutGameInput
 }
 
 export type GameCreateOrConnectWithoutReviewsInput = {
@@ -732,6 +759,7 @@ export type GameUpdateWithoutReviewsInput = {
   cachedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   articles?: Prisma.ArticleGameUpdateManyWithoutGameNestedInput
+  questLogs?: Prisma.QuestLogUpdateManyWithoutGameNestedInput
 }
 
 export type GameUncheckedUpdateWithoutReviewsInput = {
@@ -748,6 +776,91 @@ export type GameUncheckedUpdateWithoutReviewsInput = {
   cachedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   articles?: Prisma.ArticleGameUncheckedUpdateManyWithoutGameNestedInput
+  questLogs?: Prisma.QuestLogUncheckedUpdateManyWithoutGameNestedInput
+}
+
+export type GameCreateWithoutQuestLogsInput = {
+  id?: string
+  igdbId: number
+  name: string
+  slug: string
+  summary?: string | null
+  coverUrl?: string | null
+  releaseDate?: Date | string | null
+  genres?: Prisma.GameCreategenresInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  rating?: number | null
+  cachedAt?: Date | string
+  updatedAt?: Date | string
+  reviews?: Prisma.ReviewCreateNestedManyWithoutGameInput
+  articles?: Prisma.ArticleGameCreateNestedManyWithoutGameInput
+}
+
+export type GameUncheckedCreateWithoutQuestLogsInput = {
+  id?: string
+  igdbId: number
+  name: string
+  slug: string
+  summary?: string | null
+  coverUrl?: string | null
+  releaseDate?: Date | string | null
+  genres?: Prisma.GameCreategenresInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  rating?: number | null
+  cachedAt?: Date | string
+  updatedAt?: Date | string
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutGameInput
+  articles?: Prisma.ArticleGameUncheckedCreateNestedManyWithoutGameInput
+}
+
+export type GameCreateOrConnectWithoutQuestLogsInput = {
+  where: Prisma.GameWhereUniqueInput
+  create: Prisma.XOR<Prisma.GameCreateWithoutQuestLogsInput, Prisma.GameUncheckedCreateWithoutQuestLogsInput>
+}
+
+export type GameUpsertWithoutQuestLogsInput = {
+  update: Prisma.XOR<Prisma.GameUpdateWithoutQuestLogsInput, Prisma.GameUncheckedUpdateWithoutQuestLogsInput>
+  create: Prisma.XOR<Prisma.GameCreateWithoutQuestLogsInput, Prisma.GameUncheckedCreateWithoutQuestLogsInput>
+  where?: Prisma.GameWhereInput
+}
+
+export type GameUpdateToOneWithWhereWithoutQuestLogsInput = {
+  where?: Prisma.GameWhereInput
+  data: Prisma.XOR<Prisma.GameUpdateWithoutQuestLogsInput, Prisma.GameUncheckedUpdateWithoutQuestLogsInput>
+}
+
+export type GameUpdateWithoutQuestLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  igdbId?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  releaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  genres?: Prisma.GameUpdategenresInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  cachedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviews?: Prisma.ReviewUpdateManyWithoutGameNestedInput
+  articles?: Prisma.ArticleGameUpdateManyWithoutGameNestedInput
+}
+
+export type GameUncheckedUpdateWithoutQuestLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  igdbId?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  releaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  genres?: Prisma.GameUpdategenresInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  cachedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutGameNestedInput
+  articles?: Prisma.ArticleGameUncheckedUpdateManyWithoutGameNestedInput
 }
 
 
@@ -758,11 +871,13 @@ export type GameUncheckedUpdateWithoutReviewsInput = {
 export type GameCountOutputType = {
   reviews: number
   articles: number
+  questLogs: number
 }
 
 export type GameCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reviews?: boolean | GameCountOutputTypeCountReviewsArgs
   articles?: boolean | GameCountOutputTypeCountArticlesArgs
+  questLogs?: boolean | GameCountOutputTypeCountQuestLogsArgs
 }
 
 /**
@@ -789,6 +904,13 @@ export type GameCountOutputTypeCountArticlesArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.ArticleGameWhereInput
 }
 
+/**
+ * GameCountOutputType without action
+ */
+export type GameCountOutputTypeCountQuestLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuestLogWhereInput
+}
+
 
 export type GameSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -805,6 +927,7 @@ export type GameSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   reviews?: boolean | Prisma.Game$reviewsArgs<ExtArgs>
   articles?: boolean | Prisma.Game$articlesArgs<ExtArgs>
+  questLogs?: boolean | Prisma.Game$questLogsArgs<ExtArgs>
   _count?: boolean | Prisma.GameCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["game"]>
 
@@ -857,6 +980,7 @@ export type GameOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type GameInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reviews?: boolean | Prisma.Game$reviewsArgs<ExtArgs>
   articles?: boolean | Prisma.Game$articlesArgs<ExtArgs>
+  questLogs?: boolean | Prisma.Game$questLogsArgs<ExtArgs>
   _count?: boolean | Prisma.GameCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type GameIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -867,6 +991,7 @@ export type $GamePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     reviews: Prisma.$ReviewPayload<ExtArgs>[]
     articles: Prisma.$ArticleGamePayload<ExtArgs>[]
+    questLogs: Prisma.$QuestLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1277,6 +1402,7 @@ export interface Prisma__GameClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   reviews<T extends Prisma.Game$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Game$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   articles<T extends Prisma.Game$articlesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Game$articlesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ArticleGamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  questLogs<T extends Prisma.Game$questLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Game$questLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuestLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1751,6 +1877,30 @@ export type Game$articlesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.ArticleGameScalarFieldEnum | Prisma.ArticleGameScalarFieldEnum[]
+}
+
+/**
+ * Game.questLogs
+ */
+export type Game$questLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuestLog
+   */
+  select?: Prisma.QuestLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuestLog
+   */
+  omit?: Prisma.QuestLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestLogInclude<ExtArgs> | null
+  where?: Prisma.QuestLogWhereInput
+  orderBy?: Prisma.QuestLogOrderByWithRelationInput | Prisma.QuestLogOrderByWithRelationInput[]
+  cursor?: Prisma.QuestLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuestLogScalarFieldEnum | Prisma.QuestLogScalarFieldEnum[]
 }
 
 /**

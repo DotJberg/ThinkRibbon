@@ -114,3 +114,8 @@ export type ReviewDraft = Prisma.ReviewDraftModel
  * 
  */
 export type ReviewDraftImage = Prisma.ReviewDraftImageModel
+/**
+ * Model QuestLog
+ * 
+ */
+export type QuestLog = Prisma.QuestLogModel

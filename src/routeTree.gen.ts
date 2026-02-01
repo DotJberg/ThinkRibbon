@@ -16,6 +16,7 @@ import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as DraftsIndexRouteImport } from './routes/drafts/index'
 import { Route as ReviewsNewRouteImport } from './routes/reviews/new'
 import { Route as ReviewsIdRouteImport } from './routes/reviews/$id'
+import { Route as QuestlogUsernameRouteImport } from './routes/questlog/$username'
 import { Route as ProfileUsernameRouteImport } from './routes/profile/$username'
 import { Route as PostsIdRouteImport } from './routes/posts/$id'
 import { Route as GamesSlugRouteImport } from './routes/games/$slug'
@@ -58,6 +59,11 @@ const ReviewsNewRoute = ReviewsNewRouteImport.update({
 const ReviewsIdRoute = ReviewsIdRouteImport.update({
   id: '/reviews/$id',
   path: '/reviews/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestlogUsernameRoute = QuestlogUsernameRouteImport.update({
+  id: '/questlog/$username',
+  path: '/questlog/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileUsernameRoute = ProfileUsernameRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/games/$slug': typeof GamesSlugRoute
   '/posts/$id': typeof PostsIdRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/questlog/$username': typeof QuestlogUsernameRoute
   '/reviews/$id': typeof ReviewsIdRoute
   '/reviews/new': typeof ReviewsNewRoute
   '/drafts/': typeof DraftsIndexRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/games/$slug': typeof GamesSlugRoute
   '/posts/$id': typeof PostsIdRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/questlog/$username': typeof QuestlogUsernameRoute
   '/reviews/$id': typeof ReviewsIdRoute
   '/reviews/new': typeof ReviewsNewRoute
   '/drafts': typeof DraftsIndexRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/games/$slug': typeof GamesSlugRoute
   '/posts/$id': typeof PostsIdRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/questlog/$username': typeof QuestlogUsernameRoute
   '/reviews/$id': typeof ReviewsIdRoute
   '/reviews/new': typeof ReviewsNewRoute
   '/drafts/': typeof DraftsIndexRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/games/$slug'
     | '/posts/$id'
     | '/profile/$username'
+    | '/questlog/$username'
     | '/reviews/$id'
     | '/reviews/new'
     | '/drafts/'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/games/$slug'
     | '/posts/$id'
     | '/profile/$username'
+    | '/questlog/$username'
     | '/reviews/$id'
     | '/reviews/new'
     | '/drafts'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/games/$slug'
     | '/posts/$id'
     | '/profile/$username'
+    | '/questlog/$username'
     | '/reviews/$id'
     | '/reviews/new'
     | '/drafts/'
@@ -217,6 +229,7 @@ export interface RootRouteChildren {
   GamesSlugRoute: typeof GamesSlugRoute
   PostsIdRoute: typeof PostsIdRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
+  QuestlogUsernameRoute: typeof QuestlogUsernameRoute
   ReviewsIdRoute: typeof ReviewsIdRoute
   ReviewsNewRoute: typeof ReviewsNewRoute
   DraftsIndexRoute: typeof DraftsIndexRoute
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews/$id'
       fullPath: '/reviews/$id'
       preLoaderRoute: typeof ReviewsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/questlog/$username': {
+      id: '/questlog/$username'
+      path: '/questlog/$username'
+      fullPath: '/questlog/$username'
+      preLoaderRoute: typeof QuestlogUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$username': {
@@ -345,6 +365,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesSlugRoute: GamesSlugRoute,
   PostsIdRoute: PostsIdRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,
+  QuestlogUsernameRoute: QuestlogUsernameRoute,
   ReviewsIdRoute: ReviewsIdRoute,
   ReviewsNewRoute: ReviewsNewRoute,
   DraftsIndexRoute: DraftsIndexRoute,

@@ -11,6 +11,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { FeedItemCard } from "../../components/feed/FeedItem";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
+import { NowPlaying } from "../../components/profile/NowPlaying";
 import { SafeImage } from "../../components/shared/SafeImage";
 import { getArticlesByUser } from "../../lib/server/articles";
 import type { FeedItem } from "../../lib/server/feed";
@@ -315,6 +316,9 @@ function ProfilePage() {
 						<p className="mt-4 text-gray-300 max-w-2xl">{profile.bio}</p>
 					)}
 				</div>
+
+				{/* Now Playing / Quest Log */}
+				<NowPlaying username={username} isOwnProfile={!!isOwnProfile} />
 
 				{/* Content Feed */}
 				<div className="pb-8 space-y-4">

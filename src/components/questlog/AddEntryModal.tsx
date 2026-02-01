@@ -1,5 +1,5 @@
 import { Calendar, Loader2, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { QuestLogStatus } from "../../generated/prisma/client.js";
 import { addToQuestLog } from "../../lib/server/questlog";
 
@@ -35,6 +35,8 @@ export function AddEntryModal({
 	);
 	const [completedAt, setCompletedAt] = useState<string>("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const startedId = useId();
+	const completedId = useId();
 
 	if (!isOpen) return null;
 
@@ -116,11 +118,15 @@ export function AddEntryModal({
 					<div className="space-y-3">
 						{/* Started Date */}
 						<div className="space-y-1">
-							<label className="text-sm font-medium text-gray-400 flex items-center gap-2">
+							<label
+								htmlFor={startedId}
+								className="text-sm font-medium text-gray-400 flex items-center gap-2"
+							>
 								<Calendar size={14} />
 								Started Date
 							</label>
 							<input
+								id={startedId}
 								type="date"
 								value={startedAt}
 								onChange={(e) => setStartedAt(e.target.value)}
@@ -131,11 +137,15 @@ export function AddEntryModal({
 						{/* Completed/Dropped Date */}
 						{showCompletedDate && (
 							<div className="space-y-1">
-								<label className="text-sm font-medium text-gray-400 flex items-center gap-2">
+								<label
+									htmlFor={completedId}
+									className="text-sm font-medium text-gray-400 flex items-center gap-2"
+								>
 									<Calendar size={14} />
 									{status === "Completed" ? "Completed" : "Dropped"} Date
 								</label>
 								<input
+									id={completedId}
 									type="date"
 									value={completedAt}
 									onChange={(e) => setCompletedAt(e.target.value)}
@@ -144,7 +154,6 @@ export function AddEntryModal({
 							</div>
 						)}
 					</div>
-
 				</div>
 
 				{/* Footer */}

@@ -53,7 +53,7 @@ export function GameSearchModal({
 
 	const handleQueryChange = (value: string) => {
 		setQuery(value);
-		
+
 		// Clear existing timeout
 		if (debounceRef.current) {
 			clearTimeout(debounceRef.current);
@@ -105,7 +105,9 @@ export function GameSearchModal({
 			<div className="w-full max-w-lg max-h-[80vh] bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
 				{/* Header */}
 				<div className="flex items-center justify-between p-5 border-b border-gray-800">
-					<h2 className="text-lg font-bold text-white">Add Game to Quest Log</h2>
+					<h2 className="text-lg font-bold text-white">
+						Add Game to Quest Log
+					</h2>
 					<button
 						type="button"
 						onClick={handleClose}

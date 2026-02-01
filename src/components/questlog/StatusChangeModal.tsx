@@ -1,7 +1,10 @@
 import { Calendar, Loader2, Share2, Star, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import { updateQuestLog, updateQuestLogStatus } from "../../lib/server/questlog";
+import {
+	updateQuestLog,
+	updateQuestLogStatus,
+} from "../../lib/server/questlog";
 
 interface StatusChangeModalProps {
 	isOpen: boolean;
@@ -59,6 +62,8 @@ export function StatusChangeModal({
 	const [completedAt, setCompletedAt] = useState<string>(
 		formatDateForInput(currentCompletedAt),
 	);
+	const startedId = useId();
+	const completedId = useId();
 
 	if (!isOpen) return null;
 
@@ -167,11 +172,14 @@ export function StatusChangeModal({
 							<Calendar size={14} />
 							Edit Dates
 						</span>
-						
+
 						{/* Started Date */}
 						<div className="space-y-1">
-							<label className="text-xs text-gray-500">Started Date</label>
+							<label htmlFor={startedId} className="text-xs text-gray-500">
+								Started Date
+							</label>
 							<input
+								id={startedId}
 								type="date"
 								value={startedAt}
 								onChange={(e) => setStartedAt(e.target.value)}
@@ -182,10 +190,11 @@ export function StatusChangeModal({
 						{/* Completed/Dropped Date */}
 						{(newStatus === "Completed" || newStatus === "Dropped") && (
 							<div className="space-y-1">
-								<label className="text-xs text-gray-500">
+								<label htmlFor={completedId} className="text-xs text-gray-500">
 									{newStatus === "Completed" ? "Completed" : "Dropped"} Date
 								</label>
 								<input
+									id={completedId}
 									type="date"
 									value={completedAt}
 									onChange={(e) => setCompletedAt(e.target.value)}
@@ -197,119 +206,119 @@ export function StatusChangeModal({
 
 					{/* Review Options - only show when moving from Playing status */}
 					{currentStatus === "Playing" && (
-					<>
-					<div className="space-y-2">
-						<span className="text-sm font-medium text-gray-400">
-							Add a Review?
-						</span>
-						<div className="space-y-2">
-							<button
-								type="button"
-								onClick={() => setReviewOption("none")}
-								className={`w-full p-3 rounded-lg border text-left transition-all ${
-									reviewOption === "none"
-										? "border-purple-500 bg-purple-500/10 text-white"
-										: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
-								}`}
-							>
-								No Review
-								<span className="block text-xs text-gray-500 mt-1">
-									Just update the status
+						<>
+							<div className="space-y-2">
+								<span className="text-sm font-medium text-gray-400">
+									Add a Review?
 								</span>
-							</button>
-
-							<button
-								type="button"
-								onClick={() => setReviewOption("quick")}
-								className={`w-full p-3 rounded-lg border text-left transition-all ${
-									reviewOption === "quick"
-										? "border-purple-500 bg-purple-500/10 text-white"
-										: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
-								}`}
-							>
-								Quick Review
-								<span className="block text-xs text-gray-500 mt-1">
-									Just a star rating
-								</span>
-							</button>
-
-							<button
-								type="button"
-								onClick={() => setReviewOption("full")}
-								className={`w-full p-3 rounded-lg border text-left transition-all ${
-									reviewOption === "full"
-										? "border-purple-500 bg-purple-500/10 text-white"
-										: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
-								}`}
-							>
-								Full Review
-								<span className="block text-xs text-gray-500 mt-1">
-									Write a detailed review
-								</span>
-							</button>
-						</div>
-					</div>
-
-					{/* Quick Rating UI */}
-					{reviewOption === "quick" && (
-						<div className="space-y-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-							<span className="text-sm font-medium text-gray-400">
-								Your Rating
-							</span>
-							{/* Star Rating */}
-								<div className="flex justify-center gap-2">
-								{[1, 2, 3, 4, 5].map((rating) => (
+								<div className="space-y-2">
 									<button
-										key={rating}
 										type="button"
-										onClick={() => setQuickRating(rating)}
-										onMouseEnter={() => setHoverRating(rating)}
-										onMouseLeave={() => setHoverRating(0)}
-										className="p-1 transition-transform hover:scale-110"
+										onClick={() => setReviewOption("none")}
+										className={`w-full p-3 rounded-lg border text-left transition-all ${
+											reviewOption === "none"
+												? "border-purple-500 bg-purple-500/10 text-white"
+												: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+										}`}
 									>
-									<Star
-										size={28}
-											className={`transition-colors ${
-												rating <= (hoverRating || quickRating)
-													? "text-yellow-400 fill-yellow-400"
-													: "text-gray-600"
-											}`}
-										/>
-									</button>
-								))}
-							</div>
-							<p className="text-center text-sm text-gray-400">
-								{quickRating > 0 ? `${quickRating}/5` : "Select a rating"}
-							</p>
-
-							{/* Share as Post Toggle */}
-							{quickRating > 0 && (
-								<div className="space-y-2 pt-2 border-t border-gray-700">
-									<label className="flex items-center gap-3 cursor-pointer">
-										<input
-											type="checkbox"
-											checked={shareAsPost}
-											onChange={(e) => setShareAsPost(e.target.checked)}
-											className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500 focus:ring-offset-gray-900"
-										/>
-										<span className="flex items-center gap-2 text-sm text-gray-300">
-											<Share2 size={16} />
-											Share as post
+										No Review
+										<span className="block text-xs text-gray-500 mt-1">
+											Just update the status
 										</span>
-									</label>
+									</button>
 
-									{/* Post Preview */}
-									{shareAsPost && (
-										<div className="p-3 bg-gray-900 rounded-lg border border-gray-700">
-											<p className="text-sm text-gray-400 mb-1">Preview:</p>
-											<p className="text-white">{previewPost}</p>
+									<button
+										type="button"
+										onClick={() => setReviewOption("quick")}
+										className={`w-full p-3 rounded-lg border text-left transition-all ${
+											reviewOption === "quick"
+												? "border-purple-500 bg-purple-500/10 text-white"
+												: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+										}`}
+									>
+										Quick Review
+										<span className="block text-xs text-gray-500 mt-1">
+											Just a star rating
+										</span>
+									</button>
+
+									<button
+										type="button"
+										onClick={() => setReviewOption("full")}
+										className={`w-full p-3 rounded-lg border text-left transition-all ${
+											reviewOption === "full"
+												? "border-purple-500 bg-purple-500/10 text-white"
+												: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+										}`}
+									>
+										Full Review
+										<span className="block text-xs text-gray-500 mt-1">
+											Write a detailed review
+										</span>
+									</button>
+								</div>
+							</div>
+
+							{/* Quick Rating UI */}
+							{reviewOption === "quick" && (
+								<div className="space-y-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+									<span className="text-sm font-medium text-gray-400">
+										Your Rating
+									</span>
+									{/* Star Rating */}
+									<div className="flex justify-center gap-2">
+										{[1, 2, 3, 4, 5].map((rating) => (
+											<button
+												key={rating}
+												type="button"
+												onClick={() => setQuickRating(rating)}
+												onMouseEnter={() => setHoverRating(rating)}
+												onMouseLeave={() => setHoverRating(0)}
+												className="p-1 transition-transform hover:scale-110"
+											>
+												<Star
+													size={28}
+													className={`transition-colors ${
+														rating <= (hoverRating || quickRating)
+															? "text-yellow-400 fill-yellow-400"
+															: "text-gray-600"
+													}`}
+												/>
+											</button>
+										))}
+									</div>
+									<p className="text-center text-sm text-gray-400">
+										{quickRating > 0 ? `${quickRating}/5` : "Select a rating"}
+									</p>
+
+									{/* Share as Post Toggle */}
+									{quickRating > 0 && (
+										<div className="space-y-2 pt-2 border-t border-gray-700">
+											<label className="flex items-center gap-3 cursor-pointer">
+												<input
+													type="checkbox"
+													checked={shareAsPost}
+													onChange={(e) => setShareAsPost(e.target.checked)}
+													className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500 focus:ring-offset-gray-900"
+												/>
+												<span className="flex items-center gap-2 text-sm text-gray-300">
+													<Share2 size={16} />
+													Share as post
+												</span>
+											</label>
+
+											{/* Post Preview */}
+											{shareAsPost && (
+												<div className="p-3 bg-gray-900 rounded-lg border border-gray-700">
+													<p className="text-sm text-gray-400 mb-1">Preview:</p>
+													<p className="text-white">{previewPost}</p>
+												</div>
+											)}
 										</div>
 									)}
 								</div>
 							)}
-						</div>
-					)}
-					</>
+						</>
 					)}
 				</div>
 

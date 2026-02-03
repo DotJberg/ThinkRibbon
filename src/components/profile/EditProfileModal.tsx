@@ -1,7 +1,8 @@
 import { useRouter } from "@tanstack/react-router";
+import { useMutation } from "convex/react";
 import { AlertCircle, Loader2, Save, Upload, X } from "lucide-react";
 import { useId, useState } from "react";
-import { updateUserProfile } from "../../lib/server/users";
+import { api } from "../../../convex/_generated/api";
 import { UploadButton } from "../../lib/uploadthing";
 
 interface EditProfileModalProps {
@@ -32,6 +33,7 @@ export function EditProfileModal({
 }: EditProfileModalProps) {
 	const router = useRouter();
 	const uniqueId = useId();
+	const updateProfile = useMutation(api.users.updateProfile);
 	const [displayName, setDisplayName] = useState(
 		user.displayName || user.username,
 	);
@@ -47,14 +49,12 @@ export function EditProfileModal({
 		setIsSaving(true);
 		setError(null);
 		try {
-			await updateUserProfile({
-				data: {
-					clerkId: user.clerkId,
-					displayName,
-					bio,
-					avatarUrl: avatarUrl || undefined,
-					bannerUrl: bannerUrl || undefined,
-				},
+			await updateProfile({
+				clerkId: user.clerkId,
+				displayName,
+				bio,
+				avatarUrl: avatarUrl || undefined,
+				bannerUrl: bannerUrl || undefined,
 			});
 			onSave?.({
 				displayName,

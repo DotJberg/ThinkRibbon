@@ -1,14 +1,16 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, Calendar, Gamepad2, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
 import { LikeButton } from "../../components/shared/LikeButton";
 import {
 	SpoilerBadge,
 	SpoilerWarning,
 } from "../../components/shared/SpoilerWarning";
-import { getArticleById, toggleArticleLike } from "../../lib/server/articles";
 
 export const Route = createFileRoute("/articles/$id")({
 	component: ArticleDetailPage,
@@ -18,26 +20,12 @@ function ArticleDetailPage() {
 	const { id } = Route.useParams();
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
-	const [article, setArticle] = useState<Awaited<
-		ReturnType<typeof getArticleById>
-	> | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const article = useQuery(api.articles.getById, {
+		articleId: id as Id<"articles">,
+	});
+	const isLoading = article === undefined;
 	const [spoilerAccepted, setSpoilerAccepted] = useState(false);
-
-	useEffect(() => {
-		const loadArticle = async () => {
-			setIsLoading(true);
-			try {
-				const data = await getArticleById({ data: id });
-				setArticle(data);
-			} catch (error) {
-				console.error("Failed to load article:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		loadArticle();
-	}, [id]);
+	const toggleLike = useMutation(api.likes.toggle);
 
 	// Handle escape key for spoiler warning
 	useEffect(() => {
@@ -85,11 +73,14 @@ function ArticleDetailPage() {
 		);
 	}
 
-	const createdAt = new Date(article.createdAt).toLocaleDateString("en-US", {
-		month: "long",
-		day: "numeric",
-		year: "numeric",
-	});
+	const createdAt = new Date(article._creationTime).toLocaleDateString(
+		"en-US",
+		{
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+		},
+	);
 
 	// Check if content is JSON (TipTap) or plain text
 	const isJsonContent =
@@ -166,9 +157,9 @@ function ArticleDetailPage() {
 						{/* Game Tags */}
 						{article.games.length > 0 && (
 							<div className="flex flex-wrap gap-2">
-								{article.games.map(({ game }) => (
+								{article.games.map((game) => (
 									<Link
-										key={game.id}
+										key={game._id}
 										to="/games/$slug"
 										params={{ slug: game.slug }}
 										className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-full text-sm transition-colors"
@@ -209,8 +200,10 @@ function ArticleDetailPage() {
 							onToggle={
 								user
 									? () =>
-											toggleArticleLike({
-												data: { articleId: article.id, clerkId: user.id },
+											toggleLike({
+												clerkId: user.id,
+												targetType: "article",
+												targetId: article._id,
 											})
 									: async () => ({ liked: false })
 							}

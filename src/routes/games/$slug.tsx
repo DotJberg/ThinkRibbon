@@ -1,16 +1,12 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
 import { ArrowLeft, Calendar, FileText, Gamepad2, Star } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
 import { QuestLogButton } from "../../components/questlog/QuestLogButton";
 import { ReviewCard } from "../../components/reviews/ReviewCard";
 import { StarRatingDisplay } from "../../components/shared/StarRating";
-import { getArticlesByGame } from "../../lib/server/articles";
-import { getGameBySlug } from "../../lib/server/games";
-import {
-	getGameAverageRating,
-	getReviewsByGame,
-} from "../../lib/server/reviews";
 
 export const Route = createFileRoute("/games/$slug")({
 	component: GameDetailPage,
@@ -19,46 +15,26 @@ export const Route = createFileRoute("/games/$slug")({
 function GameDetailPage() {
 	const { slug } = Route.useParams();
 	const { isSignedIn } = useUser();
-	const [game, setGame] = useState<Awaited<
-		ReturnType<typeof getGameBySlug>
-	> | null>(null);
-	const [reviews, setReviews] = useState<
-		Awaited<ReturnType<typeof getReviewsByGame>>["reviews"]
-	>([]);
-	const [articles, setArticles] = useState<
-		Awaited<ReturnType<typeof getArticlesByGame>>
-	>([]);
-	const [ratingInfo, setRatingInfo] = useState({
-		averageRating: 0,
-		reviewCount: 0,
-	});
-	const [isLoading, setIsLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState<"reviews" | "articles">("reviews");
 
-	useEffect(() => {
-		const loadGame = async () => {
-			setIsLoading(true);
-			try {
-				const gameData = await getGameBySlug({ data: slug });
-				if (gameData) {
-					setGame(gameData);
-					const [reviewsData, articlesData, ratingData] = await Promise.all([
-						getReviewsByGame({ data: { gameId: gameData.id, limit: 20 } }),
-						getArticlesByGame({ data: gameData.id }),
-						getGameAverageRating({ data: gameData.id }),
-					]);
-					setReviews(reviewsData.reviews);
-					setArticles(articlesData);
-					setRatingInfo(ratingData);
-				}
-			} catch (error) {
-				console.error("Failed to load game:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		loadGame();
-	}, [slug]);
+	// Convex queries
+	const game = useQuery(api.games.getBySlug, { slug });
+	const reviewsData = useQuery(
+		api.reviews.getByGame,
+		game ? { gameId: game._id, limit: 20 } : "skip",
+	);
+	const articlesData = useQuery(
+		api.articles.getByGame,
+		game ? { gameId: game._id } : "skip",
+	);
+	const ratingInfo = useQuery(
+		api.reviews.getAverageRating,
+		game ? { gameId: game._id } : "skip",
+	);
+
+	const isLoading = game === undefined;
+	const reviews = reviewsData?.reviews ?? [];
+	const articles = articlesData ?? [];
 
 	if (isLoading) {
 		return (
@@ -131,7 +107,7 @@ function GameDetailPage() {
 										{year}
 									</span>
 								)}
-								{ratingInfo.reviewCount > 0 && (
+								{ratingInfo && ratingInfo.reviewCount > 0 && (
 									<StarRatingDisplay
 										rating={ratingInfo.averageRating}
 										reviewCount={ratingInfo.reviewCount}
@@ -160,10 +136,10 @@ function GameDetailPage() {
 
 							{isSignedIn && (
 								<div className="flex flex-wrap gap-3">
-									<QuestLogButton gameId={game.id} gameName={game.name} />
+									<QuestLogButton gameId={game._id} gameName={game.name} />
 									<Link
 										to="/reviews/new"
-										search={{ gameId: game.id, draftId: undefined }}
+										search={{ gameId: game._id, draftId: undefined }}
 										className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all border border-gray-700"
 									>
 										<Star size={20} />
@@ -211,8 +187,29 @@ function GameDetailPage() {
 						{reviews.length > 0 ? (
 							reviews.map((review) => (
 								<ReviewCard
-									key={review.id}
-									review={{ ...review, game }}
+									key={review._id}
+									review={{
+										id: review._id,
+										title: review.title,
+										content: review.content,
+										rating: review.rating,
+										coverImageUrl: review.coverImageUrl,
+										containsSpoilers: review.containsSpoilers,
+										createdAt: new Date(review._creationTime),
+										author: {
+											id: review.author?._id ?? "",
+											username: review.author?.username ?? "",
+											displayName: review.author?.displayName ?? null,
+											avatarUrl: review.author?.avatarUrl ?? null,
+										},
+										game: {
+											id: game._id,
+											name: game.name,
+											slug: game.slug,
+											coverUrl: game.coverUrl ?? null,
+										},
+										_count: review._count,
+									}}
 									isAuthenticated={isSignedIn}
 								/>
 							))
@@ -229,16 +226,16 @@ function GameDetailPage() {
 						{articles.length > 0 ? (
 							articles.map((article) => (
 								<Link
-									key={article.id}
+									key={article._id}
 									to="/articles/$id"
-									params={{ id: article.id }}
+									params={{ id: article._id }}
 									className="block bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-gray-600/50 transition-colors"
 								>
 									<h3 className="text-lg font-semibold text-white hover:text-purple-400">
 										{article.title}
 									</h3>
 									<p className="text-sm text-gray-400 mt-1">
-										by {article.author.displayName || article.author.username}
+										by {article.author?.displayName || article.author?.username}
 									</p>
 								</Link>
 							))

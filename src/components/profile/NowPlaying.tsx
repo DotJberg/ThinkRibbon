@@ -1,17 +1,23 @@
 import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
 import { ChevronRight, Gamepad2, Pencil } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import { getNowPlaying } from "../../lib/server/questlog";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
+
+type QuestLogStatus =
+	| "Playing"
+	| "Completed"
+	| "OnHold"
+	| "Dropped"
+	| "Backlog";
+
 import { StatusChangeModal } from "../questlog/StatusChangeModal";
 
 interface NowPlayingProps {
 	username: string;
 	isOwnProfile: boolean;
 }
-
-type NowPlayingEntry = Awaited<ReturnType<typeof getNowPlaying>>[number];
 
 // Status badge colors and labels
 const statusConfig: Record<
@@ -47,30 +53,14 @@ const statusConfig: Record<
 
 export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 	const { user } = useUser();
-	const [entries, setEntries] = useState<NowPlayingEntry[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [selectedEntry, setSelectedEntry] = useState<NowPlayingEntry | null>(
-		null,
-	);
-
-	const loadEntries = useCallback(async () => {
-		try {
-			const data = await getNowPlaying({ data: { username } });
-			setEntries(data);
-		} catch (error) {
-			console.error("Failed to load Now Playing:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [username]);
-
-	useEffect(() => {
-		loadEntries();
-	}, [loadEntries]);
+	const data = useQuery(api.questlog.getNowPlaying, { username });
+	const entries = data ?? [];
+	const isLoading = data === undefined;
+	// biome-ignore lint/suspicious/noExplicitAny: Convex query return type
+	const [selectedEntry, setSelectedEntry] = useState<any>(null);
 
 	const handleStatusUpdate = () => {
 		setSelectedEntry(null);
-		loadEntries(); // Refresh the list
 	};
 
 	if (isLoading) {
@@ -133,7 +123,7 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 
 				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
 					{entries.map((entry) => (
-						<div key={entry.id} className="group relative">
+						<div key={entry._id} className="group relative">
 							{/* Game Card */}
 							<Link
 								to="/games/$slug"
@@ -204,9 +194,9 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 					onSuccess={handleStatusUpdate}
 					clerkId={user.id}
 					gameId={selectedEntry.gameId}
-					gameName={selectedEntry.game.name}
+					gameName={selectedEntry.game?.name ?? ""}
 					currentStatus={selectedEntry.status}
-					questLogId={selectedEntry.id}
+					questLogId={selectedEntry._id}
 					currentStartedAt={selectedEntry.startedAt}
 					currentCompletedAt={selectedEntry.completedAt}
 				/>

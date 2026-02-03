@@ -5,7 +5,6 @@ import {
 	UploadThingError,
 	UTApi,
 } from "uploadthing/server";
-import { prisma } from "@/db";
 import { IMAGE_CONSTRAINTS } from "@/lib/image-utils";
 
 const f = createUploadthing();
@@ -54,9 +53,6 @@ export async function deleteUploadThingFiles(urls: string[]): Promise<void> {
 	}
 }
 
-// Alias for backward compatibility
-const deleteOldUploadThingFile = deleteUploadThingFile;
-
 // Helper to extract cookie value
 function getCookie(cookieHeader: string, name: string): string | null {
 	const cookies = cookieHeader.split(";").map((c) => c.trim());
@@ -101,22 +97,6 @@ export const uploadRouter = {
 		.middleware(authMiddleware)
 		.onUploadComplete(async ({ metadata, file }) => {
 			const url = file.ufsUrl || file.url;
-
-			// Get current avatar URL to delete old file
-			const user = await prisma.user.findUnique({
-				where: { clerkId: metadata.userId },
-				select: { avatarUrl: true },
-			});
-
-			// Delete old avatar if it exists
-			await deleteOldUploadThingFile(user?.avatarUrl ?? null);
-
-			// Save new avatar URL
-			await prisma.user.update({
-				where: { clerkId: metadata.userId },
-				data: { avatarUrl: url },
-			});
-
 			return { uploadedBy: metadata.userId, url };
 		}),
 
@@ -124,22 +104,6 @@ export const uploadRouter = {
 		.middleware(authMiddleware)
 		.onUploadComplete(async ({ metadata, file }) => {
 			const url = file.ufsUrl || file.url;
-
-			// Get current banner URL to delete old file
-			const user = await prisma.user.findUnique({
-				where: { clerkId: metadata.userId },
-				select: { bannerUrl: true },
-			});
-
-			// Delete old banner if it exists
-			await deleteOldUploadThingFile(user?.bannerUrl ?? null);
-
-			// Save new banner URL
-			await prisma.user.update({
-				where: { clerkId: metadata.userId },
-				data: { bannerUrl: url },
-			});
-
 			return { uploadedBy: metadata.userId, url };
 		}),
 

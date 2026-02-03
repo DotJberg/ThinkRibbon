@@ -1,7 +1,10 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, Calendar, Gamepad2, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
 import { LikeButton } from "../../components/shared/LikeButton";
 import { SafeImage } from "../../components/shared/SafeImage";
@@ -10,7 +13,6 @@ import {
 	SpoilerWarning,
 } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
-import { getReviewById, toggleReviewLike } from "../../lib/server/reviews";
 
 export const Route = createFileRoute("/reviews/$id")({
 	component: ReviewDetailPage,
@@ -20,26 +22,12 @@ function ReviewDetailPage() {
 	const { id } = Route.useParams();
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
-	const [review, setReview] = useState<Awaited<
-		ReturnType<typeof getReviewById>
-	> | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const review = useQuery(api.reviews.getById, {
+		reviewId: id as Id<"reviews">,
+	});
+	const isLoading = review === undefined;
 	const [spoilerAccepted, setSpoilerAccepted] = useState(false);
-
-	useEffect(() => {
-		const loadReview = async () => {
-			setIsLoading(true);
-			try {
-				const data = await getReviewById({ data: id });
-				setReview(data);
-			} catch (error) {
-				console.error("Failed to load review:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		loadReview();
-	}, [id]);
+	const toggleLike = useMutation(api.likes.toggle);
 
 	// Handle escape key for spoiler warning
 	useEffect(() => {
@@ -87,7 +75,7 @@ function ReviewDetailPage() {
 		);
 	}
 
-	const createdAt = new Date(review.createdAt).toLocaleDateString("en-US", {
+	const createdAt = new Date(review._creationTime).toLocaleDateString("en-US", {
 		month: "long",
 		day: "numeric",
 		year: "numeric",
@@ -216,8 +204,10 @@ function ReviewDetailPage() {
 							onToggle={
 								user
 									? () =>
-											toggleReviewLike({
-												data: { reviewId: review.id, clerkId: user.id },
+											toggleLike({
+												clerkId: user.id,
+												targetType: "review",
+												targetId: review._id,
 											})
 									: async () => ({ liked: false })
 							}

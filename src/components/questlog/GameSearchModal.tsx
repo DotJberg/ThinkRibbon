@@ -1,6 +1,7 @@
+import { useAction } from "convex/react";
 import { Loader2, Plus, Search, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { searchGames } from "../../lib/server/games";
+import { api } from "../../../convex/_generated/api";
 import { AddEntryModal } from "./AddEntryModal";
 
 interface GameSearchModalProps {
@@ -10,7 +11,8 @@ interface GameSearchModalProps {
 	clerkId: string;
 }
 
-type SearchResult = Awaited<ReturnType<typeof searchGames>>[number];
+// biome-ignore lint/suspicious/noExplicitAny: Convex action return type
+type SearchResult = any;
 
 export function GameSearchModal({
 	isOpen,
@@ -18,6 +20,7 @@ export function GameSearchModal({
 	onSuccess,
 	clerkId,
 }: GameSearchModalProps) {
+	const searchGamesAction = useAction(api.igdb.searchAndCache);
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [isSearching, setIsSearching] = useState(false);
@@ -33,23 +36,26 @@ export function GameSearchModal({
 	}, [isOpen]);
 
 	// Debounced search
-	const performSearch = useCallback(async (searchQuery: string) => {
-		if (!searchQuery.trim()) {
-			setResults([]);
-			return;
-		}
+	const performSearch = useCallback(
+		async (searchQuery: string) => {
+			if (!searchQuery.trim()) {
+				setResults([]);
+				return;
+			}
 
-		setIsSearching(true);
-		try {
-			const data = await searchGames({ data: { query: searchQuery } });
-			setResults(data);
-		} catch (error) {
-			console.error("Search failed:", error);
-			setResults([]);
-		} finally {
-			setIsSearching(false);
-		}
-	}, []);
+			setIsSearching(true);
+			try {
+				const data = await searchGamesAction({ query: searchQuery });
+				setResults(data);
+			} catch (error) {
+				console.error("Search failed:", error);
+				setResults([]);
+			} finally {
+				setIsSearching(false);
+			}
+		},
+		[searchGamesAction],
+	);
 
 	const handleQueryChange = (value: string) => {
 		setQuery(value);
@@ -94,7 +100,7 @@ export function GameSearchModal({
 				onClose={() => setSelectedGame(null)}
 				onSuccess={handleEntrySuccess}
 				clerkId={clerkId}
-				gameId={selectedGame.id}
+				gameId={selectedGame._id}
 				gameName={selectedGame.name}
 			/>
 		);
@@ -156,7 +162,7 @@ export function GameSearchModal({
 						<div className="space-y-2">
 							{results.map((game) => (
 								<button
-									key={game.id}
+									key={game._id}
 									type="button"
 									onClick={() => handleGameSelect(game)}
 									className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-purple-500/50 rounded-xl transition-all text-left group"

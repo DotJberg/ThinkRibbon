@@ -1,66 +1,38 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, Edit, FileText, Star, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Toaster, toast } from "sonner";
-import {
-	deleteArticleDraft,
-	deleteReviewDraft,
-	getAllDrafts,
-} from "../../lib/server/drafts";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 export const Route = createFileRoute("/drafts/")({
 	component: DraftsPage,
 });
 
-type ArticleDraft = Awaited<
-	ReturnType<typeof getAllDrafts>
->["articleDrafts"][number];
-type ReviewDraft = Awaited<
-	ReturnType<typeof getAllDrafts>
->["reviewDrafts"][number];
-
 function DraftsPage() {
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
-	const [articleDrafts, setArticleDrafts] = useState<ArticleDraft[]>([]);
-	const [reviewDrafts, setReviewDrafts] = useState<ReviewDraft[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const draftsData = useQuery(
+		api.drafts.getAllDrafts,
+		user?.id ? { clerkId: user.id } : "skip",
+	);
+	const articleDrafts = draftsData?.articleDrafts ?? [];
+	const reviewDrafts = draftsData?.reviewDrafts ?? [];
+	const isLoading = user && draftsData === undefined;
 	const [deletingId, setDeletingId] = useState<string | null>(null);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: loadDrafts is defined later and would cause infinite loop if included
-	useEffect(() => {
-		if (user) {
-			loadDrafts();
-		}
-	}, [user]);
-
-	const loadDrafts = async () => {
-		if (!user) return;
-
-		setIsLoading(true);
-		try {
-			const { articleDrafts: articles, reviewDrafts: reviews } =
-				await getAllDrafts({
-					data: user.id,
-				});
-			setArticleDrafts(articles);
-			setReviewDrafts(reviews);
-		} catch (error) {
-			console.error("Failed to load drafts:", error);
-			toast.error("Failed to load drafts");
-		} finally {
-			setIsLoading(false);
-		}
-	};
+	const deleteArticleDraftMut = useMutation(api.drafts.deleteArticleDraft);
+	const deleteReviewDraftMut = useMutation(api.drafts.deleteReviewDraft);
 
 	const handleDeleteArticleDraft = async (draftId: string) => {
 		if (!user) return;
-
 		setDeletingId(draftId);
 		try {
-			await deleteArticleDraft({ data: { draftId, clerkId: user.id } });
-			setArticleDrafts((prev) => prev.filter((d) => d.id !== draftId));
+			await deleteArticleDraftMut({
+				draftId: draftId as Id<"articleDrafts">,
+				clerkId: user.id,
+			});
 			toast.success("Draft deleted");
 		} catch (error) {
 			console.error("Failed to delete draft:", error);
@@ -72,11 +44,12 @@ function DraftsPage() {
 
 	const handleDeleteReviewDraft = async (draftId: string) => {
 		if (!user) return;
-
 		setDeletingId(draftId);
 		try {
-			await deleteReviewDraft({ data: { draftId, clerkId: user.id } });
-			setReviewDrafts((prev) => prev.filter((d) => d.id !== draftId));
+			await deleteReviewDraftMut({
+				draftId: draftId as Id<"reviewDrafts">,
+				clerkId: user.id,
+			});
 			toast.success("Draft deleted");
 		} catch (error) {
 			console.error("Failed to delete draft:", error);
@@ -169,18 +142,18 @@ function DraftsPage() {
 								<div className="space-y-3">
 									{articleDrafts.map((draft) => (
 										<DraftCard
-											key={draft.id}
+											key={draft._id}
 											title={draft.title || "Untitled Article"}
 											updatedAt={draft.updatedAt}
 											type="article"
-											isDeleting={deletingId === draft.id}
+											isDeleting={deletingId === draft._id}
 											onEdit={() =>
 												navigate({
 													to: "/articles/new",
-													search: { draftId: draft.id },
+													search: { draftId: draft._id },
 												})
 											}
-											onDelete={() => handleDeleteArticleDraft(draft.id)}
+											onDelete={() => handleDeleteArticleDraft(draft._id)}
 										/>
 									))}
 								</div>
@@ -197,21 +170,21 @@ function DraftsPage() {
 								<div className="space-y-3">
 									{reviewDrafts.map((draft) => (
 										<DraftCard
-											key={draft.id}
+											key={draft._id}
 											title={draft.title || "Untitled Review"}
 											subtitle={
 												draft.rating ? `${draft.rating}/5 stars` : undefined
 											}
 											updatedAt={draft.updatedAt}
 											type="review"
-											isDeleting={deletingId === draft.id}
+											isDeleting={deletingId === draft._id}
 											onEdit={() =>
 												navigate({
 													to: "/reviews/new",
-													search: { gameId: undefined, draftId: draft.id },
+													search: { gameId: undefined, draftId: draft._id },
 												})
 											}
-											onDelete={() => handleDeleteReviewDraft(draft.id)}
+											onDelete={() => handleDeleteReviewDraft(draft._id)}
 										/>
 									))}
 								</div>
@@ -227,7 +200,7 @@ function DraftsPage() {
 interface DraftCardProps {
 	title: string;
 	subtitle?: string;
-	updatedAt: Date | string;
+	updatedAt: number | Date | string;
 	type: "article" | "review";
 	isDeleting: boolean;
 	onEdit: () => void;
@@ -243,7 +216,7 @@ function DraftCard({
 	onEdit,
 	onDelete,
 }: DraftCardProps) {
-	const date = typeof updatedAt === "string" ? new Date(updatedAt) : updatedAt;
+	const date = updatedAt instanceof Date ? updatedAt : new Date(updatedAt);
 
 	return (
 		<div className="flex items-center gap-4 p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-colors">

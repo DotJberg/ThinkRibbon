@@ -1,13 +1,15 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, Cloud, Gamepad2, Save } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
-import { getReviewById, updateReview } from "../../lib/server/reviews";
 
 export const Route = createFileRoute("/reviews/edit/$id")({
 	component: EditReviewPage,
@@ -36,7 +38,6 @@ function EditReviewPage() {
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
 
 	// Loading state
-	const [isLoading, setIsLoading] = useState(true);
 	const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
 		"idle",
 	);
@@ -47,33 +48,36 @@ function EditReviewPage() {
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const initialLoadRef = useRef(true);
 
-	// Load existing review
+	// Convex hooks
+	const review = useQuery(api.reviews.getById, {
+		reviewId: id as Id<"reviews">,
+	});
+	const updateReviewMut = useMutation(api.reviews.update);
+
+	const isLoading = review === undefined;
+
+	// Populate form state from query data on first load
 	useEffect(() => {
-		const loadReview = async () => {
-			setIsLoading(true);
-			try {
-				const review = await getReviewById({ data: id });
-				if (review) {
-					setTitle(review.title);
-					setContent(review.content);
-					setRating(review.rating);
-					setCoverImageUrl(review.coverImageUrl);
-					setContainsSpoilers(review.containsSpoilers || false);
-					setGame(review.game);
-				}
-			} catch (error) {
-				console.error("Failed to load review:", error);
-				toast.error("Failed to load review");
-			} finally {
-				setIsLoading(false);
-				// Mark initial load complete after a short delay
-				setTimeout(() => {
-					initialLoadRef.current = false;
-				}, 100);
+		if (review && initialLoadRef.current) {
+			setTitle(review.title);
+			setContent(review.content);
+			setRating(review.rating);
+			setCoverImageUrl(review.coverImageUrl ?? null);
+			setContainsSpoilers(review.containsSpoilers || false);
+			if (review.game) {
+				setGame({
+					id: review.game._id,
+					name: review.game.name,
+					slug: review.game.slug,
+					coverUrl: review.game.coverUrl ?? null,
+				});
 			}
-		};
-		loadReview();
-	}, [id]);
+			// Mark initial load complete after a short delay
+			setTimeout(() => {
+				initialLoadRef.current = false;
+			}, 100);
+		}
+	}, [review]);
 
 	// Auto-save function
 	const autoSave = useCallback(async () => {
@@ -82,17 +86,15 @@ function EditReviewPage() {
 
 		setSaveStatus("saving");
 		try {
-			await updateReview({
-				data: {
-					reviewId: id,
-					title,
-					content,
-					rating,
-					coverImageUrl: coverImageUrl || undefined,
-					coverFileKey: coverFileKey || undefined,
-					containsSpoilers,
-					clerkId: user.id,
-				},
+			await updateReviewMut({
+				reviewId: id as Id<"reviews">,
+				title,
+				content,
+				rating,
+				coverImageUrl: coverImageUrl || undefined,
+				coverFileKey: coverFileKey || undefined,
+				containsSpoilers,
+				clerkId: user.id,
 			});
 			setLastSaved(new Date());
 			setSaveStatus("saved");
@@ -109,6 +111,7 @@ function EditReviewPage() {
 		coverImageUrl,
 		coverFileKey,
 		containsSpoilers,
+		updateReviewMut,
 	]);
 
 	// Debounced auto-save on content changes
@@ -147,18 +150,16 @@ function EditReviewPage() {
 
 		setIsSubmitting(true);
 		try {
-			await updateReview({
-				data: {
-					reviewId: id,
-					title,
-					content,
-					rating,
-					coverImageUrl: coverImageUrl || undefined,
-					coverFileKey: coverFileKey || undefined,
-					containsSpoilers,
-					published: true,
-					clerkId: user.id,
-				},
+			await updateReviewMut({
+				reviewId: id as Id<"reviews">,
+				title,
+				content,
+				rating,
+				coverImageUrl: coverImageUrl || undefined,
+				coverFileKey: coverFileKey || undefined,
+				containsSpoilers,
+				published: true,
+				clerkId: user.id,
 			});
 
 			toast.success("Review updated");

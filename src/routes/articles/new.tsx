@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useAction, useMutation, useQuery } from "convex/react";
 import {
 	ArrowLeft,
 	Cloud,
@@ -11,17 +12,12 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { NavigationWarning } from "../../components/editor/NavigationWarning";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
-import { createArticle } from "../../lib/server/articles";
-import {
-	deleteArticleDraft,
-	getArticleDrafts,
-	saveArticleDraft,
-} from "../../lib/server/drafts";
-import { searchGames } from "../../lib/server/games";
 
 export const Route = createFileRoute("/articles/new")({
 	component: NewArticlePage,
@@ -50,7 +46,13 @@ function NewArticlePage() {
 	// Search state
 	const [searchQuery, setSearchQuery] = useState("");
 	const [searchResults, setSearchResults] = useState<
-		Awaited<ReturnType<typeof searchGames>>
+		Array<{
+			_id: string;
+			name: string;
+			slug: string;
+			coverUrl?: string;
+			genres: string[];
+		}>
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
 
@@ -61,9 +63,6 @@ function NewArticlePage() {
 	);
 	const [lastSaved, setLastSaved] = useState<Date | null>(null);
 	const [showDraftPicker, setShowDraftPicker] = useState(false);
-	const [availableDrafts, setAvailableDrafts] = useState<
-		Awaited<ReturnType<typeof getArticleDrafts>>
-	>([]);
 
 	// Submission state
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,46 +78,47 @@ function NewArticlePage() {
 	const hasUnsavedChanges =
 		!hasPublished && (title.trim() !== "" || content.trim() !== "");
 
+	// Convex hooks
+	const createArticleMut = useMutation(api.articles.create);
+	const saveArticleDraftMut = useMutation(api.drafts.saveArticleDraft);
+	const deleteArticleDraftMut = useMutation(api.drafts.deleteArticleDraft);
+	const searchAndCache = useAction(api.igdb.searchAndCache);
+
+	// Load drafts from Convex
+	const draftsData = useQuery(
+		api.drafts.getArticleDrafts,
+		user && !initialDraftId ? { clerkId: user.id } : "skip",
+	);
+	const availableDrafts = draftsData ?? [];
+
+	// Show draft picker when drafts load
+	useEffect(() => {
+		if (availableDrafts.length > 0 && !draftId && !initialDraftId) {
+			setShowDraftPicker(true);
+		}
+	}, [availableDrafts.length, draftId, initialDraftId]);
+
 	// Load draft if draftId is provided
-	// biome-ignore lint/correctness/useExhaustiveDependencies: loadDraft is defined later and would cause infinite loop if included
-	useEffect(() => {
-		if (initialDraftId && user) {
-			loadDraft(initialDraftId);
-		}
-	}, [initialDraftId, user]);
+	const allDraftsForLoad = useQuery(
+		api.drafts.getArticleDrafts,
+		user && initialDraftId ? { clerkId: user.id } : "skip",
+	);
 
-	// Load available drafts
 	useEffect(() => {
-		if (user && !initialDraftId) {
-			getArticleDrafts({ data: user.id }).then((drafts) => {
-				setAvailableDrafts(drafts);
-				if (drafts.length > 0 && !draftId) {
-					setShowDraftPicker(true);
-				}
-			});
-		}
-	}, [user, initialDraftId, draftId]);
-
-	const loadDraft = async (id: string) => {
-		if (!user) return;
-		try {
-			const drafts = await getArticleDrafts({ data: user.id });
-			const draft = drafts.find((d) => d.id === id);
+		if (initialDraftId && allDraftsForLoad) {
+			const draft = allDraftsForLoad.find((d) => d._id === initialDraftId);
 			if (draft) {
 				setTitle(draft.title || "");
 				setContent(draft.content || "");
 				setExcerpt(draft.excerpt || "");
-				setCoverImageUrl(draft.coverImageUrl);
-				setCoverFileKey(draft.coverFileKey);
-				setContainsSpoilers(draft.containsSpoilers);
-				setDraftId(draft.id);
-				// Note: Game selection from draft.gameIds would need additional logic to fetch game details
+				setCoverImageUrl(draft.coverImageUrl ?? null);
+				setCoverFileKey(draft.coverFileKey ?? null);
+				setContainsSpoilers(draft.containsSpoilers ?? false);
+				setDraftId(draft._id);
 				toast.success("Draft loaded");
 			}
-		} catch (error) {
-			console.error("Failed to load draft:", error);
 		}
-	};
+	}, [initialDraftId, allDraftsForLoad]);
 
 	// Auto-save function
 	const autoSave = useCallback(async () => {
@@ -126,20 +126,18 @@ function NewArticlePage() {
 
 		setSaveStatus("saving");
 		try {
-			const result = await saveArticleDraft({
-				data: {
-					draftId,
-					title,
-					content,
-					excerpt: excerpt || undefined,
-					coverImageUrl: coverImageUrl || undefined,
-					coverFileKey: coverFileKey || undefined,
-					containsSpoilers,
-					gameIds: selectedGames.map((g) => g.id),
-					authorClerkId: user.id,
-				},
+			const result = await saveArticleDraftMut({
+				draftId: draftId as Id<"articleDrafts"> | undefined,
+				title,
+				content,
+				excerpt: excerpt || undefined,
+				coverImageUrl: coverImageUrl || undefined,
+				coverFileKey: coverFileKey || undefined,
+				containsSpoilers,
+				gameIds: selectedGames.map((g) => g.id),
+				authorClerkId: user.id,
 			});
-			setDraftId(result.id);
+			setDraftId(result);
 			setLastSaved(new Date());
 			setSaveStatus("saved");
 		} catch (error) {
@@ -156,6 +154,7 @@ function NewArticlePage() {
 		coverFileKey,
 		containsSpoilers,
 		selectedGames,
+		saveArticleDraftMut,
 	]);
 
 	// Debounced auto-save on content changes
@@ -188,11 +187,12 @@ function NewArticlePage() {
 		const timeoutId = setTimeout(async () => {
 			setIsSearching(true);
 			try {
-				const results = await searchGames({
-					data: { query: searchQuery, limit: 5 },
+				const results = await searchAndCache({
+					query: searchQuery,
+					limit: 5,
 				});
 				setSearchResults(
-					results.filter((g) => !selectedGames.some((sg) => sg.id === g.id)),
+					results.filter((g) => !selectedGames.some((sg) => sg.id === g._id)),
 				);
 			} catch (error) {
 				console.error("Search failed:", error);
@@ -202,7 +202,7 @@ function NewArticlePage() {
 		}, 300);
 
 		return () => clearTimeout(timeoutId);
-	}, [searchQuery, selectedGames]);
+	}, [searchQuery, selectedGames, searchAndCache]);
 
 	const handleAddGame = (game: {
 		id: string;
@@ -239,29 +239,29 @@ function NewArticlePage() {
 
 		setIsSubmitting(true);
 		try {
-			const article = await createArticle({
-				data: {
-					title,
-					content, // This is now JSON string from TipTap
-					excerpt: excerpt || undefined,
-					coverImageUrl: coverImageUrl || undefined,
-					coverFileKey: coverFileKey || undefined,
-					containsSpoilers,
-					gameIds: selectedGames.map((g) => g.id),
-					published: true,
-					authorClerkId: user.id,
-				},
+			const articleId = await createArticleMut({
+				title,
+				content,
+				excerpt: excerpt || undefined,
+				coverImageUrl: coverImageUrl || undefined,
+				coverFileKey: coverFileKey || undefined,
+				containsSpoilers,
+				gameIds: selectedGames.map((g) => g.id as Id<"games">),
+				published: true,
+				authorClerkId: user.id,
 			});
 
 			// Delete the draft if it exists
 			if (draftId) {
-				await deleteArticleDraft({
-					data: { draftId, clerkId: user.id, preserveImages: true },
+				await deleteArticleDraftMut({
+					draftId: draftId as Id<"articleDrafts">,
+					clerkId: user.id,
+					preserveImages: true,
 				});
 			}
 
 			setHasPublished(true);
-			setPublishedArticleId(article.id);
+			setPublishedArticleId(articleId);
 		} catch (error) {
 			console.error("Failed to create article:", error);
 			toast.error("Failed to publish article");
@@ -278,7 +278,8 @@ function NewArticlePage() {
 	}, [hasPublished, publishedArticleId, navigate]);
 
 	const handleDraftSelect = (selectedDraftId: string) => {
-		loadDraft(selectedDraftId);
+		// Navigate to reload with draftId
+		navigate({ to: "/articles/new", search: { draftId: selectedDraftId } });
 		setShowDraftPicker(false);
 	};
 
@@ -288,7 +289,10 @@ function NewArticlePage() {
 
 	const handleDeleteDraftOnLeave = async () => {
 		if (draftId && user) {
-			await deleteArticleDraft({ data: { draftId, clerkId: user.id } });
+			await deleteArticleDraftMut({
+				draftId: draftId as Id<"articleDrafts">,
+				clerkId: user.id,
+			});
 		}
 	};
 
@@ -328,9 +332,9 @@ function NewArticlePage() {
 					<div className="space-y-2 mb-6 max-h-64 overflow-y-auto">
 						{availableDrafts.map((draft) => (
 							<button
-								key={draft.id}
+								key={draft._id}
 								type="button"
-								onClick={() => handleDraftSelect(draft.id)}
+								onClick={() => handleDraftSelect(draft._id)}
 								className="w-full p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg text-left transition-colors"
 							>
 								<p className="text-white font-medium truncate">
@@ -511,13 +515,13 @@ function NewArticlePage() {
 							<div className="mt-2 space-y-1">
 								{searchResults.map((game) => (
 									<button
-										key={game.id}
+										key={game._id}
 										type="button"
 										onClick={() =>
 											handleAddGame({
-												id: game.id,
+												id: game._id,
 												name: game.name,
-												coverUrl: game.coverUrl,
+												coverUrl: game.coverUrl ?? null,
 											})
 										}
 										className="w-full flex items-center gap-2 p-2 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors text-left text-sm"

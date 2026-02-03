@@ -1,56 +1,60 @@
 import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
+import { useMutation } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, Reply, Send } from "lucide-react";
 import { useState } from "react";
-import { createComment } from "../../lib/server/comments";
-import { toggleCommentLike } from "../../lib/server/likes";
+import { api } from "../../../convex/_generated/api";
 
 interface CommentItemProps {
 	// biome-ignore lint/suspicious/noExplicitAny: Complex nested comment type
 	comment: any;
 	depth?: number;
 	onReplySuccess?: () => void;
-	postId?: string;
-	articleId?: string;
-	reviewId?: string;
+	targetType: "post" | "article" | "review";
+	targetId: string;
 }
 
 export function CommentItem({
 	comment,
 	depth = 0,
 	onReplySuccess,
-	postId,
-	articleId,
-	reviewId,
+	targetType,
+	targetId,
 }: CommentItemProps) {
 	const { user, isSignedIn } = useUser();
+	const toggleLike = useMutation(api.likes.toggle);
+	const createCommentMut = useMutation(api.comments.create);
 	const [showReplyInput, setShowReplyInput] = useState(false);
 	const [replyText, setReplyText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	// Local state for optimistic updates
-	const [hasLiked, setHasLiked] = useState(comment.likes?.length > 0);
-	const [likeCount, setLikeCount] = useState(comment._count.likes);
+	const [hasLiked, setHasLiked] = useState(
+		comment.hasLiked ?? comment.likes?.length > 0,
+	);
+	const [likeCount, setLikeCount] = useState(comment._count?.likes ?? 0);
 	const [isLiking, setIsLiking] = useState(false);
+
+	const commentId = comment._id || comment.id;
 
 	const handleLike = async () => {
 		if (!isSignedIn || isLiking || !user) return;
 		setIsLiking(true);
 
-		// Optimistic
 		const prevLiked = hasLiked;
 		setHasLiked(!prevLiked);
 		setLikeCount(prevLiked ? likeCount - 1 : likeCount + 1);
 
 		try {
-			await toggleCommentLike({
-				data: { commentId: comment.id, clerkId: user.id },
+			await toggleLike({
+				clerkId: user.id,
+				targetType: "comment",
+				targetId: commentId,
 			});
 		} catch (_error) {
-			// Revert
 			setHasLiked(prevLiked);
-			setLikeCount(prevLiked ? likeCount : likeCount); // simplistic revert
+			setLikeCount(prevLiked ? likeCount : likeCount);
 		} finally {
 			setIsLiking(false);
 		}
@@ -60,15 +64,12 @@ export function CommentItem({
 		if (!replyText.trim() || !user) return;
 		setIsSubmitting(true);
 		try {
-			await createComment({
-				data: {
-					content: replyText,
-					authorClerkId: user.id,
-					postId,
-					articleId,
-					reviewId,
-					parentId: comment.id,
-				},
+			await createCommentMut({
+				content: replyText,
+				authorClerkId: user.id,
+				targetType,
+				targetId,
+				parentId: commentId,
 			});
 			setReplyText("");
 			setShowReplyInput(false);
@@ -114,7 +115,7 @@ export function CommentItem({
 							{comment.author.displayName || comment.author.username}
 						</Link>
 						<span className="text-xs text-gray-500">
-							{formatDistanceToNow(new Date(comment.createdAt))} ago
+							{formatDistanceToNow(new Date(comment._creationTime))} ago
 						</span>
 					</div>
 					<p className="text-sm text-gray-300 whitespace-pre-wrap">
@@ -170,13 +171,12 @@ export function CommentItem({
 						{/* biome-ignore lint/suspicious/noExplicitAny: Complex nested reply type */}
 						{comment.replies.map((reply: any) => (
 							<CommentItem
-								key={reply.id}
+								key={reply._id || reply.id}
 								comment={reply}
 								depth={depth + 1}
 								onReplySuccess={onReplySuccess}
-								postId={postId}
-								articleId={articleId}
-								reviewId={reviewId}
+								targetType={targetType}
+								targetId={targetId}
 							/>
 						))}
 					</div>

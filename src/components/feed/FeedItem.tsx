@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
+import { useMutation } from "convex/react";
 import {
 	FileText,
 	Gamepad2,
@@ -11,16 +12,58 @@ import {
 	TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
-import { createComment } from "../../lib/server/comments";
-import type { FeedItem } from "../../lib/server/feed";
-import {
-	toggleArticleLike,
-	toggleCommentLike,
-	togglePostLike,
-	toggleReviewLike,
-} from "../../lib/server/likes";
+import { api } from "../../../convex/_generated/api";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
+
+// FeedItem type (previously from lib/server/feed)
+interface FeedItem {
+	type: "post" | "article" | "review";
+	id: string;
+	createdAt: number;
+	author: {
+		_id: string;
+		username: string;
+		displayName: string | undefined;
+		avatarUrl: string | undefined;
+	};
+	content: string;
+	title?: string;
+	excerpt?: string;
+	coverImageUrl?: string;
+	containsSpoilers?: boolean;
+	rating?: number;
+	game?: {
+		_id: string;
+		name: string;
+		slug: string;
+		coverUrl: string | undefined;
+	};
+	games?: Array<{
+		_id: string;
+		name: string;
+		slug: string;
+		coverUrl: string | undefined;
+	}>;
+	likeCount: number;
+	commentCount: number;
+	topComment?: {
+		id: string;
+		content: string;
+		createdAt: number;
+		likeCount: number;
+		hasLiked: boolean;
+		author: {
+			_id: string;
+			username: string;
+			displayName: string | undefined;
+			avatarUrl: string | undefined;
+		};
+	};
+	hasLiked: boolean;
+}
+
+export type { FeedItem };
 
 function formatDistanceToNow(date: Date): string {
 	const now = new Date();
@@ -43,6 +86,8 @@ interface FeedItemCardProps {
 
 export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 	const { user, isSignedIn } = useUser();
+	const toggleLike = useMutation(api.likes.toggle);
+	const createCommentMut = useMutation(api.comments.create);
 	const [showCommentInput, setShowCommentInput] = useState(false);
 	const [commentText, setCommentText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,19 +135,19 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 		const previousHasLiked = hasLikedComment;
 		const previousCount = commentLikeCount;
 
-		// Optimistic update
 		setHasLikedComment(!previousHasLiked);
 		setCommentLikeCount(
 			previousHasLiked ? previousCount - 1 : previousCount + 1,
 		);
 
 		try {
-			const result = await toggleCommentLike({
-				data: { clerkId: user.id, commentId },
+			const result = await toggleLike({
+				clerkId: user.id,
+				targetType: "comment",
+				targetId: commentId,
 			});
 			if (typeof result.liked === "boolean") {
 				setHasLikedComment(result.liked);
-				// If server returned different state, adjust count accordingly
 				if (result.liked !== !previousHasLiked) {
 					setCommentLikeCount(result.liked ? previousCount + 1 : previousCount);
 				}
@@ -122,20 +167,11 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 
 		setIsLiking(true);
 		try {
-			let result: { liked: boolean } | undefined;
-			if (item.type === "post") {
-				result = await togglePostLike({
-					data: { clerkId: user.id, postId: item.id },
-				});
-			} else if (item.type === "article") {
-				result = await toggleArticleLike({
-					data: { clerkId: user.id, articleId: item.id },
-				});
-			} else {
-				result = await toggleReviewLike({
-					data: { clerkId: user.id, reviewId: item.id },
-				});
-			}
+			const result = await toggleLike({
+				clerkId: user.id,
+				targetType: item.type,
+				targetId: item.id,
+			});
 			setHasLiked(result.liked);
 			setLocalLikeCount((prev) => (result.liked ? prev + 1 : prev - 1));
 		} catch (error) {
@@ -149,29 +185,28 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 		if (!commentText.trim() || !user) return;
 		setIsSubmitting(true);
 		try {
-			const newComment = await createComment({
-				data: {
-					content: commentText.trim(),
-					authorClerkId: user.id,
-					postId: item.type === "post" ? item.id : undefined,
-					articleId: item.type === "article" ? item.id : undefined,
-					reviewId: item.type === "review" ? item.id : undefined,
-				},
+			const newComment = await createCommentMut({
+				content: commentText.trim(),
+				authorClerkId: user.id,
+				targetType: item.type,
+				targetId: item.id,
 			});
 
-			setLocalTopComment({
-				id: newComment.id,
-				content: newComment.content,
-				createdAt: newComment.createdAt,
-				likeCount: 0,
-				hasLiked: false,
-				author: {
-					id: newComment.author.id,
-					username: newComment.author.username,
-					displayName: newComment.author.displayName,
-					avatarUrl: newComment.author.avatarUrl,
-				},
-			});
+			if (newComment) {
+				setLocalTopComment({
+					id: (newComment as any)._id,
+					content: (newComment as any).content,
+					createdAt: Date.now(),
+					likeCount: 0,
+					hasLiked: false,
+					author: {
+						_id: (newComment as any).author._id,
+						username: (newComment as any).author.username,
+						displayName: (newComment as any).author.displayName,
+						avatarUrl: (newComment as any).author.avatarUrl,
+					},
+				});
+			}
 			setLocalCommentCount((prev) => prev + 1);
 			setCommentText("");
 			setShowCommentInput(false);
@@ -314,7 +349,7 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 				<div className="flex flex-wrap gap-1 mb-3">
 					{item.games.slice(0, 3).map((game) => (
 						<Link
-							key={game.id}
+							key={game._id}
 							to="/games/$slug"
 							params={{ slug: game.slug }}
 							className="inline-flex items-center gap-1 px-2 py-1 bg-gray-700/50 hover:bg-gray-700 rounded-full text-xs transition-colors"

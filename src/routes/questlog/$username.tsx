@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
 import {
 	ArrowLeft,
 	ChevronDown,
@@ -10,23 +11,38 @@ import {
 	Pencil,
 	Plus,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
 import { GameSearchModal } from "../../components/questlog/GameSearchModal";
 import { StatusChangeModal } from "../../components/questlog/StatusChangeModal";
-import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import {
-	getQuestLogTimeline,
-	getUserQuestLog,
-} from "../../lib/server/questlog";
-import { getUserByUsername } from "../../lib/server/users";
+
+type QuestLogStatus =
+	| "Playing"
+	| "Completed"
+	| "OnHold"
+	| "Dropped"
+	| "Backlog";
 
 export const Route = createFileRoute("/questlog/$username")({
 	component: QuestLogPage,
 });
 
-type QuestLogEntry = Awaited<
-	ReturnType<typeof getUserQuestLog>
->["entries"][number];
+type QuestLogEntry = {
+	_id: string;
+	gameId: string;
+	status: QuestLogStatus;
+	startedAt?: number;
+	completedAt?: number;
+	notes?: string;
+	hoursPlayed?: number;
+	quickRating?: number;
+	game: {
+		_id: string;
+		name: string;
+		slug: string;
+		coverUrl?: string;
+	} | null;
+};
 
 const statusLabels: Record<QuestLogStatus, string> = {
 	Playing: "Playing",
@@ -47,16 +63,11 @@ const statusColors: Record<QuestLogStatus, string> = {
 function QuestLogPage() {
 	const { username } = Route.useParams();
 	const { user: currentUser, isSignedIn } = useUser();
-	const [entries, setEntries] = useState<QuestLogEntry[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
 	const [viewMode, setViewMode] = useState<"timeline" | "grid">("timeline");
 	const [statusFilter, setStatusFilter] = useState<QuestLogStatus | "all">(
 		"all",
 	);
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
-	const [profile, setProfile] = useState<Awaited<
-		ReturnType<typeof getUserByUsername>
-	> | null>(null);
 
 	// Modal state
 	const [showGameSearch, setShowGameSearch] = useState(false);
@@ -65,34 +76,30 @@ function QuestLogPage() {
 	// Check if viewing own profile
 	const isOwnProfile = isSignedIn && currentUser?.username === username;
 
-	const loadEntries = useCallback(async () => {
-		setIsLoading(true);
-		try {
-			const profileData = await getUserByUsername({ data: username });
-			setProfile(profileData);
+	// Convex queries
+	const profile = useQuery(api.users.getByUsername, { username });
 
-			if (viewMode === "timeline") {
-				const data = await getQuestLogTimeline({ data: { username } });
-				setEntries(data.entries);
-			} else {
-				const data = await getUserQuestLog({
-					data: {
-						username,
-						status: statusFilter === "all" ? undefined : statusFilter,
-					},
-				});
-				setEntries(data.entries);
-			}
-		} catch (error) {
-			console.error("Failed to load quest log:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [username, viewMode, statusFilter]);
+	const timelineData = useQuery(
+		api.questlog.getTimeline,
+		viewMode === "timeline" ? { username } : "skip",
+	);
 
-	useEffect(() => {
-		loadEntries();
-	}, [loadEntries]);
+	const gridData = useQuery(
+		api.questlog.getUserQuestLog,
+		viewMode === "grid"
+			? { username, status: statusFilter === "all" ? undefined : statusFilter }
+			: "skip",
+	);
+
+	const isLoading =
+		viewMode === "timeline"
+			? timelineData === undefined
+			: gridData === undefined;
+
+	const entries: QuestLogEntry[] =
+		viewMode === "timeline"
+			? (timelineData?.entries ?? [])
+			: (gridData?.entries ?? []);
 
 	const filteredEntries =
 		statusFilter === "all"
@@ -250,7 +257,9 @@ function QuestLogPage() {
 				<GameSearchModal
 					isOpen={showGameSearch}
 					onClose={() => setShowGameSearch(false)}
-					onSuccess={loadEntries}
+					onSuccess={() => {
+						// Convex reactivity handles refresh
+					}}
 					clerkId={currentUser.id}
 				/>
 			)}
@@ -262,13 +271,13 @@ function QuestLogPage() {
 					onClose={() => setEditingEntry(null)}
 					onSuccess={() => {
 						setEditingEntry(null);
-						loadEntries();
+						// Convex reactivity handles refresh
 					}}
 					clerkId={currentUser.id}
 					gameId={editingEntry.gameId}
-					gameName={editingEntry.game.name}
+					gameName={editingEntry.game?.name ?? "Unknown"}
 					currentStatus={editingEntry.status}
-					questLogId={editingEntry.id}
+					questLogId={editingEntry._id}
 					currentStartedAt={editingEntry.startedAt}
 					currentCompletedAt={editingEntry.completedAt}
 				/>
@@ -291,17 +300,17 @@ function TimelineView({
 		<div className="space-y-4">
 			{entries.map((entry) => (
 				<div
-					key={entry.id}
+					key={entry._id}
 					className="relative bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-purple-500/50 transition-all"
 				>
 					<Link
 						to="/games/$slug"
-						params={{ slug: entry.game.slug }}
+						params={{ slug: entry.game?.slug ?? "" }}
 						className="flex gap-4"
 					>
 						{/* Game Cover */}
 						<div className="w-16 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-700">
-							{entry.game.coverUrl ? (
+							{entry.game?.coverUrl ? (
 								<img
 									src={entry.game.coverUrl}
 									alt={entry.game.name}
@@ -318,7 +327,7 @@ function TimelineView({
 						<div className="flex-1 min-w-0">
 							<div className="flex items-center gap-2 mb-1">
 								<h3 className="font-semibold text-white truncate">
-									{entry.game.name}
+									{entry.game?.name}
 								</h3>
 								<span
 									className={`px-2 py-0.5 text-xs font-medium rounded-full text-white ${statusColors[entry.status]}`}
@@ -392,14 +401,14 @@ function GridView({
 	return (
 		<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
 			{entries.map((entry) => (
-				<div key={entry.id} className="group relative">
+				<div key={entry._id} className="group relative">
 					<Link
 						to="/games/$slug"
-						params={{ slug: entry.game.slug }}
+						params={{ slug: entry.game?.slug ?? "" }}
 						className="block"
 					>
 						<div className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-800 border-2 border-transparent group-hover:border-purple-500 transition-all">
-							{entry.game.coverUrl ? (
+							{entry.game?.coverUrl ? (
 								<img
 									src={entry.game.coverUrl}
 									alt={entry.game.name}
@@ -420,7 +429,7 @@ function GridView({
 							{/* Hover Overlay */}
 							<div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
 								<h3 className="font-semibold text-white text-sm line-clamp-2">
-									{entry.game.name}
+									{entry.game?.name}
 								</h3>
 								<span className="text-xs text-gray-300">
 									{statusLabels[entry.status]}

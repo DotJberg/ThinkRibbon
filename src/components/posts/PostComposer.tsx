@@ -1,6 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
-import { useEffect, useState } from "react";
-import { getUserByClerkId } from "../../lib/server/users";
+import { useQuery } from "convex/react";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
 
 interface PostComposerProps {
 	onSubmit: (content: string) => Promise<void>;
@@ -11,30 +12,13 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 	const { user } = useUser();
 	const [content, setContent] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-	// Fetch user's custom avatar from database
-	useEffect(() => {
-		if (!user?.id) return;
+	const dbUser = useQuery(
+		api.users.getByClerkId,
+		user?.id ? { clerkId: user.id } : "skip",
+	);
 
-		const fetchUser = () => {
-			getUserByClerkId({ data: user.id })
-				.then((userData) => {
-					if (userData?.avatarUrl) {
-						setAvatarUrl(userData.avatarUrl);
-					}
-				})
-				.catch(console.error);
-		};
-
-		fetchUser();
-		// Re-fetch after a short delay to catch sync in progress
-		const timer = setTimeout(fetchUser, 1000);
-		return () => clearTimeout(timer);
-	}, [user?.id]);
-
-	// Use database avatar if available, otherwise fall back to Clerk avatar
-	const displayAvatarUrl = avatarUrl || user?.imageUrl;
+	const displayAvatarUrl = dbUser?.avatarUrl || user?.imageUrl;
 
 	const remaining = maxLength - content.length;
 	const isOverLimit = remaining < 0;

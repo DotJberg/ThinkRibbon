@@ -1,10 +1,15 @@
+import { useMutation } from "convex/react";
 import { Calendar, Loader2, Share2, Star, X } from "lucide-react";
 import { useId, useState } from "react";
-import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import {
-	updateQuestLog,
-	updateQuestLogStatus,
-} from "../../lib/server/questlog";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+
+type QuestLogStatus =
+	| "Playing"
+	| "Completed"
+	| "OnHold"
+	| "Dropped"
+	| "Backlog";
 
 interface StatusChangeModalProps {
 	isOpen: boolean;
@@ -15,8 +20,8 @@ interface StatusChangeModalProps {
 	gameName: string;
 	currentStatus: QuestLogStatus;
 	questLogId: string;
-	currentStartedAt?: Date | null;
-	currentCompletedAt?: Date | null;
+	currentStartedAt?: number | null;
+	currentCompletedAt?: number | null;
 }
 
 type ReviewOption = "none" | "quick" | "full";
@@ -30,7 +35,7 @@ const statusOptions: { value: QuestLogStatus; label: string; emoji: string }[] =
 		{ value: "Playing", label: "Playing", emoji: "🎮" },
 	];
 
-function formatDateForInput(date: Date | null | undefined): string {
+function formatDateForInput(date: number | null | undefined): string {
 	if (!date) return "";
 	const d = new Date(date);
 	return d.toISOString().split("T")[0];
@@ -48,6 +53,8 @@ export function StatusChangeModal({
 	currentStartedAt,
 	currentCompletedAt,
 }: StatusChangeModalProps) {
+	const updateQuestLogMut = useMutation(api.questlog.update);
+	const updateQuestLogStatusMut = useMutation(api.questlog.updateStatus);
 	const [newStatus, setNewStatus] = useState<QuestLogStatus>(
 		currentStatus === "Playing" ? "Completed" : currentStatus,
 	);
@@ -88,25 +95,23 @@ export function StatusChangeModal({
 
 			// If using quick rating, use the status update function
 			if (reviewOption === "quick" && quickRating > 0) {
-				await updateQuestLogStatus({
-					data: {
-						clerkId,
-						gameId,
-						newStatus,
-						quickRating,
-						shareAsPost,
-					},
+				await updateQuestLogStatusMut({
+					clerkId,
+					gameId: gameId as Id<"games">,
+					newStatus,
+					quickRating,
+					shareAsPost,
 				});
 			} else {
 				// Use updateQuestLog to update status and dates
-				await updateQuestLog({
-					data: {
-						clerkId,
-						questLogId,
-						status: newStatus,
-						startedAt: startedAt ? new Date(startedAt) : undefined,
-						completedAt: completedAt ? new Date(completedAt) : undefined,
-					},
+				await updateQuestLogMut({
+					clerkId,
+					questLogId: questLogId as Id<"questLogs">,
+					status: newStatus,
+					startedAt: startedAt ? new Date(startedAt).getTime() : undefined,
+					completedAt: completedAt
+						? new Date(completedAt).getTime()
+						: undefined,
 				});
 			}
 

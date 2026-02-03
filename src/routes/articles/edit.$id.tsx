@@ -1,13 +1,14 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { ArrowLeft, Cloud, Gamepad2, Save, Search, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
-import { getArticleById, updateArticle } from "../../lib/server/articles";
-import { searchGames } from "../../lib/server/games";
 
 export const Route = createFileRoute("/articles/edit/$id")({
 	component: EditArticlePage,
@@ -33,12 +34,17 @@ function EditArticlePage() {
 	// Search state
 	const [searchQuery, setSearchQuery] = useState("");
 	const [searchResults, setSearchResults] = useState<
-		Awaited<ReturnType<typeof searchGames>>
+		Array<{
+			_id: string;
+			name: string;
+			slug: string;
+			coverUrl?: string;
+			genres: string[];
+		}>
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
 
 	// Loading state
-	const [isLoading, setIsLoading] = useState(true);
 	const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
 		"idle",
 	);
@@ -49,39 +55,38 @@ function EditArticlePage() {
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const initialLoadRef = useRef(true);
 
-	// Load existing article
+	// Convex hooks
+	const article = useQuery(api.articles.getById, {
+		articleId: id as Id<"articles">,
+	});
+	const updateArticleMut = useMutation(api.articles.update);
+	const searchAndCache = useAction(api.igdb.searchAndCache);
+
+	const isLoading = article === undefined;
+
+	// Populate form state from query data on first load
 	useEffect(() => {
-		const loadArticle = async () => {
-			setIsLoading(true);
-			try {
-				const article = await getArticleById({ data: id });
-				if (article) {
-					setTitle(article.title);
-					setContent(article.content);
-					setExcerpt(article.excerpt || "");
-					setCoverImageUrl(article.coverImageUrl);
-					setContainsSpoilers(article.containsSpoilers || false);
-					setSelectedGames(
-						article.games.map(({ game }) => ({
-							id: game.id,
-							name: game.name,
-							coverUrl: game.coverUrl,
-						})),
-					);
-				}
-			} catch (error) {
-				console.error("Failed to load article:", error);
-				toast.error("Failed to load article");
-			} finally {
-				setIsLoading(false);
-				// Mark initial load complete after a short delay
-				setTimeout(() => {
-					initialLoadRef.current = false;
-				}, 100);
+		if (article && initialLoadRef.current) {
+			setTitle(article.title);
+			setContent(article.content);
+			setExcerpt(article.excerpt || "");
+			setCoverImageUrl(article.coverImageUrl ?? null);
+			setContainsSpoilers(article.containsSpoilers || false);
+			if (article.games) {
+				setSelectedGames(
+					article.games.map((g) => ({
+						id: g._id,
+						name: g.name,
+						coverUrl: g.coverUrl ?? null,
+					})),
+				);
 			}
-		};
-		loadArticle();
-	}, [id]);
+			// Mark initial load complete after a short delay
+			setTimeout(() => {
+				initialLoadRef.current = false;
+			}, 100);
+		}
+	}, [article]);
 
 	// Auto-save function
 	const autoSave = useCallback(async () => {
@@ -89,18 +94,16 @@ function EditArticlePage() {
 
 		setSaveStatus("saving");
 		try {
-			await updateArticle({
-				data: {
-					articleId: id,
-					title,
-					content,
-					excerpt: excerpt || undefined,
-					coverImageUrl: coverImageUrl || undefined,
-					coverFileKey: coverFileKey || undefined,
-					containsSpoilers,
-					gameIds: selectedGames.map((g) => g.id),
-					clerkId: user.id,
-				},
+			await updateArticleMut({
+				articleId: id as Id<"articles">,
+				title,
+				content,
+				excerpt: excerpt || undefined,
+				coverImageUrl: coverImageUrl || undefined,
+				coverFileKey: coverFileKey || undefined,
+				containsSpoilers,
+				gameIds: selectedGames.map((g) => g.id as Id<"games">),
+				clerkId: user.id,
 			});
 			setLastSaved(new Date());
 			setSaveStatus("saved");
@@ -118,6 +121,7 @@ function EditArticlePage() {
 		coverFileKey,
 		containsSpoilers,
 		selectedGames,
+		updateArticleMut,
 	]);
 
 	// Debounced auto-save on content changes
@@ -150,11 +154,12 @@ function EditArticlePage() {
 		const timeoutId = setTimeout(async () => {
 			setIsSearching(true);
 			try {
-				const results = await searchGames({
-					data: { query: searchQuery, limit: 5 },
+				const results = await searchAndCache({
+					query: searchQuery,
+					limit: 5,
 				});
 				setSearchResults(
-					results.filter((g) => !selectedGames.some((sg) => sg.id === g.id)),
+					results.filter((g) => !selectedGames.some((sg) => sg.id === g._id)),
 				);
 			} catch (error) {
 				console.error("Search failed:", error);
@@ -164,7 +169,7 @@ function EditArticlePage() {
 		}, 300);
 
 		return () => clearTimeout(timeoutId);
-	}, [searchQuery, selectedGames]);
+	}, [searchQuery, selectedGames, searchAndCache]);
 
 	const handleAddGame = (game: {
 		id: string;
@@ -196,19 +201,17 @@ function EditArticlePage() {
 
 		setIsSubmitting(true);
 		try {
-			await updateArticle({
-				data: {
-					articleId: id,
-					title,
-					content,
-					excerpt: excerpt || undefined,
-					coverImageUrl: coverImageUrl || undefined,
-					coverFileKey: coverFileKey || undefined,
-					containsSpoilers,
-					gameIds: selectedGames.map((g) => g.id),
-					published: true,
-					clerkId: user.id,
-				},
+			await updateArticleMut({
+				articleId: id as Id<"articles">,
+				title,
+				content,
+				excerpt: excerpt || undefined,
+				coverImageUrl: coverImageUrl || undefined,
+				coverFileKey: coverFileKey || undefined,
+				containsSpoilers,
+				gameIds: selectedGames.map((g) => g.id as Id<"games">),
+				published: true,
+				clerkId: user.id,
 			});
 
 			toast.success("Article updated");
@@ -385,13 +388,13 @@ function EditArticlePage() {
 							<div className="mt-2 space-y-1">
 								{searchResults.map((game) => (
 									<button
-										key={game.id}
+										key={game._id}
 										type="button"
 										onClick={() =>
 											handleAddGame({
-												id: game.id,
+												id: game._id,
 												name: game.name,
-												coverUrl: game.coverUrl,
+												coverUrl: game.coverUrl ?? null,
 											})
 										}
 										className="w-full flex items-center gap-2 p-2 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors text-left text-sm"

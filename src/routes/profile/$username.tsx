@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import {
 	Calendar,
 	Edit,
@@ -8,22 +9,13 @@ import {
 	UserPlus,
 	Users,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import type { FeedItem } from "../../components/feed/FeedItem";
 import { FeedItemCard } from "../../components/feed/FeedItem";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import { NowPlaying } from "../../components/profile/NowPlaying";
 import { SafeImage } from "../../components/shared/SafeImage";
-import { getArticlesByUser } from "../../lib/server/articles";
-import type { FeedItem } from "../../lib/server/feed";
-import { getPostsByUser } from "../../lib/server/posts";
-import { getReviewsByUser } from "../../lib/server/reviews";
-import {
-	followUser,
-	getFollowCounts,
-	getUserByUsername,
-	isFollowing,
-	unfollowUser,
-} from "../../lib/server/users";
 
 export const Route = createFileRoute("/profile/$username")({
 	component: ProfilePage,
@@ -32,97 +24,71 @@ export const Route = createFileRoute("/profile/$username")({
 function ProfilePage() {
 	const { username } = Route.useParams();
 	const { user: currentUser, isSignedIn } = useUser();
-	const [profile, setProfile] = useState<Awaited<
-		ReturnType<typeof getUserByUsername>
-	> | null>(null);
-	const [posts, setPosts] = useState<
-		Awaited<ReturnType<typeof getPostsByUser>>["posts"]
-	>([]);
-	const [reviews, setReviews] = useState<
-		Awaited<ReturnType<typeof getReviewsByUser>>
-	>([]);
-	const [articles, setArticles] = useState<
-		Awaited<ReturnType<typeof getArticlesByUser>>
-	>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [following, setFollowing] = useState(false);
-	const [followCounts, setFollowCounts] = useState({
-		followers: 0,
-		following: 0,
-	});
 	const [isFollowingLoading, setIsFollowingLoading] = useState(false);
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
 	const isOwnProfile = isSignedIn && currentUser?.username === username;
 
-	const loadProfile = useCallback(
-		async (showLoading = true) => {
-			if (showLoading) setIsLoading(true);
-			try {
-				const profileData = await getUserByUsername({ data: username });
-				if (profileData) {
-					setProfile(profileData);
-					const [postsData, reviewsData, articlesData, counts] =
-						await Promise.all([
-							getPostsByUser({ data: { username, clerkId: currentUser?.id } }),
-							getReviewsByUser({
-								data: {
-									username,
-									includeUnpublished: isOwnProfile,
-									clerkId: currentUser?.id,
-								},
-							}),
-							getArticlesByUser({
-								data: {
-									username,
-									includeUnpublished: isOwnProfile,
-									clerkId: currentUser?.id,
-								},
-							}),
-							getFollowCounts({ data: profileData.id }),
-						]);
-					setPosts(postsData.posts);
-					setReviews(reviewsData);
-					setArticles(articlesData);
-					setFollowCounts(counts);
-
-					// Check if current user follows this profile
-					if (isSignedIn && currentUser && !isOwnProfile) {
-						const isFollowingResult = await isFollowing({
-							data: { clerkId: currentUser.id, targetUserId: profileData.id },
-						});
-						setFollowing(isFollowingResult);
-					}
+	// Convex queries
+	const profile = useQuery(api.users.getByUsername, { username });
+	const postsData = useQuery(
+		api.posts.getByUser,
+		profile ? { username, clerkId: currentUser?.id } : "skip",
+	);
+	const reviewsData = useQuery(
+		api.reviews.getByUser,
+		profile
+			? {
+					username,
+					includeUnpublished: !!isOwnProfile,
+					clerkId: currentUser?.id,
 				}
-			} catch (error) {
-				console.error("Failed to load profile:", error);
-			} finally {
-				if (showLoading) setIsLoading(false);
-			}
-		},
-		[username, isOwnProfile, isSignedIn, currentUser],
+			: "skip",
+	);
+	const articlesData = useQuery(
+		api.articles.getByUser,
+		profile
+			? {
+					username,
+					includeUnpublished: !!isOwnProfile,
+					clerkId: currentUser?.id,
+				}
+			: "skip",
+	);
+	const followCounts = useQuery(
+		api.users.getFollowCounts,
+		profile ? { userId: profile._id } : "skip",
+	);
+	const followingStatus = useQuery(
+		api.users.isFollowing,
+		isSignedIn && currentUser && profile && !isOwnProfile
+			? { clerkId: currentUser.id, targetUserId: profile._id }
+			: "skip",
 	);
 
-	useEffect(() => {
-		loadProfile();
-	}, [loadProfile]);
+	const followUserMut = useMutation(api.users.followUser);
+	const unfollowUserMut = useMutation(api.users.unfollowUser);
+
+	const isLoading = profile === undefined;
+	const posts = postsData?.posts ?? [];
+	const reviews = reviewsData ?? [];
+	const articles = articlesData ?? [];
+	const following = followingStatus ?? false;
 
 	const handleFollowToggle = async () => {
 		if (!currentUser || !profile || isOwnProfile) return;
 		setIsFollowingLoading(true);
 		try {
 			if (following) {
-				await unfollowUser({
-					data: { clerkId: currentUser.id, targetUserId: profile.id },
+				await unfollowUserMut({
+					clerkId: currentUser.id,
+					targetUserId: profile._id,
 				});
-				setFollowing(false);
-				setFollowCounts((prev) => ({ ...prev, followers: prev.followers - 1 }));
 			} else {
-				await followUser({
-					data: { clerkId: currentUser.id, targetUserId: profile.id },
+				await followUserMut({
+					clerkId: currentUser.id,
+					targetUserId: profile._id,
 				});
-				setFollowing(true);
-				setFollowCounts((prev) => ({ ...prev, followers: prev.followers + 1 }));
 			}
 		} catch (error) {
 			console.error("Failed to toggle follow:", error);
@@ -152,7 +118,7 @@ function ProfilePage() {
 		);
 	}
 
-	const joinDate = new Date(profile.createdAt).toLocaleDateString("en-US", {
+	const joinDate = new Date(profile._creationTime).toLocaleDateString("en-US", {
 		month: "long",
 		year: "numeric",
 	});
@@ -161,45 +127,45 @@ function ProfilePage() {
 	const feedItems: FeedItem[] = [
 		...posts.map((post) => ({
 			type: "post" as const,
-			id: post.id,
-			createdAt: new Date(post.createdAt),
+			id: post._id,
+			createdAt: post._creationTime,
 			author: post.author,
 			content: post.content,
 			likeCount: post._count.likes,
 			commentCount: post._count.comments,
-			hasLiked: post.likes.length > 0,
+			hasLiked: post.hasLiked ?? false,
 		})),
 		...reviews.map((review) => ({
 			type: "review" as const,
-			id: review.id,
-			createdAt: new Date(review.createdAt),
+			id: review._id,
+			createdAt: review._creationTime,
 			author: review.author,
 			content: review.content,
 			title: review.title,
 			rating: review.rating,
 			coverImageUrl: review.coverImageUrl,
 			containsSpoilers: review.containsSpoilers,
-			game: review.game,
+			game: review.game ?? undefined,
 			likeCount: review._count.likes,
 			commentCount: review._count.comments,
-			hasLiked: review.likes.length > 0,
+			hasLiked: review.hasLiked ?? false,
 		})),
 		...articles.map((article) => ({
 			type: "article" as const,
-			id: article.id,
-			createdAt: new Date(article.createdAt),
+			id: article._id,
+			createdAt: article._creationTime,
 			author: article.author,
 			content: article.content,
 			title: article.title,
 			excerpt: article.excerpt ?? undefined,
 			coverImageUrl: article.coverImageUrl,
 			containsSpoilers: article.containsSpoilers,
-			games: article.games.map((g) => g.game),
+			games: article.games,
 			likeCount: article._count.likes,
 			commentCount: article._count.comments,
-			hasLiked: article.likes.length > 0,
+			hasLiked: article.hasLiked ?? false,
 		})),
-	].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+	].sort((a, b) => b.createdAt - a.createdAt);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
@@ -294,13 +260,13 @@ function ProfilePage() {
 								<span className="flex items-center gap-1 text-gray-400">
 									<Users size={14} />
 									<span className="text-white font-medium">
-										{followCounts.followers}
+										{followCounts?.followers ?? 0}
 									</span>{" "}
 									followers
 								</span>
 								<span className="text-gray-400">
 									<span className="text-white font-medium">
-										{followCounts.following}
+										{followCounts?.following ?? 0}
 									</span>{" "}
 									following
 								</span>
@@ -339,10 +305,17 @@ function ProfilePage() {
 					isOpen={isEditModalOpen}
 					onClose={() => setIsEditModalOpen(false)}
 					onSave={() => {
-						// Reload profile data from server to get fresh data
-						loadProfile(false);
+						// Convex reactivity handles refresh automatically
 					}}
-					user={profile}
+					user={{
+						id: profile._id,
+						clerkId: profile.clerkId,
+						username: profile.username,
+						displayName: profile.displayName ?? null,
+						bio: profile.bio ?? null,
+						avatarUrl: profile.avatarUrl ?? null,
+						bannerUrl: profile.bannerUrl ?? null,
+					}}
 				/>
 			)}
 		</div>

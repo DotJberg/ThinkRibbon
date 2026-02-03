@@ -1,20 +1,16 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import { Compass, Gamepad2, TrendingUp, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { api } from "../../convex/_generated/api";
+import type { FeedItem } from "../components/feed/FeedItem";
 import { FeedItemCard } from "../components/feed/FeedItem";
 import {
 	type DiscoverFeedType,
 	FeedSelector,
 } from "../components/feed/FeedSelector";
 import { PostComposer } from "../components/posts/PostComposer";
-import {
-	type FeedItem,
-	getDiscoverFeed,
-	getFollowingFeed,
-	getPopularFeed,
-} from "../lib/server/feed";
-import { createPost } from "../lib/server/posts";
 
 export const Route = createFileRoute("/")({
 	component: HomePage,
@@ -27,10 +23,6 @@ function HomePage() {
 	);
 	const [discoverFeedType, setDiscoverFeedType] =
 		useState<DiscoverFeedType>("discover");
-	const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [hasMore, setHasMore] = useState(false);
-	const [cursor, setCursor] = useState<string | undefined>();
 
 	// Set default tab based on auth state
 	useEffect(() => {
@@ -39,92 +31,57 @@ function HomePage() {
 		}
 	}, [isLoaded, isSignedIn]);
 
-	// Load feed based on active tab and discover feed type
-	useEffect(() => {
-		const loadFeed = async () => {
-			setIsLoading(true);
-			try {
-				let result: { items: FeedItem[]; nextCursor?: string };
+	// Feed queries - use "skip" for inactive tabs
+	const followingData = useQuery(
+		api.feed.getFollowing,
+		activeTab === "following" && isSignedIn && user
+			? { clerkId: user.id, limit: 20 }
+			: "skip",
+	);
 
-				if (activeTab === "following" && isSignedIn && user) {
-					result = await getFollowingFeed({
-						data: { clerkId: user.id, limit: 20 },
-					});
-				} else if (discoverFeedType === "popular") {
-					result = await getPopularFeed({
-						data: { clerkId: user?.id, limit: 20 },
-					});
-				} else {
-					result = await getDiscoverFeed({
-						data: { clerkId: user?.id, limit: 20 },
-					});
-				}
+	const popularData = useQuery(
+		api.feed.getPopular,
+		activeTab === "discover" && discoverFeedType === "popular"
+			? { clerkId: user?.id, limit: 20 }
+			: "skip",
+	);
 
-				setFeedItems(result.items);
-				setHasMore(!!result.nextCursor);
-				setCursor(result.nextCursor);
-			} catch (error) {
-				console.error("Failed to load feed:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	const discoverData = useQuery(
+		api.feed.getDiscover,
+		activeTab === "discover" && discoverFeedType === "discover"
+			? { clerkId: user?.id, limit: 20 }
+			: "skip",
+	);
 
-		if (isLoaded) {
-			loadFeed();
-		}
-	}, [activeTab, discoverFeedType, isSignedIn, user, isLoaded]);
+	const createPostMut = useMutation(api.posts.create);
+
+	// Determine active feed data
+	let feedItems: FeedItem[] = [];
+	let isLoading = false;
+
+	if (activeTab === "following") {
+		isLoading = followingData === undefined;
+		feedItems = followingData?.items ?? [];
+	} else if (discoverFeedType === "popular") {
+		isLoading = popularData === undefined;
+		feedItems = popularData?.items ?? [];
+	} else {
+		isLoading = discoverData === undefined;
+		feedItems = discoverData?.items ?? [];
+	}
+
+	// Don't show loading before Clerk is loaded
+	if (!isLoaded) {
+		isLoading = true;
+	}
 
 	const handleCreatePost = async (content: string) => {
 		if (!user) return;
-		try {
-			await createPost({
-				data: { content, authorClerkId: user.id },
-			});
-			// Refresh feed
-			let result: { items: FeedItem[]; nextCursor?: string };
-			if (activeTab === "following" && isSignedIn) {
-				result = await getFollowingFeed({
-					data: { clerkId: user.id, limit: 20 },
-				});
-			} else if (discoverFeedType === "popular") {
-				result = await getPopularFeed({
-					data: { clerkId: user.id, limit: 20 },
-				});
-			} else {
-				result = await getDiscoverFeed({
-					data: { clerkId: user.id, limit: 20 },
-				});
-			}
-			setFeedItems(result.items);
-		} catch (error) {
-			console.error("Failed to create post:", error);
-		}
-	};
-
-	const loadMore = async () => {
-		if (!cursor) return;
-		try {
-			let result: { items: FeedItem[]; nextCursor?: string };
-			if (activeTab === "following" && isSignedIn && user) {
-				result = await getFollowingFeed({
-					data: { clerkId: user.id, cursor, limit: 20 },
-				});
-			} else if (discoverFeedType === "popular") {
-				result = await getPopularFeed({
-					data: { clerkId: user?.id, cursor, limit: 20 },
-				});
-			} else {
-				result = await getDiscoverFeed({
-					data: { clerkId: user?.id, cursor, limit: 20 },
-				});
-			}
-			setFeedItems((prev) => [...prev, ...result.items]);
-			setHasMore(!!result.nextCursor);
-			setCursor(result.nextCursor);
-		} catch (error) {
-			console.error("Failed to load more:", error);
-		}
+		await createPostMut({
+			content,
+			authorClerkId: user.id,
+		});
+		// No manual re-fetch needed - Convex reactivity auto-updates
 	};
 
 	return (
@@ -236,15 +193,6 @@ function HomePage() {
 								{feedItems.map((item) => (
 									<FeedItemCard key={`${item.type}-${item.id}`} item={item} />
 								))}
-								{hasMore && (
-									<button
-										type="button"
-										onClick={loadMore}
-										className="w-full py-3 text-center text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800 rounded-xl transition-colors"
-									>
-										Load more
-									</button>
-								)}
 							</>
 						)}
 					</div>

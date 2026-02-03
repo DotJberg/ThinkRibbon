@@ -1,33 +1,34 @@
-import { useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { ConvexReactClient, useMutation } from "convex/react";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect } from "react";
-
+import { api } from "../../convex/_generated/api";
 import Header from "../components/Header";
-
 import ClerkProvider from "../integrations/clerk/provider";
-import { syncUser } from "../lib/server/users";
 
 import appCss from "../styles.css?url";
+
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 // Component to sync user with database when signed in
 function UserSync() {
 	const { user, isSignedIn } = useUser();
+	const syncUserMutation = useMutation(api.users.syncUser);
 
 	useEffect(() => {
 		if (isSignedIn && user) {
-			syncUser({
-				data: {
-					clerkId: user.id,
-					email: user.primaryEmailAddress?.emailAddress || "",
-					username: user.username || user.id,
-					displayName: user.fullName || undefined,
-					avatarUrl: user.imageUrl || undefined,
-				},
+			syncUserMutation({
+				clerkId: user.id,
+				email: user.primaryEmailAddress?.emailAddress || "",
+				username: user.username || user.id,
+				displayName: user.fullName || undefined,
+				avatarUrl: user.imageUrl || undefined,
 			}).catch(console.error);
 		}
-	}, [isSignedIn, user]);
+	}, [isSignedIn, user, syncUserMutation]);
 
 	return null;
 }
@@ -70,20 +71,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<ClerkProvider>
-					<UserSync />
-					<Header />
-					{children}
-					<TanStackDevtools
-						config={{
-							position: "bottom-right",
-						}}
-						plugins={[
-							{
-								name: "Tanstack Router",
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-						]}
-					/>
+					<ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+						<UserSync />
+						<Header />
+						{children}
+						<TanStackDevtools
+							config={{
+								position: "bottom-right",
+							}}
+							plugins={[
+								{
+									name: "Tanstack Router",
+									render: <TanStackRouterDevtoolsPanel />,
+								},
+							]}
+						/>
+					</ConvexProviderWithClerk>
 				</ClerkProvider>
 				<Scripts />
 			</body>

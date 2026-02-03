@@ -1,8 +1,17 @@
 import { useUser } from "@clerk/clerk-react";
+import { useQuery } from "convex/react";
 import { BookOpen, Check, Loader2, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import { getQuestLogEntry } from "../../lib/server/questlog";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+
+type QuestLogStatus =
+	| "Playing"
+	| "Completed"
+	| "OnHold"
+	| "Dropped"
+	| "Backlog";
+
 import { AddEntryModal } from "./AddEntryModal";
 import { StatusChangeModal } from "./StatusChangeModal";
 
@@ -11,8 +20,6 @@ interface QuestLogButtonProps {
 	gameName: string;
 	onUpdate?: () => void;
 }
-
-type QuestLogEntry = Awaited<ReturnType<typeof getQuestLogEntry>>;
 
 const statusLabels: Record<QuestLogStatus, string> = {
 	Playing: "Playing",
@@ -36,50 +43,19 @@ export function QuestLogButton({
 	onUpdate,
 }: QuestLogButtonProps) {
 	const { user, isSignedIn } = useUser();
-	const [entry, setEntry] = useState<QuestLogEntry>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const entry = useQuery(
+		api.questlog.getEntry,
+		user?.id ? { clerkId: user.id, gameId: gameId as Id<"games"> } : "skip",
+	);
+	const isLoading = entry === undefined;
 	const [showAddModal, setShowAddModal] = useState(false);
 	const [showStatusModal, setShowStatusModal] = useState(false);
 
-	useEffect(() => {
-		const load = async () => {
-			if (!user?.id) {
-				setIsLoading(false);
-				return;
-			}
-			try {
-				const data = await getQuestLogEntry({
-					data: { clerkId: user.id, gameId },
-				});
-				setEntry(data);
-			} catch (error) {
-				console.error("Failed to load quest log entry:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		load();
-	}, [user?.id, gameId]);
-
-	const handleAddSuccess = async () => {
-		// Refresh the entry
-		if (user?.id) {
-			const updated = await getQuestLogEntry({
-				data: { clerkId: user.id, gameId },
-			});
-			setEntry(updated);
-		}
+	const handleAddSuccess = () => {
 		onUpdate?.();
 	};
 
-	const handleStatusSuccess = async () => {
-		// Refresh the entry
-		if (user?.id) {
-			const updated = await getQuestLogEntry({
-				data: { clerkId: user.id, gameId },
-			});
-			setEntry(updated);
-		}
+	const handleStatusSuccess = () => {
 		onUpdate?.();
 	};
 
@@ -166,7 +142,7 @@ export function QuestLogButton({
 				gameId={gameId}
 				gameName={gameName}
 				currentStatus={entry.status}
-				questLogId={entry.id}
+				questLogId={entry._id}
 				currentStartedAt={entry.startedAt}
 				currentCompletedAt={entry.completedAt}
 			/>

@@ -1,7 +1,15 @@
+import { useMutation } from "convex/react";
 import { Calendar, Loader2, Plus, X } from "lucide-react";
 import { useId, useState } from "react";
-import type { QuestLogStatus } from "../../generated/prisma/client.js";
-import { addToQuestLog } from "../../lib/server/questlog";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+
+type QuestLogStatus =
+	| "Playing"
+	| "Completed"
+	| "OnHold"
+	| "Dropped"
+	| "Backlog";
 
 interface AddEntryModalProps {
 	isOpen: boolean;
@@ -29,6 +37,7 @@ export function AddEntryModal({
 	gameId,
 	gameName,
 }: AddEntryModalProps) {
+	const addEntry = useMutation(api.questlog.add);
 	const [status, setStatus] = useState<QuestLogStatus>("Playing");
 	const [startedAt, setStartedAt] = useState<string>(
 		new Date().toISOString().split("T")[0],
@@ -45,17 +54,15 @@ export function AddEntryModal({
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		try {
-			await addToQuestLog({
-				data: {
-					clerkId,
-					gameId,
-					status,
-					startedAt: startedAt ? new Date(startedAt) : undefined,
-					completedAt:
-						showCompletedDate && completedAt
-							? new Date(completedAt)
-							: undefined,
-				},
+			await addEntry({
+				clerkId,
+				gameId: gameId as Id<"games">,
+				status,
+				startedAt: startedAt ? new Date(startedAt).getTime() : undefined,
+				completedAt:
+					showCompletedDate && completedAt
+						? new Date(completedAt).getTime()
+						: undefined,
 			});
 
 			onSuccess?.();

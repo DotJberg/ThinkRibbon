@@ -6,40 +6,20 @@ import {
 	useUser,
 } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
 import { LogOut, Settings, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { getUserByClerkId } from "../../lib/server/users";
+import { api } from "../../../convex/_generated/api";
 
 export default function HeaderUser() {
 	const { user } = useUser();
 	const { signOut, openUserProfile } = useClerk();
-	const [dbUser, setDbUser] = useState<{ avatarUrl: string | null } | null>(
-		null,
+	const dbUser = useQuery(
+		api.users.getByClerkId,
+		user?.id ? { clerkId: user.id } : "skip",
 	);
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
-
-	// Fetch user's custom avatar from database
-	useEffect(() => {
-		if (!user?.id) return;
-
-		const fetchUser = () => {
-			getUserByClerkId({ data: user.id })
-				.then((userData) => {
-					if (userData) {
-						setDbUser({ avatarUrl: userData.avatarUrl });
-					}
-				})
-				.catch(console.error);
-		};
-
-		// Fetch immediately
-		fetchUser();
-
-		// Re-fetch after a short delay to catch any sync that might be in progress
-		const timer = setTimeout(fetchUser, 1000);
-		return () => clearTimeout(timer);
-	}, [user?.id]);
 
 	// Close dropdown when clicking outside
 	useEffect(() => {

@@ -1,12 +1,13 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, MessageCircle, Send } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { CommentItem } from "../../components/shared/CommentItem";
 import { LikeButton } from "../../components/shared/LikeButton";
-import { createComment, getPostComments } from "../../lib/server/comments";
-import { getPostById, togglePostLike } from "../../lib/server/posts";
 
 export const Route = createFileRoute("/posts/$id")({
 	component: PostDetailPage,
@@ -15,53 +16,31 @@ export const Route = createFileRoute("/posts/$id")({
 function PostDetailPage() {
 	const { id } = Route.useParams();
 	const { user, isSignedIn } = useUser();
-	const [post, setPost] = useState<Awaited<
-		ReturnType<typeof getPostById>
-	> | null>(null);
-	const [comments, setComments] = useState<
-		Awaited<ReturnType<typeof getPostComments>>["comments"]
-	>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const post = useQuery(api.posts.getById, { id: id as Id<"posts"> });
+	const commentsData = useQuery(
+		api.comments.getByTarget,
+		post
+			? { targetType: "post" as const, targetId: post._id, clerkId: user?.id }
+			: "skip",
+	);
+	const comments = commentsData?.comments ?? [];
+	const isLoading = post === undefined;
 	const [commentText, setCommentText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-
-	const loadData = useCallback(async () => {
-		setIsLoading(true);
-		try {
-			const [postData, commentsData] = await Promise.all([
-				getPostById({ data: { id } }),
-				getPostComments({ data: { postId: id, clerkId: user?.id } }),
-			]);
-			setPost(postData);
-			setComments(commentsData.comments);
-		} catch (error) {
-			console.error("Failed to load data:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [id, user?.id]);
-
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
+	const createCommentMut = useMutation(api.comments.create);
+	const toggleLike = useMutation(api.likes.toggle);
 
 	const handleCreateComment = async () => {
 		if (!commentText.trim() || !user || !post) return;
 		setIsSubmitting(true);
 		try {
-			await createComment({
-				data: {
-					content: commentText,
-					authorClerkId: user.id,
-					postId: post.id,
-				},
+			await createCommentMut({
+				content: commentText,
+				authorClerkId: user.id,
+				targetType: "post",
+				targetId: post._id,
 			});
 			setCommentText("");
-			// Refresh comments
-			const { comments } = await getPostComments({
-				data: { postId: post.id, clerkId: user.id },
-			});
-			setComments(comments);
 		} catch (error) {
 			console.error("Failed to create comment:", error);
 		} finally {
@@ -137,7 +116,7 @@ function PostDetailPage() {
 									@{post.author.username}
 								</span>
 								<span className="text-gray-500 text-sm">
-									· {formatDistanceToNow(new Date(post.createdAt))} ago
+									· {formatDistanceToNow(new Date(post._creationTime))} ago
 								</span>
 							</div>
 						</div>
@@ -153,8 +132,10 @@ function PostDetailPage() {
 							onToggle={
 								user
 									? () =>
-											togglePostLike({
-												data: { postId: post.id, clerkId: user.id },
+											toggleLike({
+												clerkId: user.id,
+												targetType: "post",
+												targetId: post._id,
 											})
 									: async () => ({ liked: false })
 							}
@@ -214,15 +195,11 @@ function PostDetailPage() {
 					<div className="space-y-6">
 						{comments.map((comment) => (
 							<CommentItem
-								key={comment.id}
+								key={comment._id}
 								comment={comment}
-								postId={post.id}
-								onReplySuccess={async () => {
-									const { comments } = await getPostComments({
-										data: { postId: post.id, clerkId: user?.id },
-									});
-									setComments(comments);
-								}}
+								targetType="post"
+								targetId={post._id}
+								onReplySuccess={() => {}}
 							/>
 						))}
 						{comments.length === 0 && (

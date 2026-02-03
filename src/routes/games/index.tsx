@@ -1,16 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useAction, useQuery } from "convex/react";
 import { Gamepad2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { api } from "../../../convex/_generated/api";
 import { GameCard } from "../../components/games/GameCard";
 import {
 	GamesFeedSelector,
 	type GamesFeedType,
 } from "../../components/games/GamesFeedSelector";
-import {
-	getGamesWithReviews,
-	getHighestRatedGames,
-	searchGames,
-} from "../../lib/server/games";
 
 export const Route = createFileRoute("/games/")({
 	component: GamesPage,
@@ -19,38 +16,28 @@ export const Route = createFileRoute("/games/")({
 function GamesPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [searchResults, setSearchResults] = useState<
-		Awaited<ReturnType<typeof searchGames>>
-	>([]);
-	const [latestReviewedGames, setLatestReviewedGames] = useState<
-		Awaited<ReturnType<typeof getGamesWithReviews>>["games"]
-	>([]);
-	const [highestRatedGames, setHighestRatedGames] = useState<
-		Awaited<ReturnType<typeof getHighestRatedGames>>["games"]
+		Array<{
+			_id: string;
+			name: string;
+			slug: string;
+			coverUrl?: string;
+			genres: string[];
+			releaseDate?: number;
+		}>
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
 	const [selectedFeed, setSelectedFeed] =
 		useState<GamesFeedType>("latest-reviewed");
 
-	// Load initial data
-	useEffect(() => {
-		const loadGames = async () => {
-			setIsLoading(true);
-			try {
-				const [latestReviewed, highestRated] = await Promise.all([
-					getGamesWithReviews({ data: { limit: 12 } }),
-					getHighestRatedGames({ data: { limit: 12 } }),
-				]);
-				setLatestReviewedGames(latestReviewed.games);
-				setHighestRatedGames(highestRated.games);
-			} catch (error) {
-				console.error("Failed to load games:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		loadGames();
-	}, []);
+	// Convex queries
+	const latestReviewedData = useQuery(api.games.getWithReviews, { limit: 12 });
+	const highestRatedData = useQuery(api.games.getHighestRated, { limit: 12 });
+	const searchAndCache = useAction(api.igdb.searchAndCache);
+
+	const latestReviewedGames = latestReviewedData?.games ?? [];
+	const highestRatedGames = highestRatedData?.games ?? [];
+	const isLoading =
+		latestReviewedData === undefined || highestRatedData === undefined;
 
 	// Handle search
 	useEffect(() => {
@@ -62,8 +49,9 @@ function GamesPage() {
 		const timeoutId = setTimeout(async () => {
 			setIsSearching(true);
 			try {
-				const results = await searchGames({
-					data: { query: searchQuery, limit: 20 },
+				const results = await searchAndCache({
+					query: searchQuery,
+					limit: 20,
 				});
 				setSearchResults(results);
 			} catch (error) {
@@ -74,13 +62,38 @@ function GamesPage() {
 		}, 300);
 
 		return () => clearTimeout(timeoutId);
-	}, [searchQuery]);
+	}, [searchQuery, searchAndCache]);
 
 	const currentGames = searchQuery.trim()
-		? searchResults
+		? searchResults.map((g) => ({
+				id: g._id,
+				name: g.name,
+				slug: g.slug,
+				coverUrl: g.coverUrl ?? null,
+				genres: g.genres,
+				releaseDate: g.releaseDate ? new Date(g.releaseDate) : null,
+			}))
 		: selectedFeed === "latest-reviewed"
-			? latestReviewedGames
-			: highestRatedGames;
+			? latestReviewedGames.map((g) => ({
+					id: g._id,
+					name: g.name,
+					slug: g.slug,
+					coverUrl: g.coverUrl ?? null,
+					genres: g.genres,
+					releaseDate: g.releaseDate ? new Date(g.releaseDate) : null,
+					_count: g._count,
+					averageRating: g.averageRating,
+				}))
+			: highestRatedGames.map((g) => ({
+					id: g._id,
+					name: g.name,
+					slug: g.slug,
+					coverUrl: g.coverUrl ?? null,
+					genres: g.genres,
+					releaseDate: g.releaseDate ? new Date(g.releaseDate) : null,
+					_count: g._count,
+					averageRating: g.averageRating,
+				}));
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">

@@ -8,6 +8,8 @@ interface FeedItem {
 	type: FeedItemType;
 	id: string;
 	createdAt: number;
+	updatedAt?: number;
+	editCount?: number;
 	author: {
 		_id: Id<"users">;
 		username: string;
@@ -166,6 +168,8 @@ async function enrichItems(
 			type: "post",
 			id: post._id,
 			createdAt: post._creationTime,
+			updatedAt: post.updatedAt,
+			editCount: post.editCount,
 			author: {
 				_id: author._id,
 				username: author.username,
@@ -226,6 +230,8 @@ async function enrichItems(
 			type: "article",
 			id: article._id,
 			createdAt: article._creationTime,
+			updatedAt: article.updatedAt,
+			editCount: article.editCount,
 			author: {
 				_id: author._id,
 				username: author.username,
@@ -279,6 +285,8 @@ async function enrichItems(
 			type: "review",
 			id: review._id,
 			createdAt: review._creationTime,
+			updatedAt: review.updatedAt,
+			editCount: review.editCount,
 			author: {
 				_id: author._id,
 				username: author.username,

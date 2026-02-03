@@ -159,6 +159,7 @@ function EditReviewPage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				published: true,
+				saveHistory: true,
 				clerkId: user.id,
 			});
 

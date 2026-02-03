@@ -187,6 +187,64 @@ export const getByUser = query({
 	},
 });
 
+export const updatePost = mutation({
+	args: {
+		postId: v.id("posts"),
+		content: v.string(),
+		clerkId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const post = await ctx.db.get(args.postId);
+		if (!post) throw new Error("Post not found");
+
+		const author = await ctx.db.get(post.authorId);
+		if (!author || author.clerkId !== args.clerkId) {
+			throw new Error("Unauthorized");
+		}
+
+		// Save current content as a version snapshot before patching
+		await ctx.db.insert("postVersions", {
+			postId: args.postId,
+			content: post.content,
+			editedAt: Date.now(),
+		});
+
+		await ctx.db.patch(args.postId, {
+			content: args.content.slice(0, 280),
+			updatedAt: Date.now(),
+			editCount: (post.editCount ?? 0) + 1,
+		});
+
+		return args.postId;
+	},
+});
+
+export const getHistory = query({
+	args: { postId: v.id("posts") },
+	handler: async (ctx, args) => {
+		const post = await ctx.db.get(args.postId);
+		if (!post) return null;
+
+		const versions = await ctx.db
+			.query("postVersions")
+			.withIndex("by_postId", (q) => q.eq("postId", args.postId))
+			.order("desc")
+			.collect();
+
+		return {
+			current: {
+				content: post.content,
+				editedAt: post.updatedAt ?? post._creationTime,
+			},
+			versions: versions.map((v) => ({
+				_id: v._id,
+				content: v.content,
+				editedAt: v.editedAt,
+			})),
+		};
+	},
+});
+
 export const deletePost = mutation({
 	args: { postId: v.id("posts"), clerkId: v.string() },
 	handler: async (ctx, args) => {
@@ -196,6 +254,15 @@ export const deletePost = mutation({
 		const author = await ctx.db.get(post.authorId);
 		if (!author || author.clerkId !== args.clerkId) {
 			throw new Error("Unauthorized");
+		}
+
+		// Cascade: delete post versions
+		const postVersions = await ctx.db
+			.query("postVersions")
+			.withIndex("by_postId", (q) => q.eq("postId", args.postId))
+			.collect();
+		for (const ver of postVersions) {
+			await ctx.db.delete(ver._id);
 		}
 
 		// Cascade: delete post images

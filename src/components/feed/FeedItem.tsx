@@ -22,6 +22,8 @@ interface FeedItem {
 	type: "post" | "article" | "review";
 	id: string;
 	createdAt: number;
+	updatedAt?: number;
+	editCount?: number;
 	author: {
 		_id: string;
 		username: string;
@@ -259,6 +261,9 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 							<span>@{item.author.username}</span>
 							<span>·</span>
 							<span>{formatDistanceToNow(new Date(item.createdAt))}</span>
+							{(item.editCount ?? 0) > 0 && (
+								<span className="text-gray-600 text-xs">(edited)</span>
+							)}
 						</div>
 					</div>
 				</div>

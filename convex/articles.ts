@@ -61,6 +61,7 @@ export const update = mutation({
 		containsSpoilers: v.optional(v.boolean()),
 		gameIds: v.optional(v.array(v.id("games"))),
 		published: v.optional(v.boolean()),
+		saveHistory: v.optional(v.boolean()),
 		clerkId: v.string(),
 	},
 	handler: async (ctx, args) => {
@@ -70,6 +71,20 @@ export const update = mutation({
 		const author = await ctx.db.get(article.authorId);
 		if (!author || author.clerkId !== args.clerkId) {
 			throw new Error("Unauthorized");
+		}
+
+		// Save a version snapshot before patching (only on explicit save)
+		if (args.saveHistory) {
+			await ctx.db.insert("articleVersions", {
+				articleId: args.articleId,
+				title: article.title,
+				content: article.content,
+				contentJson: article.contentJson,
+				excerpt: article.excerpt,
+				coverImageUrl: article.coverImageUrl,
+				containsSpoilers: article.containsSpoilers,
+				editedAt: Date.now(),
+			});
 		}
 
 		// Update game junctions if provided
@@ -102,6 +117,9 @@ export const update = mutation({
 		if (args.containsSpoilers !== undefined)
 			updateData.containsSpoilers = args.containsSpoilers;
 		if (args.published !== undefined) updateData.published = args.published;
+		if (args.saveHistory) {
+			updateData.editCount = (article.editCount ?? 0) + 1;
+		}
 
 		await ctx.db.patch(args.articleId, updateData);
 		return args.articleId;
@@ -149,10 +167,47 @@ export const getById = query({
 						username: author.username,
 						displayName: author.displayName,
 						avatarUrl: author.avatarUrl,
+						clerkId: author.clerkId,
 					}
 				: null,
 			games: games.filter(Boolean),
 			_count: { likes: likes.length, comments: comments.length },
+		};
+	},
+});
+
+export const getHistory = query({
+	args: { articleId: v.id("articles") },
+	handler: async (ctx, args) => {
+		const article = await ctx.db.get(args.articleId);
+		if (!article) return null;
+
+		const versions = await ctx.db
+			.query("articleVersions")
+			.withIndex("by_articleId", (q) => q.eq("articleId", args.articleId))
+			.order("desc")
+			.collect();
+
+		return {
+			current: {
+				title: article.title,
+				content: article.content,
+				contentJson: article.contentJson,
+				excerpt: article.excerpt,
+				coverImageUrl: article.coverImageUrl,
+				containsSpoilers: article.containsSpoilers,
+				editedAt: article.updatedAt ?? article._creationTime,
+			},
+			versions: versions.map((v) => ({
+				_id: v._id,
+				title: v.title,
+				content: v.content,
+				contentJson: v.contentJson,
+				excerpt: v.excerpt,
+				coverImageUrl: v.coverImageUrl,
+				containsSpoilers: v.containsSpoilers,
+				editedAt: v.editedAt,
+			})),
 		};
 	},
 });
@@ -378,6 +433,13 @@ export const deleteArticle = mutation({
 		if (!author || author.clerkId !== args.clerkId) {
 			throw new Error("Unauthorized");
 		}
+
+		// Cascade: article versions
+		const versions = await ctx.db
+			.query("articleVersions")
+			.withIndex("by_articleId", (q) => q.eq("articleId", args.articleId))
+			.collect();
+		for (const ver of versions) await ctx.db.delete(ver._id);
 
 		// Cascade: game junctions
 		const junctions = await ctx.db

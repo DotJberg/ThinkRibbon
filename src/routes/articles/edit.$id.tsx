@@ -213,6 +213,7 @@ function EditArticlePage() {
 				containsSpoilers,
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				published: true,
+				saveHistory: true,
 				clerkId: user.id,
 			});
 

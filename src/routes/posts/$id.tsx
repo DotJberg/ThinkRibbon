@@ -1,14 +1,25 @@
 import { useUser } from "@clerk/clerk-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, MessageCircle, Send } from "lucide-react";
+import {
+	ArrowLeft,
+	Edit3,
+	History,
+	MessageCircle,
+	MoreHorizontal,
+	Send,
+	Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { EditPostModal } from "../../components/posts/EditPostModal";
 import { PostImageGrid } from "../../components/posts/PostImageGrid";
 import { CommentItem } from "../../components/shared/CommentItem";
+import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { LikeButton } from "../../components/shared/LikeButton";
+import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
 
 export const Route = createFileRoute("/posts/$id")({
 	component: PostDetailPage,
@@ -16,6 +27,7 @@ export const Route = createFileRoute("/posts/$id")({
 
 function PostDetailPage() {
 	const { id } = Route.useParams();
+	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
 	const post = useQuery(api.posts.getById, { id: id as Id<"posts"> });
 	const commentsData = useQuery(
@@ -28,8 +40,28 @@ function PostDetailPage() {
 	const isLoading = post === undefined;
 	const [commentText, setCommentText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [showMenu, setShowMenu] = useState(false);
+	const [showEditModal, setShowEditModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showHistoryModal, setShowHistoryModal] = useState(false);
 	const createCommentMut = useMutation(api.comments.create);
 	const toggleLike = useMutation(api.likes.toggle);
+	const deletePostMut = useMutation(api.posts.deletePost);
+
+	// Only fetch history when modal is open
+	const historyData = useQuery(
+		api.posts.getHistory,
+		showHistoryModal ? { postId: id as Id<"posts"> } : "skip",
+	);
+
+	const isAuthor = user && post?.author?.clerkId === user.id;
+	const hasEdits = (post?.editCount ?? 0) > 0;
+
+	const handleDelete = async () => {
+		if (!user || !post) return;
+		await deletePostMut({ postId: post._id, clerkId: user.id });
+		navigate({ to: "/" });
+	};
 
 	const handleCreateComment = async () => {
 		if (!commentText.trim() || !user || !post) return;
@@ -119,8 +151,75 @@ function PostDetailPage() {
 								<span className="text-gray-500 text-sm">
 									· {formatDistanceToNow(new Date(post._creationTime))} ago
 								</span>
+								{hasEdits && (
+									<span className="text-gray-600 text-xs">(edited)</span>
+								)}
 							</div>
 						</div>
+
+						{/* Action menu */}
+						{(isAuthor || hasEdits) && (
+							<div className="relative">
+								<button
+									type="button"
+									onClick={() => setShowMenu(!showMenu)}
+									className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors"
+								>
+									<MoreHorizontal size={20} />
+								</button>
+								{showMenu && (
+									<>
+										{/* biome-ignore lint/a11y/noStaticElementInteractions: Dropdown backdrop */}
+										{/* biome-ignore lint/a11y/useKeyWithClickEvents: Click only for backdrop */}
+										<div
+											className="fixed inset-0 z-40"
+											onClick={() => setShowMenu(false)}
+										/>
+										<div className="absolute right-0 top-full mt-1 z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 min-w-[160px]">
+											{isAuthor && (
+												<button
+													type="button"
+													onClick={() => {
+														setShowMenu(false);
+														setShowEditModal(true);
+													}}
+													className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+												>
+													<Edit3 size={16} />
+													Edit
+												</button>
+											)}
+											{hasEdits && (
+												<button
+													type="button"
+													onClick={() => {
+														setShowMenu(false);
+														setShowHistoryModal(true);
+													}}
+													className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+												>
+													<History size={16} />
+													View History
+												</button>
+											)}
+											{isAuthor && (
+												<button
+													type="button"
+													onClick={() => {
+														setShowMenu(false);
+														setShowDeleteModal(true);
+													}}
+													className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors"
+												>
+													<Trash2 size={16} />
+													Delete
+												</button>
+											)}
+										</div>
+									</>
+								)}
+							</div>
+						)}
 					</div>
 
 					<p className="text-white whitespace-pre-wrap text-lg mb-6">
@@ -217,6 +316,30 @@ function PostDetailPage() {
 					</div>
 				</div>
 			</div>
+
+			{/* Modals */}
+			<EditPostModal
+				isOpen={showEditModal}
+				onClose={() => setShowEditModal(false)}
+				postId={post._id}
+				currentContent={post.content}
+			/>
+
+			<DeleteConfirmationModal
+				isOpen={showDeleteModal}
+				onClose={() => setShowDeleteModal(false)}
+				onConfirm={handleDelete}
+				title="Delete Post"
+				description="Are you sure you want to delete this post? This action cannot be undone."
+			/>
+
+			<VersionHistoryModal
+				isOpen={showHistoryModal}
+				onClose={() => setShowHistoryModal(false)}
+				contentType="post"
+				current={historyData?.current ?? null}
+				versions={historyData?.versions ?? []}
+			/>
 		</div>
 	);
 }

@@ -47,10 +47,17 @@ export default defineSchema({
 	posts: defineTable({
 		content: v.string(),
 		authorId: v.id("users"),
+		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
 		legacyId: v.optional(v.string()),
 	})
 		.index("by_authorId", ["authorId"]),
+
+	postVersions: defineTable({
+		postId: v.id("posts"),
+		content: v.string(),
+		editedAt: v.number(),
+	}).index("by_postId", ["postId"]),
 
 	postImages: defineTable({
 		url: v.string(),
@@ -69,11 +76,23 @@ export default defineSchema({
 		containsSpoilers: v.boolean(),
 		published: v.boolean(),
 		authorId: v.id("users"),
+		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
 		legacyId: v.optional(v.string()),
 	})
 		.index("by_authorId", ["authorId"])
 		.index("by_published", ["published"]),
+
+	articleVersions: defineTable({
+		articleId: v.id("articles"),
+		title: v.string(),
+		content: v.string(),
+		contentJson: v.optional(v.string()),
+		excerpt: v.optional(v.string()),
+		coverImageUrl: v.optional(v.string()),
+		containsSpoilers: v.boolean(),
+		editedAt: v.number(),
+	}).index("by_articleId", ["articleId"]),
 
 	articleGames: defineTable({
 		articleId: v.id("articles"),
@@ -101,6 +120,7 @@ export default defineSchema({
 		published: v.boolean(),
 		authorId: v.id("users"),
 		gameId: v.id("games"),
+		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
 		legacyId: v.optional(v.string()),
 	})
@@ -108,6 +128,17 @@ export default defineSchema({
 		.index("by_gameId", ["gameId"])
 		.index("by_authorId_gameId", ["authorId", "gameId"])
 		.index("by_published", ["published"]),
+
+	reviewVersions: defineTable({
+		reviewId: v.id("reviews"),
+		title: v.string(),
+		content: v.string(),
+		contentJson: v.optional(v.string()),
+		rating: v.number(),
+		coverImageUrl: v.optional(v.string()),
+		containsSpoilers: v.boolean(),
+		editedAt: v.number(),
+	}).index("by_reviewId", ["reviewId"]),
 
 	reviewImages: defineTable({
 		url: v.string(),

@@ -53,6 +53,7 @@ export const update = mutation({
 		coverFileKey: v.optional(v.string()),
 		containsSpoilers: v.optional(v.boolean()),
 		published: v.optional(v.boolean()),
+		saveHistory: v.optional(v.boolean()),
 		clerkId: v.string(),
 	},
 	handler: async (ctx, args) => {
@@ -68,6 +69,20 @@ export const update = mutation({
 			throw new Error("Rating must be between 1 and 5");
 		}
 
+		// Save a version snapshot before patching (only on explicit save)
+		if (args.saveHistory) {
+			await ctx.db.insert("reviewVersions", {
+				reviewId: args.reviewId,
+				title: review.title,
+				content: review.content,
+				contentJson: review.contentJson,
+				rating: review.rating,
+				coverImageUrl: review.coverImageUrl,
+				containsSpoilers: review.containsSpoilers,
+				editedAt: Date.now(),
+			});
+		}
+
 		const updateData: Record<string, unknown> = { updatedAt: Date.now() };
 		if (args.title !== undefined) updateData.title = args.title;
 		if (args.content !== undefined) updateData.content = args.content;
@@ -81,6 +96,9 @@ export const update = mutation({
 		if (args.containsSpoilers !== undefined)
 			updateData.containsSpoilers = args.containsSpoilers;
 		if (args.published !== undefined) updateData.published = args.published;
+		if (args.saveHistory) {
+			updateData.editCount = (review.editCount ?? 0) + 1;
+		}
 
 		await ctx.db.patch(args.reviewId, updateData);
 		return args.reviewId;
@@ -117,10 +135,47 @@ export const getById = query({
 						username: author.username,
 						displayName: author.displayName,
 						avatarUrl: author.avatarUrl,
+						clerkId: author.clerkId,
 					}
 				: null,
 			game,
 			_count: { likes: likes.length, comments: comments.length },
+		};
+	},
+});
+
+export const getHistory = query({
+	args: { reviewId: v.id("reviews") },
+	handler: async (ctx, args) => {
+		const review = await ctx.db.get(args.reviewId);
+		if (!review) return null;
+
+		const versions = await ctx.db
+			.query("reviewVersions")
+			.withIndex("by_reviewId", (q) => q.eq("reviewId", args.reviewId))
+			.order("desc")
+			.collect();
+
+		return {
+			current: {
+				title: review.title,
+				content: review.content,
+				contentJson: review.contentJson,
+				rating: review.rating,
+				coverImageUrl: review.coverImageUrl,
+				containsSpoilers: review.containsSpoilers,
+				editedAt: review.updatedAt ?? review._creationTime,
+			},
+			versions: versions.map((v) => ({
+				_id: v._id,
+				title: v.title,
+				content: v.content,
+				contentJson: v.contentJson,
+				rating: v.rating,
+				coverImageUrl: v.coverImageUrl,
+				containsSpoilers: v.containsSpoilers,
+				editedAt: v.editedAt,
+			})),
 		};
 	},
 });
@@ -366,6 +421,13 @@ export const deleteReview = mutation({
 		if (!author || author.clerkId !== args.clerkId) {
 			throw new Error("Unauthorized");
 		}
+
+		// Cascade: review versions
+		const versions = await ctx.db
+			.query("reviewVersions")
+			.withIndex("by_reviewId", (q) => q.eq("reviewId", args.reviewId))
+			.collect();
+		for (const ver of versions) await ctx.db.delete(ver._id);
 
 		// Cascade: images
 		const images = await ctx.db

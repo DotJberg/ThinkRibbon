@@ -1,16 +1,27 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, Calendar, Gamepad2, MessageCircle } from "lucide-react";
+import {
+	ArrowLeft,
+	Calendar,
+	Edit3,
+	Gamepad2,
+	History,
+	MessageCircle,
+	MoreHorizontal,
+	Trash2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
+import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { LikeButton } from "../../components/shared/LikeButton";
 import {
 	SpoilerBadge,
 	SpoilerWarning,
 } from "../../components/shared/SpoilerWarning";
+import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
 
 export const Route = createFileRoute("/articles/$id")({
 	component: ArticleDetailPage,
@@ -25,7 +36,26 @@ function ArticleDetailPage() {
 	});
 	const isLoading = article === undefined;
 	const [spoilerAccepted, setSpoilerAccepted] = useState(false);
+	const [showMenu, setShowMenu] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showHistoryModal, setShowHistoryModal] = useState(false);
 	const toggleLike = useMutation(api.likes.toggle);
+	const deleteArticleMut = useMutation(api.articles.deleteArticle);
+
+	// Only fetch history when modal is open
+	const historyData = useQuery(
+		api.articles.getHistory,
+		showHistoryModal ? { articleId: id as Id<"articles"> } : "skip",
+	);
+
+	const isAuthor = user && article?.author?.clerkId === user.id;
+	const hasEdits = (article?.editCount ?? 0) > 0;
+
+	const handleDelete = async () => {
+		if (!user || !article) return;
+		await deleteArticleMut({ articleId: article._id, clerkId: user.id });
+		navigate({ to: "/" });
+	};
 
 	// Handle escape key for spoiler warning
 	useEffect(() => {
@@ -116,6 +146,68 @@ function ArticleDetailPage() {
 								{article.title}
 							</h1>
 							{article.containsSpoilers && <SpoilerBadge />}
+
+							{/* Action menu */}
+							{(isAuthor || hasEdits) && (
+								<div className="relative">
+									<button
+										type="button"
+										onClick={() => setShowMenu(!showMenu)}
+										className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors"
+									>
+										<MoreHorizontal size={20} />
+									</button>
+									{showMenu && (
+										<>
+											{/* biome-ignore lint/a11y/noStaticElementInteractions: Dropdown backdrop */}
+											{/* biome-ignore lint/a11y/useKeyWithClickEvents: Click only for backdrop */}
+											<div
+												className="fixed inset-0 z-40"
+												onClick={() => setShowMenu(false)}
+											/>
+											<div className="absolute right-0 top-full mt-1 z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 min-w-[160px]">
+												{isAuthor && (
+													<Link
+														to="/articles/edit/$id"
+														params={{ id }}
+														onClick={() => setShowMenu(false)}
+														className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+													>
+														<Edit3 size={16} />
+														Edit
+													</Link>
+												)}
+												{hasEdits && (
+													<button
+														type="button"
+														onClick={() => {
+															setShowMenu(false);
+															setShowHistoryModal(true);
+														}}
+														className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+													>
+														<History size={16} />
+														View History
+													</button>
+												)}
+												{isAuthor && (
+													<button
+														type="button"
+														onClick={() => {
+															setShowMenu(false);
+															setShowDeleteModal(true);
+														}}
+														className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors"
+													>
+														<Trash2 size={16} />
+														Delete
+													</button>
+												)}
+											</div>
+										</>
+									)}
+								</div>
+							)}
 						</div>
 
 						{/* Author */}
@@ -150,6 +242,9 @@ function ArticleDetailPage() {
 								<div className="text-sm text-gray-500 flex items-center gap-1">
 									<Calendar size={14} />
 									{createdAt}
+									{hasEdits && (
+										<span className="text-gray-600 text-xs ml-1">(edited)</span>
+									)}
 								</div>
 							</div>
 						</div>
@@ -218,6 +313,23 @@ function ArticleDetailPage() {
 					</div>
 				</article>
 			</div>
+
+			{/* Modals */}
+			<DeleteConfirmationModal
+				isOpen={showDeleteModal}
+				onClose={() => setShowDeleteModal(false)}
+				onConfirm={handleDelete}
+				title="Delete Article"
+				description="Are you sure you want to delete this article? This action cannot be undone."
+			/>
+
+			<VersionHistoryModal
+				isOpen={showHistoryModal}
+				onClose={() => setShowHistoryModal(false)}
+				contentType="article"
+				current={historyData?.current ?? null}
+				versions={historyData?.versions ?? []}
+			/>
 		</div>
 	);
 }

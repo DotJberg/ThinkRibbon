@@ -14,6 +14,11 @@ export const IMAGE_CONSTRAINTS = {
 	},
 };
 
+export const POST_IMAGE_CONSTRAINTS = {
+	maxLongestSide: 1600,
+	maxCount: 4,
+};
+
 // Validate image dimensions on client before upload
 export function validateImageDimensions(
 	width: number,
@@ -54,4 +59,60 @@ export function validateImageDimensions(
 		targetHeight,
 		message: `Image will be resized from ${width}x${height} to ${targetWidth}x${targetHeight}`,
 	};
+}
+
+// Resize an image file on the client if its longest side exceeds maxPx.
+// Returns the original file unchanged if no resize is needed.
+export function resizeImageIfNeeded(file: File, maxPx = 1600): Promise<File> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+
+		img.onload = () => {
+			URL.revokeObjectURL(url);
+
+			const { width, height } = img;
+			if (width <= maxPx && height <= maxPx) {
+				resolve(file);
+				return;
+			}
+
+			const scale = maxPx / Math.max(width, height);
+			const targetW = Math.round(width * scale);
+			const targetH = Math.round(height * scale);
+
+			const canvas = document.createElement("canvas");
+			canvas.width = targetW;
+			canvas.height = targetH;
+			const ctx = canvas.getContext("2d");
+			if (!ctx) {
+				resolve(file);
+				return;
+			}
+
+			ctx.drawImage(img, 0, 0, targetW, targetH);
+
+			const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+			const quality = outputType === "image/jpeg" ? 0.85 : undefined;
+
+			canvas.toBlob(
+				(blob) => {
+					if (!blob) {
+						resolve(file);
+						return;
+					}
+					resolve(new File([blob], file.name, { type: outputType }));
+				},
+				outputType,
+				quality,
+			);
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			reject(new Error("Failed to load image for resizing"));
+		};
+
+		img.src = url;
+	});
 }

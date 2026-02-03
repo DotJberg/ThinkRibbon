@@ -1,10 +1,19 @@
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
-import { useState } from "react";
+import { ImagePlus, X } from "lucide-react";
+import { useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import {
+	POST_IMAGE_CONSTRAINTS,
+	resizeImageIfNeeded,
+} from "../../lib/image-utils";
+import { useUploadThing } from "../../lib/uploadthing";
 
 interface PostComposerProps {
-	onSubmit: (content: string) => Promise<void>;
+	onSubmit: (
+		content: string,
+		images: { url: string; fileKey: string }[],
+	) => Promise<void>;
 	maxLength?: number;
 }
 
@@ -12,6 +21,11 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 	const { user } = useUser();
 	const [content, setContent] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+	const [previews, setPreviews] = useState<string[]>([]);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const { startUpload, isUploading } = useUploadThing("postImage");
 
 	const dbUser = useQuery(
 		api.users.getByClerkId,
@@ -22,16 +36,70 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 
 	const remaining = maxLength - content.length;
 	const isOverLimit = remaining < 0;
-	const isEmpty = content.trim().length === 0;
+	const isEmpty = content.trim().length === 0 && selectedFiles.length === 0;
+
+	const handleAddFiles = (files: FileList | null) => {
+		if (!files) return;
+		const newFiles = Array.from(files).slice(
+			0,
+			POST_IMAGE_CONSTRAINTS.maxCount - selectedFiles.length,
+		);
+		if (newFiles.length === 0) return;
+
+		const updated = [...selectedFiles, ...newFiles].slice(
+			0,
+			POST_IMAGE_CONSTRAINTS.maxCount,
+		);
+		setSelectedFiles(updated);
+
+		// Generate previews for new files
+		for (const file of newFiles) {
+			const url = URL.createObjectURL(file);
+			setPreviews((prev) =>
+				[...prev, url].slice(0, POST_IMAGE_CONSTRAINTS.maxCount),
+			);
+		}
+	};
+
+	const handleRemoveFile = (index: number) => {
+		URL.revokeObjectURL(previews[index]);
+		setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+		setPreviews((prev) => prev.filter((_, i) => i !== index));
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (isEmpty || isOverLimit || isSubmitting) return;
+		if (isEmpty || isOverLimit || isSubmitting || isUploading) return;
 
 		setIsSubmitting(true);
 		try {
-			await onSubmit(content);
+			let uploadedImages: { url: string; fileKey: string }[] = [];
+
+			if (selectedFiles.length > 0) {
+				// Resize files before uploading
+				const resized = await Promise.all(
+					selectedFiles.map((f) =>
+						resizeImageIfNeeded(f, POST_IMAGE_CONSTRAINTS.maxLongestSide),
+					),
+				);
+
+				const result = await startUpload(resized);
+				if (result) {
+					uploadedImages = result.map((r) => ({
+						url: r.ufsUrl || r.url,
+						fileKey: r.key,
+					}));
+				}
+			}
+
+			await onSubmit(content, uploadedImages);
 			setContent("");
+			// Clean up previews
+			for (const url of previews) {
+				URL.revokeObjectURL(url);
+			}
+			setSelectedFiles([]);
+			setPreviews([]);
 		} catch (error) {
 			console.error("Failed to create post:", error);
 		} finally {
@@ -46,6 +114,8 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 			</div>
 		);
 	}
+
+	const busy = isSubmitting || isUploading;
 
 	return (
 		<form
@@ -77,18 +147,62 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 						className="w-full bg-transparent text-white placeholder:text-gray-500 resize-none focus:outline-none text-lg"
 					/>
 
+					{/* Image previews */}
+					{previews.length > 0 && (
+						<div className="grid grid-cols-2 gap-2 mt-2">
+							{previews.map((url, i) => (
+								<div key={url} className="relative group">
+									<img
+										src={url}
+										alt=""
+										className="w-full h-24 object-cover rounded-lg"
+									/>
+									<button
+										type="button"
+										onClick={() => handleRemoveFile(i)}
+										className="absolute top-1 right-1 p-1 bg-black/70 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+									>
+										<X size={14} />
+									</button>
+								</div>
+							))}
+						</div>
+					)}
+
 					<div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-700/50">
-						<div
-							className={`text-sm ${isOverLimit ? "text-red-400" : remaining < 20 ? "text-yellow-400" : "text-gray-500"}`}
-						>
-							{remaining}
+						<div className="flex items-center gap-3">
+							<button
+								type="button"
+								onClick={() => fileInputRef.current?.click()}
+								disabled={
+									selectedFiles.length >= POST_IMAGE_CONSTRAINTS.maxCount ||
+									busy
+								}
+								className="text-gray-400 hover:text-purple-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+								title="Add images"
+							>
+								<ImagePlus size={20} />
+							</button>
+							<input
+								ref={fileInputRef}
+								type="file"
+								accept="image/*"
+								multiple
+								className="hidden"
+								onChange={(e) => handleAddFiles(e.target.files)}
+							/>
+							<span
+								className={`text-sm ${isOverLimit ? "text-red-400" : remaining < 20 ? "text-yellow-400" : "text-gray-500"}`}
+							>
+								{remaining}
+							</span>
 						</div>
 						<button
 							type="submit"
-							disabled={isEmpty || isOverLimit || isSubmitting}
+							disabled={isEmpty || isOverLimit || busy}
 							className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-full text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							{isSubmitting ? "Posting..." : "Post"}
+							{busy ? "Posting..." : "Post"}
 						</button>
 					</div>
 				</div>

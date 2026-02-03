@@ -166,6 +166,20 @@ export const uploadRouter = {
 				constraints: IMAGE_CONSTRAINTS.inline,
 			};
 		}),
+
+	// Post image - max 2MB, up to 4 images per post
+	postImage: f({ image: { maxFileSize: "2MB", maxFileCount: 4 } })
+		.middleware(authMiddleware)
+		.onUploadComplete(async ({ metadata, file }) => {
+			const url = file.ufsUrl || file.url;
+			const fileKey = extractFileKey(url);
+
+			return {
+				uploadedBy: metadata.userId,
+				url,
+				fileKey,
+			};
+		}),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof uploadRouter;

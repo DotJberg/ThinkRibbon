@@ -52,6 +52,13 @@ export default defineSchema({
 	})
 		.index("by_authorId", ["authorId"]),
 
+	postImages: defineTable({
+		url: v.string(),
+		fileKey: v.string(),
+		caption: v.optional(v.string()),
+		postId: v.id("posts"),
+	}).index("by_postId", ["postId"]),
+
 	articles: defineTable({
 		title: v.string(),
 		content: v.string(),

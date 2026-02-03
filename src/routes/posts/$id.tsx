@@ -6,6 +6,7 @@ import { ArrowLeft, MessageCircle, Send } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { PostImageGrid } from "../../components/posts/PostImageGrid";
 import { CommentItem } from "../../components/shared/CommentItem";
 import { LikeButton } from "../../components/shared/LikeButton";
 
@@ -125,6 +126,12 @@ function PostDetailPage() {
 					<p className="text-white whitespace-pre-wrap text-lg mb-6">
 						{post.content}
 					</p>
+
+					{post.images && post.images.length > 0 && (
+						<div className="mb-6">
+							<PostImageGrid images={post.images} />
+						</div>
+					)}
 
 					<div className="flex items-center gap-6 border-t border-gray-700/50 pt-4">
 						<LikeButton

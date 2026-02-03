@@ -32,6 +32,10 @@ interface FeedItem {
 		slug: string;
 		coverUrl: string | undefined;
 	}>;
+	images?: Array<{
+		url: string;
+		caption: string | undefined;
+	}>;
 	likeCount: number;
 	commentCount: number;
 	topComment?: {
@@ -146,6 +150,11 @@ async function enrichItems(
 			)
 			.collect();
 
+		const postImages = await ctx.db
+			.query("postImages")
+			.withIndex("by_postId", (q: any) => q.eq("postId", post._id))
+			.collect();
+
 		const topComment = await getTopComment(
 			ctx,
 			"post",
@@ -164,6 +173,10 @@ async function enrichItems(
 				avatarUrl: author.avatarUrl,
 			},
 			content: post.content,
+			images: postImages.map((img: Doc<"postImages">) => ({
+				url: img.url,
+				caption: img.caption,
+			})),
 			likeCount: likes.length,
 			commentCount: comments.length,
 			hasLiked: currentUserId

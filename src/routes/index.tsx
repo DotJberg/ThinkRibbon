@@ -75,11 +75,21 @@ function HomePage() {
 		isLoading = true;
 	}
 
-	const handleCreatePost = async (content: string) => {
+	const handleCreatePost = async (
+		content: string,
+		images: { url: string; fileKey: string }[],
+	) => {
 		if (!user) return;
 		await createPostMut({
 			content,
 			authorClerkId: user.id,
+			images:
+				images.length > 0
+					? images.map((img) => ({
+							url: img.url,
+							fileKey: img.fileKey,
+						}))
+					: undefined,
 		});
 		// No manual re-fetch needed - Convex reactivity auto-updates
 	};

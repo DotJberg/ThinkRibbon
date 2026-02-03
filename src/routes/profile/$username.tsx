@@ -131,6 +131,7 @@ function ProfilePage() {
 			createdAt: post._creationTime,
 			author: post.author,
 			content: post.content,
+			images: post.images,
 			likeCount: post._count.likes,
 			commentCount: post._count.comments,
 			hasLiked: post.hasLiked ?? false,

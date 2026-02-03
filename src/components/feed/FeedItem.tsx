@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { PostImageGrid } from "../posts/PostImageGrid";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
 
@@ -31,6 +32,10 @@ interface FeedItem {
 	title?: string;
 	excerpt?: string;
 	coverImageUrl?: string;
+	images?: Array<{
+		url: string;
+		caption?: string;
+	}>;
 	containsSpoilers?: boolean;
 	rating?: number;
 	game?: {
@@ -375,6 +380,9 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 			{item.type === "post" && (
 				<div className="text-gray-300 mb-3">
 					<p className="whitespace-pre-wrap">{item.content}</p>
+					{item.images && item.images.length > 0 && (
+						<PostImageGrid images={item.images} />
+					)}
 				</div>
 			)}
 			{item.type === "article" && item.excerpt && (

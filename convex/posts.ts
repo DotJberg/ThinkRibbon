@@ -2,10 +2,21 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
+
+// Force rebuild
 export const create = mutation({
 	args: {
 		content: v.string(),
 		authorClerkId: v.string(),
+		images: v.optional(
+			v.array(
+				v.object({
+					url: v.string(),
+					fileKey: v.string(),
+					caption: v.optional(v.string()),
+				}),
+			),
+		),
 	},
 	handler: async (ctx, args) => {
 		const user = await ctx.db
@@ -19,6 +30,17 @@ export const create = mutation({
 			authorId: user._id,
 			updatedAt: Date.now(),
 		});
+
+		if (args.images) {
+			for (const img of args.images.slice(0, 4)) {
+				await ctx.db.insert("postImages", {
+					url: img.url,
+					fileKey: img.fileKey,
+					caption: img.caption,
+					postId,
+				});
+			}
+		}
 
 		return postId;
 	},
@@ -46,6 +68,11 @@ export const getById = query({
 			)
 			.collect();
 
+		const images = await ctx.db
+			.query("postImages")
+			.withIndex("by_postId", (q) => q.eq("postId", post._id))
+			.collect();
+
 		return {
 			...post,
 			author: author
@@ -57,6 +84,10 @@ export const getById = query({
 						clerkId: author.clerkId,
 					}
 				: null,
+			images: images.map((img) => ({
+				url: img.url,
+				caption: img.caption,
+			})),
 			_count: { likes: likes.length, comments: comments.length },
 		};
 	},
@@ -125,6 +156,11 @@ export const getByUser = query({
 					)
 					.collect();
 
+				const images = await ctx.db
+					.query("postImages")
+					.withIndex("by_postId", (q) => q.eq("postId", post._id))
+					.collect();
+
 				const hasLiked = currentUserId
 					? likes.some((l) => l.userId === currentUserId)
 					: false;
@@ -137,6 +173,10 @@ export const getByUser = query({
 						displayName: targetUser.displayName,
 						avatarUrl: targetUser.avatarUrl,
 					},
+					images: images.map((img) => ({
+						url: img.url,
+						caption: img.caption,
+					})),
 					_count: { likes: likes.length, comments: comments.length },
 					hasLiked,
 				};
@@ -156,6 +196,15 @@ export const deletePost = mutation({
 		const author = await ctx.db.get(post.authorId);
 		if (!author || author.clerkId !== args.clerkId) {
 			throw new Error("Unauthorized");
+		}
+
+		// Cascade: delete post images
+		const postImages = await ctx.db
+			.query("postImages")
+			.withIndex("by_postId", (q) => q.eq("postId", args.postId))
+			.collect();
+		for (const img of postImages) {
+			await ctx.db.delete(img._id);
 		}
 
 		// Cascade: delete likes

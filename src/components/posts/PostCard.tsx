@@ -3,6 +3,7 @@ import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
 import { SafeImage } from "../shared/SafeImage";
+import { PostImageGrid } from "./PostImageGrid";
 
 interface PostCardProps {
 	post: {
@@ -15,6 +16,7 @@ interface PostCardProps {
 			displayName: string | null;
 			avatarUrl: string | null;
 		};
+		images?: Array<{ url: string; caption?: string }>;
 		_count: {
 			likes: number;
 			comments: number;
@@ -80,6 +82,10 @@ export function PostCard({
 					<p className="text-gray-200 mt-1 whitespace-pre-wrap break-words">
 						{post.content}
 					</p>
+
+					{post.images && post.images.length > 0 && (
+						<PostImageGrid images={post.images} />
+					)}
 
 					{/* Actions */}
 					<div className="flex items-center gap-4 mt-3">

@@ -14,6 +14,12 @@ export const collectAllFileKeys = internalQuery({
 			if (user.bannerUrl) fileKeys.add(user.bannerUrl);
 		}
 
+		// Post images
+		const postImages = await ctx.db.query("postImages").collect();
+		for (const img of postImages) {
+			fileKeys.add(img.url);
+		}
+
 		// Article covers and images
 		const articles = await ctx.db.query("articles").collect();
 		for (const article of articles) {

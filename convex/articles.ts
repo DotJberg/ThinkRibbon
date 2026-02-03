@@ -250,7 +250,7 @@ export const getByUser = query({
 		if (args.clerkId) {
 			const currentUser = await ctx.db
 				.query("users")
-				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId!))
 				.unique();
 			currentUserId = currentUser?._id ?? null;
 		}

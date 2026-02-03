@@ -347,7 +347,10 @@ function NewReviewPage() {
 								</p>
 								<p className="text-sm text-gray-500">
 									{draft.rating ? `${draft.rating}/5 stars • ` : ""}
-									Last edited {new Date(draft.updatedAt).toLocaleDateString()}
+									Last edited{" "}
+									{new Date(
+										draft.updatedAt ?? draft._creationTime,
+									).toLocaleDateString()}
 								</p>
 							</button>
 						))}

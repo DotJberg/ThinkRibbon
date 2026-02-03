@@ -144,7 +144,7 @@ function DraftsPage() {
 										<DraftCard
 											key={draft._id}
 											title={draft.title || "Untitled Article"}
-											updatedAt={draft.updatedAt}
+											updatedAt={draft.updatedAt ?? draft._creationTime}
 											type="article"
 											isDeleting={deletingId === draft._id}
 											onEdit={() =>
@@ -175,7 +175,7 @@ function DraftsPage() {
 											subtitle={
 												draft.rating ? `${draft.rating}/5 stars` : undefined
 											}
-											updatedAt={draft.updatedAt}
+											updatedAt={draft.updatedAt ?? draft._creationTime}
 											type="review"
 											isDeleting={deletingId === draft._id}
 											onEdit={() =>

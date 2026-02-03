@@ -122,67 +122,75 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 				</div>
 
 				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-					{entries.map((entry) => (
-						<div key={entry._id} className="group relative">
-							{/* Game Card */}
-							<Link
-								to="/games/$slug"
-								params={{ slug: entry.game.slug }}
-								className="block"
-							>
-								<div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-700 border-2 border-transparent group-hover:border-purple-500 transition-all shadow-lg">
-									{entry.game.coverUrl ? (
-										<img
-											src={entry.game.coverUrl}
-											alt={entry.game.name}
-											className="w-full h-full object-cover"
-										/>
-									) : (
-										<div className="w-full h-full flex items-center justify-center text-gray-500">
-											<Gamepad2 size={32} />
-										</div>
-									)}
-
-									{/* Gradient overlay for text readability */}
-									<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-
-									{/* Game name and status */}
-									<div className="absolute bottom-0 left-0 right-0 p-3">
-										<h4 className="text-white font-medium text-sm line-clamp-2 mb-1">
-											{entry.game.name}
-										</h4>
-										<span
-											className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[entry.status].bgColor} ${statusConfig[entry.status].color}`}
-										>
-											{statusConfig[entry.status].label}
-										</span>
-									</div>
-
-									{/* Rating in corner */}
-									{entry.quickRating && (
-										<div className="absolute top-2 right-2 bg-black/70 text-yellow-400 text-xs px-2 py-1 rounded-full font-medium">
-											⭐ {entry.quickRating}/10
-										</div>
-									)}
-								</div>
-							</Link>
-
-							{/* Edit button for own profile */}
-							{isOwnProfile && (
-								<button
-									type="button"
-									onClick={() => setSelectedEntry(entry)}
-									className="absolute top-2 left-2 p-2.5 bg-black/80 hover:bg-purple-600 text-white rounded-lg shadow-lg transition-all flex items-center gap-1.5"
-									title="Update Status"
+					{entries
+						.filter(
+							(
+								entry,
+							): entry is typeof entry & {
+								game: NonNullable<typeof entry.game>;
+							} => entry.game !== null,
+						)
+						.map((entry) => (
+							<div key={entry._id} className="group relative">
+								{/* Game Card */}
+								<Link
+									to="/games/$slug"
+									params={{ slug: entry.game.slug }}
+									className="block"
 								>
-									<Pencil size={16} />
-									<span className="text-xs font-medium hidden sm:inline">
-										Edit
-									</span>
-								</button>
-							)}
-						</div>
-					))}
+									<div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-700 border-2 border-transparent group-hover:border-purple-500 transition-all shadow-lg">
+										{entry.game.coverUrl ? (
+											<img
+												src={entry.game.coverUrl}
+												alt={entry.game.name}
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											<div className="w-full h-full flex items-center justify-center text-gray-500">
+												<Gamepad2 size={32} />
+											</div>
+										)}
+
+										{/* Gradient overlay for text readability */}
+										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+										{/* Game name and status */}
+										<div className="absolute bottom-0 left-0 right-0 p-3">
+											<h4 className="text-white font-medium text-sm line-clamp-2 mb-1">
+												{entry.game.name}
+											</h4>
+											<span
+												className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[entry.status].bgColor} ${statusConfig[entry.status].color}`}
+											>
+												{statusConfig[entry.status].label}
+											</span>
+										</div>
+
+										{/* Rating in corner */}
+										{entry.quickRating && (
+											<div className="absolute top-2 right-2 bg-black/70 text-yellow-400 text-xs px-2 py-1 rounded-full font-medium">
+												⭐ {entry.quickRating}/10
+											</div>
+										)}
+									</div>
+								</Link>
+
+								{/* Edit button for own profile */}
+								{isOwnProfile && (
+									<button
+										type="button"
+										onClick={() => setSelectedEntry(entry)}
+										className="absolute top-2 left-2 p-2.5 bg-black/80 hover:bg-purple-600 text-white rounded-lg shadow-lg transition-all flex items-center gap-1.5"
+										title="Update Status"
+									>
+										<Pencil size={16} />
+										<span className="text-xs font-medium hidden sm:inline">
+											Edit
+										</span>
+									</button>
+								)}
+							</div>
+						))}
 				</div>
 			</div>
 

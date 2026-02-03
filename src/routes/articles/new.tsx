@@ -341,7 +341,10 @@ function NewArticlePage() {
 									{draft.title || "Untitled Draft"}
 								</p>
 								<p className="text-sm text-gray-500">
-									Last edited {new Date(draft.updatedAt).toLocaleDateString()}
+									Last edited{" "}
+									{new Date(
+										draft.updatedAt ?? draft._creationTime,
+									).toLocaleDateString()}
 								</p>
 							</button>
 						))}

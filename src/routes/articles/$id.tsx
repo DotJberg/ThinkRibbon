@@ -46,7 +46,7 @@ function ArticleDetailPage() {
 		);
 	}
 
-	if (!article) {
+	if (!article || !article.author) {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
 				<div className="text-center">
@@ -157,25 +157,27 @@ function ArticleDetailPage() {
 						{/* Game Tags */}
 						{article.games.length > 0 && (
 							<div className="flex flex-wrap gap-2">
-								{article.games.map((game) => (
-									<Link
-										key={game._id}
-										to="/games/$slug"
-										params={{ slug: game.slug }}
-										className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-full text-sm transition-colors"
-									>
-										{game.coverUrl ? (
-											<img
-												src={game.coverUrl}
-												alt=""
-												className="w-4 h-5 rounded object-cover"
-											/>
-										) : (
-											<Gamepad2 size={14} className="text-gray-400" />
-										)}
-										<span className="text-gray-300">{game.name}</span>
-									</Link>
-								))}
+								{article.games
+									.filter((game) => game !== null)
+									.map((game) => (
+										<Link
+											key={game._id}
+											to="/games/$slug"
+											params={{ slug: game.slug }}
+											className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-full text-sm transition-colors"
+										>
+											{game.coverUrl ? (
+												<img
+													src={game.coverUrl}
+													alt=""
+													className="w-4 h-5 rounded object-cover"
+												/>
+											) : (
+												<Gamepad2 size={14} className="text-gray-400" />
+											)}
+											<span className="text-gray-300">{game.name}</span>
+										</Link>
+									))}
 							</div>
 						)}
 					</header>

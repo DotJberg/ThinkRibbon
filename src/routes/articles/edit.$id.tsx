@@ -74,11 +74,13 @@ function EditArticlePage() {
 			setContainsSpoilers(article.containsSpoilers || false);
 			if (article.games) {
 				setSelectedGames(
-					article.games.map((g) => ({
-						id: g._id,
-						name: g.name,
-						coverUrl: g.coverUrl ?? null,
-					})),
+					article.games
+						.filter((g) => g !== null)
+						.map((g) => ({
+							id: g._id,
+							name: g.name,
+							coverUrl: g.coverUrl ?? null,
+						})),
 				);
 			}
 			// Mark initial load complete after a short delay

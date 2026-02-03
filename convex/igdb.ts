@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 
@@ -119,7 +120,7 @@ export const searchAndCache = action({
 		const results = [];
 		for (const igdbGame of igdbGames) {
 			const gameData = igdbToGameData(igdbGame);
-			const id = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
+			const id: Id<"games"> = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
 			results.push({ _id: id, ...gameData });
 		}
 
@@ -140,7 +141,7 @@ export const fetchBySlug = action({
 		if (igdbGames.length === 0) return null;
 
 		const gameData = igdbToGameData(igdbGames[0]);
-		const id = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
+		const id: Id<"games"> = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
 		return { _id: id, ...gameData };
 	},
 });
@@ -161,7 +162,7 @@ export const fetchPopular = action({
 		const results = [];
 		for (const igdbGame of igdbGames) {
 			const gameData = igdbToGameData(igdbGame);
-			const id = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
+			const id: Id<"games"> = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
 			results.push({ _id: id, ...gameData });
 		}
 
@@ -188,7 +189,7 @@ export const fetchRecent = action({
 		const results = [];
 		for (const igdbGame of igdbGames) {
 			const gameData = igdbToGameData(igdbGame);
-			const id = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
+			const id: Id<"games"> = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
 			results.push({ _id: id, ...gameData });
 		}
 

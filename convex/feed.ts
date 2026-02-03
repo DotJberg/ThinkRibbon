@@ -380,7 +380,7 @@ export const getPopular = query({
 		if (args.clerkId) {
 			const user = await ctx.db
 				.query("users")
-				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId!))
 				.unique();
 			currentUserId = user?._id ?? null;
 		}
@@ -450,7 +450,7 @@ export const getDiscover = query({
 		if (args.clerkId) {
 			const user = await ctx.db
 				.query("users")
-				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId!))
 				.unique();
 			currentUserId = user?._id ?? null;
 		}

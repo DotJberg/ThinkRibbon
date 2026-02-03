@@ -73,8 +73,8 @@ export const run = internalAction({
 		const dbUrls = await ctx.runQuery(internal.cleanup.collectAllFileKeys);
 		const dbFileKeys = new Set(
 			dbUrls
-				.map((url) => extractFileKey(url))
-				.filter((key): key is string => key !== null),
+				.map((url: string) => extractFileKey(url))
+				.filter((key: string | null): key is string => key !== null),
 		);
 
 		const token = process.env.UPLOADTHING_TOKEN;

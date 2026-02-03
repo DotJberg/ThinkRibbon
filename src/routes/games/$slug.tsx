@@ -224,21 +224,24 @@ function GameDetailPage() {
 				{activeTab === "articles" && (
 					<div className="space-y-4">
 						{articles.length > 0 ? (
-							articles.map((article) => (
-								<Link
-									key={article._id}
-									to="/articles/$id"
-									params={{ id: article._id }}
-									className="block bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-gray-600/50 transition-colors"
-								>
-									<h3 className="text-lg font-semibold text-white hover:text-purple-400">
-										{article.title}
-									</h3>
-									<p className="text-sm text-gray-400 mt-1">
-										by {article.author?.displayName || article.author?.username}
-									</p>
-								</Link>
-							))
+							articles
+								.filter((a) => a._id)
+								.map((article) => (
+									<Link
+										key={article._id}
+										to="/articles/$id"
+										params={{ id: article._id as string }}
+										className="block bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-gray-600/50 transition-colors"
+									>
+										<h3 className="text-lg font-semibold text-white hover:text-purple-400">
+											{article.title}
+										</h3>
+										<p className="text-sm text-gray-400 mt-1">
+											by{" "}
+											{article.author?.displayName || article.author?.username}
+										</p>
+									</Link>
+								))
 						) : (
 							<div className="text-center py-12 text-gray-500">
 								No articles about this game yet.

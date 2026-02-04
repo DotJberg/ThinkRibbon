@@ -56,6 +56,7 @@ export function ReviewCard({
 						<img
 							src={review.coverImageUrl}
 							alt={review.title}
+							loading="lazy"
 							className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 						/>
 					</div>
@@ -74,6 +75,7 @@ export function ReviewCard({
 							<img
 								src={review.game.coverUrl}
 								alt={review.game.name}
+								loading="lazy"
 								className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 							/>
 						) : (
@@ -123,6 +125,7 @@ export function ReviewCard({
 										<img
 											src={review.author.avatarUrl}
 											alt=""
+											loading="lazy"
 											className="w-full h-full object-cover"
 										/>
 									) : (

@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 
 interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 	fallback?: React.ReactNode;
 }
 
-export function SafeImage({
+export const SafeImage = memo(function SafeImage({
 	src,
 	alt,
 	className,
 	fallback,
 	crossOrigin = "anonymous",
+	loading = "lazy",
 	onError,
 	...props
 }: SafeImageProps) {
@@ -25,6 +26,7 @@ export function SafeImage({
 			alt={alt}
 			className={className}
 			crossOrigin={crossOrigin}
+			loading={loading}
 			onError={(e) => {
 				setHasError(true);
 				onError?.(e);
@@ -32,4 +34,4 @@ export function SafeImage({
 			{...props}
 		/>
 	);
-}
+});

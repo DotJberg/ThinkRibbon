@@ -199,11 +199,30 @@ export const getUserCollection = query({
 			else if (entry.ownershipType === "Digital") stats.digital++;
 		}
 
-		// Get all quest log entries for this user (for playthrough data)
-		const questLogEntries = await ctx.db
-			.query("questLogs")
-			.withIndex("by_userId", (q) => q.eq("userId", user._id))
-			.collect();
+		// Batch fetch all related data upfront to avoid N+1 queries
+		const [questLogEntries, userReviews, allGames] = await Promise.all([
+			ctx.db
+				.query("questLogs")
+				.withIndex("by_userId", (q) => q.eq("userId", user._id))
+				.collect(),
+			ctx.db
+				.query("reviews")
+				.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
+				.collect(),
+			ctx.db.query("games").collect(),
+		]);
+
+		// Build games lookup map
+		const gamesById = new Map<string, (typeof allGames)[0]>();
+		for (const game of allGames) {
+			gamesById.set(game._id as string, game);
+		}
+
+		// Build reviews lookup map by gameId
+		const reviewsByGameId = new Map<string, (typeof userReviews)[0]>();
+		for (const review of userReviews) {
+			reviewsByGameId.set(review.gameId as string, review);
+		}
 
 		// Group quest log entries by gameId
 		const playthroughsByGame = new Map<string, typeof questLogEntries>();
@@ -216,72 +235,65 @@ export const getUserCollection = query({
 		}
 
 		// Enrich collection entries with game data and playthroughs
-		const games = await Promise.all(
-			collectionEntries.map(async (entry) => {
-				const game = await ctx.db.get(entry.gameId);
-				if (!game) return null;
+		const games = collectionEntries.map((entry) => {
+			const game = gamesById.get(entry.gameId as string);
+			if (!game) return null;
 
-				// Get user's review for this game
-				const review = await ctx.db
-					.query("reviews")
-					.withIndex("by_authorId_gameId", (q) =>
-						q.eq("authorId", user._id).eq("gameId", entry.gameId),
-					)
-					.first();
+			// Get user's review for this game
+			const review = reviewsByGameId.get(entry.gameId as string);
 
-				// Get playthroughs for this game
-				const playthroughs = playthroughsByGame.get(entry.gameId as string) || [];
-				const sortedPlaythroughs = playthroughs.sort(
-					(a, b) =>
-						(b.updatedAt || b._creationTime) - (a.updatedAt || a._creationTime),
-				);
+			// Get playthroughs for this game
+			const playthroughs = playthroughsByGame.get(entry.gameId as string) || [];
+			const sortedPlaythroughs = playthroughs.sort(
+				(a, b) =>
+					(b.updatedAt || b._creationTime) - (a.updatedAt || a._creationTime),
+			);
 
-				// Get latest status from playthroughs (if any)
-				const latestPlaythrough = sortedPlaythroughs[0];
+			// Get latest status from playthroughs (if any)
+			const latestPlaythrough = sortedPlaythroughs[0];
 
-				return {
-					collection: {
-						_id: entry._id,
-						ownershipType: entry.ownershipType,
-						status: entry.status || null,
-						platform: entry.platform,
-						difficulty: entry.difficulty,
-						acquiredAt: entry.acquiredAt,
-						updatedAt: entry.updatedAt || entry._creationTime,
-					},
-					game: {
-						_id: game._id,
-						name: game.name,
-						slug: game.slug,
-						coverUrl: game.coverUrl,
-						releaseDate: game.releaseDate,
-						genres: game.genres,
-						platforms: game.platforms,
-					},
-					playthroughs: sortedPlaythroughs.map((p) => ({
-						_id: p._id,
-						status: p.status,
-						platform: p.platform,
-						difficulty: p.difficulty,
-						startedAt: p.startedAt,
-						completedAt: p.completedAt,
-						quickRating: p.quickRating,
-						hoursPlayed: p.hoursPlayed,
-						notes: p.notes,
-						updatedAt: p.updatedAt || p._creationTime,
-					})),
-					latestRating: latestPlaythrough?.quickRating || null,
-					review: review
-						? {
-								_id: review._id,
-								title: review.title,
-								rating: review.rating,
-								published: review.published,
-							}
-						: null,
-				};
-			}),
-		);
+			return {
+				collection: {
+					_id: entry._id,
+					ownershipType: entry.ownershipType,
+					status: entry.status || null,
+					platform: entry.platform,
+					difficulty: entry.difficulty,
+					acquiredAt: entry.acquiredAt,
+					updatedAt: entry.updatedAt || entry._creationTime,
+				},
+				game: {
+					_id: game._id,
+					name: game.name,
+					slug: game.slug,
+					coverUrl: game.coverUrl,
+					releaseDate: game.releaseDate,
+					genres: game.genres,
+					platforms: game.platforms,
+				},
+				playthroughs: sortedPlaythroughs.map((p) => ({
+					_id: p._id,
+					status: p.status,
+					platform: p.platform,
+					difficulty: p.difficulty,
+					startedAt: p.startedAt,
+					completedAt: p.completedAt,
+					quickRating: p.quickRating,
+					hoursPlayed: p.hoursPlayed,
+					notes: p.notes,
+					updatedAt: p.updatedAt || p._creationTime,
+				})),
+				latestRating: latestPlaythrough?.quickRating || null,
+				review: review
+					? {
+							_id: review._id,
+							title: review.title,
+							rating: review.rating,
+							published: review.published,
+						}
+					: null,
+			};
+		});
 
 		// Filter nulls and sort by most recently updated
 		const validGames = games

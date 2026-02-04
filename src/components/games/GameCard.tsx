@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Gamepad2, Star } from "lucide-react";
+import { memo } from "react";
 
 interface GameCardProps {
 	game: {
@@ -18,7 +19,7 @@ interface GameCardProps {
 	};
 }
 
-export function GameCard({ game }: GameCardProps) {
+export const GameCard = memo(function GameCard({ game }: GameCardProps) {
 	const year = game.releaseDate
 		? new Date(game.releaseDate).getFullYear()
 		: null;
@@ -36,6 +37,7 @@ export function GameCard({ game }: GameCardProps) {
 						<img
 							src={game.coverUrl}
 							alt={game.name}
+							loading="lazy"
 							className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 						/>
 					) : (
@@ -91,4 +93,4 @@ export function GameCard({ game }: GameCardProps) {
 			</article>
 		</Link>
 	);
-}
+});

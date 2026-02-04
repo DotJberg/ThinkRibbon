@@ -2,7 +2,7 @@ import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { Compass, Gamepad2, TrendingUp, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import type { FeedItem } from "../components/feed/FeedItem";
 import { FeedItemCard } from "../components/feed/FeedItem";
@@ -76,35 +76,38 @@ function HomePage() {
 		isLoading = true;
 	}
 
-	const handleCreatePost = async (
-		content: string,
-		images: { url: string; fileKey: string }[],
-		linkPreview?: LinkPreviewData,
-	) => {
-		if (!user) return;
-		await createPostMut({
-			content,
-			authorClerkId: user.id,
-			images:
-				images.length > 0
-					? images.map((img) => ({
-							url: img.url,
-							fileKey: img.fileKey,
-						}))
-					: undefined,
-			linkPreview:
-				images.length === 0 && linkPreview
-					? {
-							url: linkPreview.url,
-							title: linkPreview.title,
-							description: linkPreview.description,
-							imageUrl: linkPreview.imageUrl,
-							siteName: linkPreview.siteName,
-							domain: linkPreview.domain,
-						}
-					: undefined,
-		});
-	};
+	const handleCreatePost = useCallback(
+		async (
+			content: string,
+			images: { url: string; fileKey: string }[],
+			linkPreview?: LinkPreviewData,
+		) => {
+			if (!user) return;
+			await createPostMut({
+				content,
+				authorClerkId: user.id,
+				images:
+					images.length > 0
+						? images.map((img) => ({
+								url: img.url,
+								fileKey: img.fileKey,
+							}))
+						: undefined,
+				linkPreview:
+					images.length === 0 && linkPreview
+						? {
+								url: linkPreview.url,
+								title: linkPreview.title,
+								description: linkPreview.description,
+								imageUrl: linkPreview.imageUrl,
+								siteName: linkPreview.siteName,
+								domain: linkPreview.domain,
+							}
+						: undefined,
+			});
+		},
+		[user, createPostMut],
+	);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
@@ -211,11 +214,9 @@ function HomePage() {
 							</div>
 						) : (
 							// Feed items
-							<>
-								{feedItems.map((item) => (
-									<FeedItemCard key={`${item.type}-${item.id}`} item={item} />
-								))}
-							</>
+							feedItems.map((item) => (
+								<FeedItemCard key={`${item.type}-${item.id}`} item={item} />
+							))
 						)}
 					</div>
 				</div>

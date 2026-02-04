@@ -65,21 +65,20 @@ interface FeedItem {
 	hasLiked: boolean;
 }
 
-async function getTopComment(
-	ctx: any,
+// Helper to get top comment from pre-fetched data
+function getTopCommentFromMaps(
 	targetType: "post" | "article" | "review",
 	targetId: string,
 	currentUserId: Id<"users"> | null,
+	commentsByTarget: Map<string, Doc<"comments">[]>,
+	likesByTarget: Map<string, Doc<"likes">[]>,
+	usersById: Map<string, Doc<"users">>,
 ) {
-	const comments = await ctx.db
-		.query("comments")
-		.withIndex("by_target", (q: any) =>
-			q.eq("targetType", targetType).eq("targetId", targetId),
-		)
-		.collect();
+	const key = `${targetType}-${targetId}`;
+	const comments = commentsByTarget.get(key) || [];
 
 	// Filter top-level comments only
-	const topLevel = comments.filter((c: Doc<"comments">) => !c.parentId);
+	const topLevel = comments.filter((c) => !c.parentId);
 	if (topLevel.length === 0) return undefined;
 
 	// Find comment with most likes
@@ -87,37 +86,27 @@ async function getTopComment(
 	let bestLikeCount = 0;
 
 	for (const comment of topLevel) {
-		const likes = await ctx.db
-			.query("likes")
-			.withIndex("by_target", (q: any) =>
-				q.eq("targetType", "comment").eq("targetId", comment._id),
-			)
-			.collect();
+		const commentLikes = likesByTarget.get(`comment-${comment._id}`) || [];
 		if (
-			likes.length > bestLikeCount ||
-			(likes.length === bestLikeCount &&
+			commentLikes.length > bestLikeCount ||
+			(commentLikes.length === bestLikeCount &&
 				comment._creationTime > best._creationTime)
 		) {
 			best = comment;
-			bestLikeCount = likes.length;
+			bestLikeCount = commentLikes.length;
 		}
 	}
 
-	const author = await ctx.db.get(best.authorId);
-	const likes = await ctx.db
-		.query("likes")
-		.withIndex("by_target", (q: any) =>
-			q.eq("targetType", "comment").eq("targetId", best._id),
-		)
-		.collect();
+	const author = usersById.get(best.authorId as string);
+	const bestLikes = likesByTarget.get(`comment-${best._id}`) || [];
 
 	return {
 		id: best._id,
 		content: best.content,
 		createdAt: best._creationTime,
-		likeCount: likes.length,
+		likeCount: bestLikes.length,
 		hasLiked: currentUserId
-			? likes.some((l: Doc<"likes">) => l.userId === currentUserId)
+			? bestLikes.some((l) => l.userId === currentUserId)
 			: false,
 		author: author
 			? {
@@ -142,37 +131,91 @@ async function enrichItems(
 	reviews: Doc<"reviews">[],
 	currentUserId: Id<"users"> | null,
 ): Promise<FeedItem[]> {
+
+	// Batch fetch all related data upfront
+	const [
+		allLikes,
+		allComments,
+		allPostImages,
+		allPostLinkPreviews,
+		allArticleGames,
+		allGames,
+	] = await Promise.all([
+		ctx.db.query("likes").collect(),
+		ctx.db.query("comments").collect(),
+		ctx.db.query("postImages").collect(),
+		ctx.db.query("postLinkPreviews").collect(),
+		ctx.db.query("articleGames").collect(),
+		ctx.db.query("games").collect(),
+	]);
+
+	// Fetch all users (authors + comment authors)
+	const allUsers = await ctx.db.query("users").collect();
+
+	// Build lookup maps
+	const usersById = new Map<string, Doc<"users">>();
+	for (const user of allUsers) {
+		usersById.set(user._id as string, user);
+	}
+
+	const gamesById = new Map<string, Doc<"games">>();
+	for (const game of allGames) {
+		gamesById.set(game._id as string, game);
+	}
+
+	// Build likes by target (type-id)
+	const likesByTarget = new Map<string, Doc<"likes">[]>();
+	for (const like of allLikes) {
+		const key = `${like.targetType}-${like.targetId}`;
+		if (!likesByTarget.has(key)) likesByTarget.set(key, []);
+		likesByTarget.get(key)!.push(like);
+	}
+
+	// Build comments by target (type-id)
+	const commentsByTarget = new Map<string, Doc<"comments">[]>();
+	for (const comment of allComments) {
+		const key = `${comment.targetType}-${comment.targetId}`;
+		if (!commentsByTarget.has(key)) commentsByTarget.set(key, []);
+		commentsByTarget.get(key)!.push(comment);
+	}
+
+	// Build post images by postId
+	const postImagesByPostId = new Map<string, Doc<"postImages">[]>();
+	for (const img of allPostImages) {
+		const key = img.postId as string;
+		if (!postImagesByPostId.has(key)) postImagesByPostId.set(key, []);
+		postImagesByPostId.get(key)!.push(img);
+	}
+
+	// Build link previews by postId
+	const linkPreviewsByPostId = new Map<string, Doc<"postLinkPreviews">>();
+	for (const preview of allPostLinkPreviews) {
+		linkPreviewsByPostId.set(preview.postId as string, preview);
+	}
+
+	// Build article games by articleId
+	const articleGamesByArticleId = new Map<string, Doc<"articleGames">[]>();
+	for (const ag of allArticleGames) {
+		const key = ag.articleId as string;
+		if (!articleGamesByArticleId.has(key)) articleGamesByArticleId.set(key, []);
+		articleGamesByArticleId.get(key)!.push(ag);
+	}
+
 	const items: FeedItem[] = [];
 
+	// Process posts
 	for (const post of posts) {
-		const author = await ctx.db.get(post.authorId);
+		const author = usersById.get(post.authorId as string);
 		if (!author) continue;
 
-		const likes = await ctx.db
-			.query("likes")
-			.withIndex("by_target", (q: any) =>
-				q.eq("targetType", "post").eq("targetId", post._id),
-			)
-			.collect();
-		const comments = await ctx.db
-			.query("comments")
-			.withIndex("by_target", (q: any) =>
-				q.eq("targetType", "post").eq("targetId", post._id),
-			)
-			.collect();
-
-		const postImages = await ctx.db
-			.query("postImages")
-			.withIndex("by_postId", (q: any) => q.eq("postId", post._id))
-			.collect();
+		const postLikes = likesByTarget.get(`post-${post._id}`) || [];
+		const postComments = commentsByTarget.get(`post-${post._id}`) || [];
+		const postImages = postImagesByPostId.get(post._id as string) || [];
 
 		// Fetch link preview only if no images
 		let linkPreview = undefined;
 		if (postImages.length === 0) {
-			const preview = await ctx.db
-				.query("postLinkPreviews")
-				.withIndex("by_postId", (q: any) => q.eq("postId", post._id))
-				.first();
+			const preview = linkPreviewsByPostId.get(post._id as string);
 			if (preview) {
 				linkPreview = {
 					url: preview.url,
@@ -185,11 +228,13 @@ async function enrichItems(
 			}
 		}
 
-		const topComment = await getTopComment(
-			ctx,
+		const topComment = getTopCommentFromMaps(
 			"post",
-			post._id,
+			post._id as string,
 			currentUserId,
+			commentsByTarget,
+			likesByTarget,
+			usersById,
 		);
 
 		items.push({
@@ -206,54 +251,40 @@ async function enrichItems(
 				avatarUrl: author.avatarUrl,
 			},
 			content: post.content,
-			images: postImages.map((img: Doc<"postImages">) => ({
+			images: postImages.map((img) => ({
 				url: img.url,
 				caption: img.caption,
 			})),
 			linkPreview,
-			likeCount: likes.length,
-			commentCount: comments.length,
+			likeCount: postLikes.length,
+			commentCount: postComments.length,
 			hasLiked: currentUserId
-				? likes.some((l: Doc<"likes">) => l.userId === currentUserId)
+				? postLikes.some((l) => l.userId === currentUserId)
 				: false,
 			topComment,
 		});
 	}
 
+	// Process articles
 	for (const article of articles) {
-		const author = await ctx.db.get(article.authorId);
+		const author = usersById.get(article.authorId as string);
 		if (!author) continue;
 
-		const gameJunctions = await ctx.db
-			.query("articleGames")
-			.withIndex("by_articleId", (q: any) =>
-				q.eq("articleId", article._id),
-			)
-			.collect();
-		const games = (
-			await Promise.all(
-				gameJunctions.map((j: Doc<"articleGames">) => ctx.db.get(j.gameId)),
-			)
-		).filter(Boolean);
+		const gameJunctions = articleGamesByArticleId.get(article._id as string) || [];
+		const games = gameJunctions
+			.map((j) => gamesById.get(j.gameId as string))
+			.filter(Boolean) as Doc<"games">[];
 
-		const likes = await ctx.db
-			.query("likes")
-			.withIndex("by_target", (q: any) =>
-				q.eq("targetType", "article").eq("targetId", article._id),
-			)
-			.collect();
-		const comments = await ctx.db
-			.query("comments")
-			.withIndex("by_target", (q: any) =>
-				q.eq("targetType", "article").eq("targetId", article._id),
-			)
-			.collect();
+		const articleLikes = likesByTarget.get(`article-${article._id}`) || [];
+		const articleComments = commentsByTarget.get(`article-${article._id}`) || [];
 
-		const topComment = await getTopComment(
-			ctx,
+		const topComment = getTopCommentFromMaps(
 			"article",
-			article._id,
+			article._id as string,
 			currentUserId,
+			commentsByTarget,
+			likesByTarget,
+			usersById,
 		);
 
 		items.push({
@@ -272,44 +303,37 @@ async function enrichItems(
 			content: article.content,
 			title: article.title,
 			excerpt: article.excerpt || undefined,
-			games: games.map((g: any) => ({
+			games: games.map((g) => ({
 				_id: g._id,
 				name: g.name,
 				slug: g.slug,
 				coverUrl: g.coverUrl,
 			})),
-			likeCount: likes.length,
-			commentCount: comments.length,
+			likeCount: articleLikes.length,
+			commentCount: articleComments.length,
 			hasLiked: currentUserId
-				? likes.some((l: Doc<"likes">) => l.userId === currentUserId)
+				? articleLikes.some((l) => l.userId === currentUserId)
 				: false,
 			topComment,
 		});
 	}
 
+	// Process reviews
 	for (const review of reviews) {
-		const author = await ctx.db.get(review.authorId);
+		const author = usersById.get(review.authorId as string);
 		if (!author) continue;
 
-		const game = await ctx.db.get(review.gameId);
-		const likes = await ctx.db
-			.query("likes")
-			.withIndex("by_target", (q: any) =>
-				q.eq("targetType", "review").eq("targetId", review._id),
-			)
-			.collect();
-		const comments = await ctx.db
-			.query("comments")
-			.withIndex("by_target", (q: any) =>
-				q.eq("targetType", "review").eq("targetId", review._id),
-			)
-			.collect();
+		const game = gamesById.get(review.gameId as string);
+		const reviewLikes = likesByTarget.get(`review-${review._id}`) || [];
+		const reviewComments = commentsByTarget.get(`review-${review._id}`) || [];
 
-		const topComment = await getTopComment(
-			ctx,
+		const topComment = getTopCommentFromMaps(
 			"review",
-			review._id,
+			review._id as string,
 			currentUserId,
+			commentsByTarget,
+			likesByTarget,
+			usersById,
 		);
 
 		items.push({
@@ -338,10 +362,10 @@ async function enrichItems(
 						coverUrl: game.coverUrl,
 					}
 				: undefined,
-			likeCount: likes.length,
-			commentCount: comments.length,
+			likeCount: reviewLikes.length,
+			commentCount: reviewComments.length,
 			hasLiked: currentUserId
-				? likes.some((l: Doc<"likes">) => l.userId === currentUserId)
+				? reviewLikes.some((l) => l.userId === currentUserId)
 				: false,
 			topComment,
 		});

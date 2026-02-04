@@ -63,24 +63,37 @@ export const getWithReviews = query({
 	handler: async (ctx, args) => {
 		const limit = args.limit || 20;
 
-		const allGames = await ctx.db.query("games").collect();
+		// Batch fetch all data upfront to avoid N+1 queries
+		const [allGames, allReviews, allQuestLogs] = await Promise.all([
+			ctx.db.query("games").collect(),
+			ctx.db.query("reviews").collect(),
+			ctx.db.query("questLogs").collect(),
+		]);
+
+		// Build maps for reviews and quest logs by gameId
+		const reviewsByGameId = new Map<string, typeof allReviews>();
+		for (const review of allReviews) {
+			if (review.published) {
+				const gameId = review.gameId as string;
+				if (!reviewsByGameId.has(gameId)) reviewsByGameId.set(gameId, []);
+				reviewsByGameId.get(gameId)!.push(review);
+			}
+		}
+
+		const questLogsByGameId = new Map<string, typeof allQuestLogs>();
+		for (const questLog of allQuestLogs) {
+			if (questLog.quickRating != null) {
+				const gameId = questLog.gameId as string;
+				if (!questLogsByGameId.has(gameId)) questLogsByGameId.set(gameId, []);
+				questLogsByGameId.get(gameId)!.push(questLog);
+			}
+		}
 
 		// Filter to games that have at least one rating (full review or quick rating)
 		const gamesWithRatings = [];
 		for (const game of allGames) {
-			// Get full reviews
-			const reviews = await ctx.db
-				.query("reviews")
-				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
-				.collect();
-			const publishedReviews = reviews.filter((r) => r.published);
-
-			// Get quick ratings from quest logs
-			const questLogs = await ctx.db
-				.query("questLogs")
-				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
-				.collect();
-			const withQuickRating = questLogs.filter((q) => q.quickRating != null);
+			const publishedReviews = reviewsByGameId.get(game._id as string) || [];
+			const withQuickRating = questLogsByGameId.get(game._id as string) || [];
 
 			const reviewCount = publishedReviews.length;
 			const quickCount = withQuickRating.length;
@@ -139,23 +152,36 @@ export const getHighestRated = query({
 	handler: async (ctx, args) => {
 		const limit = args.limit || 20;
 
-		const allGames = await ctx.db.query("games").collect();
+		// Batch fetch all data upfront to avoid N+1 queries
+		const [allGames, allReviews, allQuestLogs] = await Promise.all([
+			ctx.db.query("games").collect(),
+			ctx.db.query("reviews").collect(),
+			ctx.db.query("questLogs").collect(),
+		]);
+
+		// Build maps for reviews and quest logs by gameId
+		const reviewsByGameId = new Map<string, typeof allReviews>();
+		for (const review of allReviews) {
+			if (review.published) {
+				const gameId = review.gameId as string;
+				if (!reviewsByGameId.has(gameId)) reviewsByGameId.set(gameId, []);
+				reviewsByGameId.get(gameId)!.push(review);
+			}
+		}
+
+		const questLogsByGameId = new Map<string, typeof allQuestLogs>();
+		for (const questLog of allQuestLogs) {
+			if (questLog.quickRating != null) {
+				const gameId = questLog.gameId as string;
+				if (!questLogsByGameId.has(gameId)) questLogsByGameId.set(gameId, []);
+				questLogsByGameId.get(gameId)!.push(questLog);
+			}
+		}
 
 		const gamesWithRatings = [];
 		for (const game of allGames) {
-			// Get full reviews
-			const reviews = await ctx.db
-				.query("reviews")
-				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
-				.collect();
-			const published = reviews.filter((r) => r.published);
-
-			// Get quick ratings from quest logs
-			const questLogs = await ctx.db
-				.query("questLogs")
-				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
-				.collect();
-			const withQuickRating = questLogs.filter((q) => q.quickRating != null);
+			const published = reviewsByGameId.get(game._id as string) || [];
+			const withQuickRating = questLogsByGameId.get(game._id as string) || [];
 
 			const reviewCount = published.length;
 			const quickCount = withQuickRating.length;

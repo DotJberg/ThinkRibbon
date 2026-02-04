@@ -15,7 +15,7 @@ import {
 	Trash2,
 	TrendingUp,
 } from "lucide-react";
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { EditPostModal } from "../posts/EditPostModal";
@@ -109,7 +109,10 @@ interface FeedItemCardProps {
 	onCommentAdded?: () => void;
 }
 
-export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
+export const FeedItemCard = memo(function FeedItemCard({
+	item,
+	onCommentAdded,
+}: FeedItemCardProps) {
 	const { user, isSignedIn } = useUser();
 	const toggleLike = useMutation(api.likes.toggle);
 	const createCommentMut = useMutation(api.comments.create);
@@ -191,60 +194,75 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 	const config = typeConfig[item.type];
 	const Icon = config.icon;
 
-	const handleCommentLike = async (commentId: string) => {
-		if (!isSignedIn || !user || isLikingComment) return;
+	const handleCommentLike = useCallback(
+		async (commentId: string) => {
+			if (!isSignedIn || !user || isLikingComment) return;
 
-		setIsLikingComment(true);
-		const previousHasLiked = hasLikedComment;
-		const previousCount = commentLikeCount;
+			setIsLikingComment(true);
+			const previousHasLiked = hasLikedComment;
+			const previousCount = commentLikeCount;
 
-		setHasLikedComment(!previousHasLiked);
-		setCommentLikeCount(
-			previousHasLiked ? previousCount - 1 : previousCount + 1,
-		);
+			setHasLikedComment(!previousHasLiked);
+			setCommentLikeCount(
+				previousHasLiked ? previousCount - 1 : previousCount + 1,
+			);
 
-		try {
-			const result = await toggleLike({
-				clerkId: user.id,
-				targetType: "comment",
-				targetId: commentId,
-			});
-			if (typeof result.liked === "boolean") {
-				setHasLikedComment(result.liked);
-				if (result.liked !== !previousHasLiked) {
-					setCommentLikeCount(result.liked ? previousCount + 1 : previousCount);
+			try {
+				const result = await toggleLike({
+					clerkId: user.id,
+					targetType: "comment",
+					targetId: commentId,
+				});
+				if (typeof result.liked === "boolean") {
+					setHasLikedComment(result.liked);
+					if (result.liked !== !previousHasLiked) {
+						setCommentLikeCount(
+							result.liked ? previousCount + 1 : previousCount,
+						);
+					}
 				}
+			} catch (error) {
+				console.error("Error liking comment:", error);
+				setHasLikedComment(previousHasLiked);
+				setCommentLikeCount(previousCount);
+			} finally {
+				setIsLikingComment(false);
 			}
-		} catch (error) {
-			console.error("Error liking comment:", error);
-			setHasLikedComment(previousHasLiked);
-			setCommentLikeCount(previousCount);
-		} finally {
-			setIsLikingComment(false);
-		}
-	};
+		},
+		[
+			isSignedIn,
+			user,
+			isLikingComment,
+			hasLikedComment,
+			commentLikeCount,
+			toggleLike,
+		],
+	);
 
-	const handleToggleLike = async (e: React.MouseEvent) => {
-		e.preventDefault();
-		if (!user || isLiking) return;
+	const handleToggleLike = useCallback(
+		async (e: React.MouseEvent) => {
+			e.preventDefault();
+			if (!user || isLiking) return;
 
-		setIsLiking(true);
-		try {
-			const result = await toggleLike({
-				clerkId: user.id,
-				targetType: item.type,
-				targetId: item.id,
-			});
-			setHasLiked(result.liked);
-			setLocalLikeCount((prev) => (result.liked ? prev + 1 : prev - 1));
-		} catch (error) {
-			console.error("Failed to toggle like:", error);
-		} finally {
-			setIsLiking(false);
-		}
-	};
+			setIsLiking(true);
+			try {
+				const result = await toggleLike({
+					clerkId: user.id,
+					targetType: item.type,
+					targetId: item.id,
+				});
+				setHasLiked(result.liked);
+				setLocalLikeCount((prev) => (result.liked ? prev + 1 : prev - 1));
+			} catch (error) {
+				console.error("Failed to toggle like:", error);
+			} finally {
+				setIsLiking(false);
+			}
+		},
+		[user, isLiking, toggleLike, item.type, item.id],
+	);
 
-	const handleSubmitComment = async () => {
+	const handleSubmitComment = useCallback(async () => {
 		if (!commentText.trim() || !user) return;
 		setIsSubmitting(true);
 		try {
@@ -290,7 +308,7 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 		} finally {
 			setIsSubmitting(false);
 		}
-	};
+	}, [commentText, user, createCommentMut, item.type, item.id, onCommentAdded]);
 
 	if (isDeleted) return null;
 
@@ -784,4 +802,4 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 			/>
 		</div>
 	);
-}
+});

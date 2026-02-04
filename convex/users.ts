@@ -316,64 +316,77 @@ export const getDiscoverUsers = query({
 
 		const users = shuffled.slice(0, limit);
 
-		// Enrich with stats
-		const enriched = await Promise.all(
-			users.map(async (user) => {
-				// Count reviews
-				const reviews = await ctx.db
-					.query("reviews")
-					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
-					.collect();
-				const publishedReviews = reviews.filter((r) => r.published);
+		// Batch fetch all related data upfront to avoid N+1 queries
+		const [allReviews, allArticles, allPosts, allCollections, allQuestLogs, allFollows] =
+			await Promise.all([
+				ctx.db.query("reviews").collect(),
+				ctx.db.query("articles").collect(),
+				ctx.db.query("posts").collect(),
+				ctx.db.query("collections").collect(),
+				ctx.db.query("questLogs").collect(),
+				ctx.db.query("follows").collect(),
+			]);
 
-				// Count articles
-				const articles = await ctx.db
-					.query("articles")
-					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
-					.collect();
-				const publishedArticles = articles.filter((a) => a.published);
+		// Build count maps by userId
+		const reviewCountByUser = new Map<string, number>();
+		for (const review of allReviews) {
+			if (review.published) {
+				const authorId = review.authorId as string;
+				reviewCountByUser.set(authorId, (reviewCountByUser.get(authorId) || 0) + 1);
+			}
+		}
 
-				// Count posts
-				const posts = await ctx.db
-					.query("posts")
-					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
-					.collect();
+		const articleCountByUser = new Map<string, number>();
+		for (const article of allArticles) {
+			if (article.published) {
+				const authorId = article.authorId as string;
+				articleCountByUser.set(authorId, (articleCountByUser.get(authorId) || 0) + 1);
+			}
+		}
 
-				// Count collection items
-				const collectionItems = await ctx.db
-					.query("collections")
-					.withIndex("by_userId", (q) => q.eq("userId", user._id))
-					.collect();
+		const postCountByUser = new Map<string, number>();
+		for (const post of allPosts) {
+			const authorId = post.authorId as string;
+			postCountByUser.set(authorId, (postCountByUser.get(authorId) || 0) + 1);
+		}
 
-				// Count quest log entries
-				const questLogEntries = await ctx.db
-					.query("questLogs")
-					.withIndex("by_userId", (q) => q.eq("userId", user._id))
-					.collect();
+		const collectionCountByUser = new Map<string, number>();
+		for (const collection of allCollections) {
+			const userId = collection.userId as string;
+			collectionCountByUser.set(userId, (collectionCountByUser.get(userId) || 0) + 1);
+		}
 
-				// Get follower count
-				const followers = await ctx.db
-					.query("follows")
-					.withIndex("by_followingId", (q) => q.eq("followingId", user._id))
-					.collect();
+		const questLogCountByUser = new Map<string, number>();
+		for (const questLog of allQuestLogs) {
+			const userId = questLog.userId as string;
+			questLogCountByUser.set(userId, (questLogCountByUser.get(userId) || 0) + 1);
+		}
 
-				return {
-					_id: user._id,
-					username: user.username,
-					displayName: user.displayName,
-					avatarUrl: user.avatarUrl,
-					bio: user.bio,
-					_count: {
-						reviews: publishedReviews.length,
-						articles: publishedArticles.length,
-						posts: posts.length,
-						collection: collectionItems.length,
-						questLog: questLogEntries.length,
-						followers: followers.length,
-					},
-				};
-			}),
-		);
+		const followerCountByUser = new Map<string, number>();
+		for (const follow of allFollows) {
+			const followingId = follow.followingId as string;
+			followerCountByUser.set(followingId, (followerCountByUser.get(followingId) || 0) + 1);
+		}
+
+		// Enrich users from pre-computed maps
+		const enriched = users.map((user) => {
+			const id = user._id as string;
+			return {
+				_id: user._id,
+				username: user.username,
+				displayName: user.displayName,
+				avatarUrl: user.avatarUrl,
+				bio: user.bio,
+				_count: {
+					reviews: reviewCountByUser.get(id) || 0,
+					articles: articleCountByUser.get(id) || 0,
+					posts: postCountByUser.get(id) || 0,
+					collection: collectionCountByUser.get(id) || 0,
+					questLog: questLogCountByUser.get(id) || 0,
+					followers: followerCountByUser.get(id) || 0,
+				},
+			};
+		});
 
 		return enriched;
 	},
@@ -424,58 +437,77 @@ export const searchUsers = query({
 			})
 			.slice(0, limit);
 
-		// Enrich with stats
-		const enriched = await Promise.all(
-			matchingUsers.map(async (user) => {
-				const reviews = await ctx.db
-					.query("reviews")
-					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
-					.collect();
-				const publishedReviews = reviews.filter((r) => r.published);
+		// Batch fetch all related data upfront to avoid N+1 queries
+		const [allReviews, allArticles, allPosts, allCollections, allQuestLogs, allFollows] =
+			await Promise.all([
+				ctx.db.query("reviews").collect(),
+				ctx.db.query("articles").collect(),
+				ctx.db.query("posts").collect(),
+				ctx.db.query("collections").collect(),
+				ctx.db.query("questLogs").collect(),
+				ctx.db.query("follows").collect(),
+			]);
 
-				const articles = await ctx.db
-					.query("articles")
-					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
-					.collect();
-				const publishedArticles = articles.filter((a) => a.published);
+		// Build count maps by userId
+		const reviewCountByUser = new Map<string, number>();
+		for (const review of allReviews) {
+			if (review.published) {
+				const authorId = review.authorId as string;
+				reviewCountByUser.set(authorId, (reviewCountByUser.get(authorId) || 0) + 1);
+			}
+		}
 
-				const posts = await ctx.db
-					.query("posts")
-					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
-					.collect();
+		const articleCountByUser = new Map<string, number>();
+		for (const article of allArticles) {
+			if (article.published) {
+				const authorId = article.authorId as string;
+				articleCountByUser.set(authorId, (articleCountByUser.get(authorId) || 0) + 1);
+			}
+		}
 
-				const collectionItems = await ctx.db
-					.query("collections")
-					.withIndex("by_userId", (q) => q.eq("userId", user._id))
-					.collect();
+		const postCountByUser = new Map<string, number>();
+		for (const post of allPosts) {
+			const authorId = post.authorId as string;
+			postCountByUser.set(authorId, (postCountByUser.get(authorId) || 0) + 1);
+		}
 
-				const questLogEntries = await ctx.db
-					.query("questLogs")
-					.withIndex("by_userId", (q) => q.eq("userId", user._id))
-					.collect();
+		const collectionCountByUser = new Map<string, number>();
+		for (const collection of allCollections) {
+			const userId = collection.userId as string;
+			collectionCountByUser.set(userId, (collectionCountByUser.get(userId) || 0) + 1);
+		}
 
-				const followers = await ctx.db
-					.query("follows")
-					.withIndex("by_followingId", (q) => q.eq("followingId", user._id))
-					.collect();
+		const questLogCountByUser = new Map<string, number>();
+		for (const questLog of allQuestLogs) {
+			const userId = questLog.userId as string;
+			questLogCountByUser.set(userId, (questLogCountByUser.get(userId) || 0) + 1);
+		}
 
-				return {
-					_id: user._id,
-					username: user.username,
-					displayName: user.displayName,
-					avatarUrl: user.avatarUrl,
-					bio: user.bio,
-					_count: {
-						reviews: publishedReviews.length,
-						articles: publishedArticles.length,
-						posts: posts.length,
-						collection: collectionItems.length,
-						questLog: questLogEntries.length,
-						followers: followers.length,
-					},
-				};
-			}),
-		);
+		const followerCountByUser = new Map<string, number>();
+		for (const follow of allFollows) {
+			const followingId = follow.followingId as string;
+			followerCountByUser.set(followingId, (followerCountByUser.get(followingId) || 0) + 1);
+		}
+
+		// Enrich users from pre-computed maps
+		const enriched = matchingUsers.map((user) => {
+			const id = user._id as string;
+			return {
+				_id: user._id,
+				username: user.username,
+				displayName: user.displayName,
+				avatarUrl: user.avatarUrl,
+				bio: user.bio,
+				_count: {
+					reviews: reviewCountByUser.get(id) || 0,
+					articles: articleCountByUser.get(id) || 0,
+					posts: postCountByUser.get(id) || 0,
+					collection: collectionCountByUser.get(id) || 0,
+					questLog: questLogCountByUser.get(id) || 0,
+					followers: followerCountByUser.get(id) || 0,
+				},
+			};
+		});
 
 		return enriched;
 	},

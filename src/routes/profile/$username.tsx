@@ -11,7 +11,7 @@ import {
 	UserPlus,
 	Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { FeedItem } from "../../components/feed/FeedItem";
 import { FeedItemCard } from "../../components/feed/FeedItem";
@@ -84,6 +84,60 @@ function ProfilePage() {
 	const articles = articlesData ?? [];
 	const following = followingStatus ?? false;
 
+	// Create unified feed by combining and sorting all content chronologically
+	// Must be called before early returns to maintain hook order
+	const feedItems = useMemo<FeedItem[]>(() => {
+		return [
+			...posts.map((post) => ({
+				type: "post" as const,
+				id: post._id,
+				createdAt: post._creationTime,
+				updatedAt: post.updatedAt,
+				editCount: post.editCount,
+				author: post.author,
+				content: post.content,
+				images: post.images,
+				likeCount: post._count.likes,
+				commentCount: post._count.comments,
+				hasLiked: post.hasLiked ?? false,
+			})),
+			...reviews.map((review) => ({
+				type: "review" as const,
+				id: review._id,
+				createdAt: review._creationTime,
+				updatedAt: review.updatedAt,
+				editCount: review.editCount,
+				author: review.author,
+				content: review.content,
+				title: review.title,
+				rating: review.rating,
+				coverImageUrl: review.coverImageUrl,
+				containsSpoilers: review.containsSpoilers,
+				game: review.game ?? undefined,
+				likeCount: review._count.likes,
+				commentCount: review._count.comments,
+				hasLiked: review.hasLiked ?? false,
+			})),
+			...articles.map((article) => ({
+				type: "article" as const,
+				id: article._id,
+				createdAt: article._creationTime,
+				updatedAt: article.updatedAt,
+				editCount: article.editCount,
+				author: article.author,
+				content: article.content,
+				title: article.title,
+				excerpt: article.excerpt ?? undefined,
+				coverImageUrl: article.coverImageUrl,
+				containsSpoilers: article.containsSpoilers,
+				games: article.games,
+				likeCount: article._count.likes,
+				commentCount: article._count.comments,
+				hasLiked: article.hasLiked ?? false,
+			})),
+		].sort((a, b) => b.createdAt - a.createdAt);
+	}, [posts, reviews, articles]);
+
 	const handleFollowToggle = async () => {
 		if (!currentUser || !profile || isOwnProfile) return;
 		setIsFollowingLoading(true);
@@ -131,57 +185,6 @@ function ProfilePage() {
 		month: "long",
 		year: "numeric",
 	});
-
-	// Create unified feed by combining and sorting all content chronologically
-	const feedItems: FeedItem[] = [
-		...posts.map((post) => ({
-			type: "post" as const,
-			id: post._id,
-			createdAt: post._creationTime,
-			updatedAt: post.updatedAt,
-			editCount: post.editCount,
-			author: post.author,
-			content: post.content,
-			images: post.images,
-			likeCount: post._count.likes,
-			commentCount: post._count.comments,
-			hasLiked: post.hasLiked ?? false,
-		})),
-		...reviews.map((review) => ({
-			type: "review" as const,
-			id: review._id,
-			createdAt: review._creationTime,
-			updatedAt: review.updatedAt,
-			editCount: review.editCount,
-			author: review.author,
-			content: review.content,
-			title: review.title,
-			rating: review.rating,
-			coverImageUrl: review.coverImageUrl,
-			containsSpoilers: review.containsSpoilers,
-			game: review.game ?? undefined,
-			likeCount: review._count.likes,
-			commentCount: review._count.comments,
-			hasLiked: review.hasLiked ?? false,
-		})),
-		...articles.map((article) => ({
-			type: "article" as const,
-			id: article._id,
-			createdAt: article._creationTime,
-			updatedAt: article.updatedAt,
-			editCount: article.editCount,
-			author: article.author,
-			content: article.content,
-			title: article.title,
-			excerpt: article.excerpt ?? undefined,
-			coverImageUrl: article.coverImageUrl,
-			containsSpoilers: article.containsSpoilers,
-			games: article.games,
-			likeCount: article._count.likes,
-			commentCount: article._count.comments,
-			hasLiked: article.hasLiked ?? false,
-		})),
-	].sort((a, b) => b.createdAt - a.createdAt);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">

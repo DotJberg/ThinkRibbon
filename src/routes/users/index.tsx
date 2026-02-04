@@ -9,7 +9,7 @@ import {
 	Star,
 	Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { SafeImage } from "../../components/shared/SafeImage";
 
@@ -42,7 +42,7 @@ interface UserWithStats {
 	};
 }
 
-function UserCard({ user }: { user: UserWithStats }) {
+const UserCard = memo(function UserCard({ user }: { user: UserWithStats }) {
 	const hasActivity =
 		user._count.reviews > 0 ||
 		user._count.articles > 0 ||
@@ -127,7 +127,7 @@ function UserCard({ user }: { user: UserWithStats }) {
 			</div>
 		</Link>
 	);
-}
+});
 
 function UsersPage() {
 	const navigate = useNavigate();

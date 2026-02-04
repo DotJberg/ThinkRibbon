@@ -26,6 +26,20 @@ export const create = mutation({
 			throw new Error("Rating must be between 1 and 5");
 		}
 
+		// Check for existing review on this game
+		const existingReview = await ctx.db
+			.query("reviews")
+			.withIndex("by_authorId_gameId", (q) =>
+				q.eq("authorId", user._id).eq("gameId", args.gameId),
+			)
+			.first();
+
+		if (existingReview) {
+			throw new Error(
+				"You have already reviewed this game. Edit your existing review instead.",
+			);
+		}
+
 		return ctx.db.insert("reviews", {
 			title: args.title,
 			content: args.content,
@@ -146,6 +160,24 @@ export const getById = query({
 			game,
 			_count: { likes: likes.length, comments: comments.length },
 		};
+	},
+});
+
+export const getUserReviewForGame = query({
+	args: { clerkId: v.string(), gameId: v.id("games") },
+	handler: async (ctx, args) => {
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		if (!user) return null;
+
+		return ctx.db
+			.query("reviews")
+			.withIndex("by_authorId_gameId", (q) =>
+				q.eq("authorId", user._id).eq("gameId", args.gameId),
+			)
+			.first();
 	},
 });
 

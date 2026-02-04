@@ -37,6 +37,13 @@ export const upsertFromIgdb = internalMutation({
 	},
 });
 
+export const getById = query({
+	args: { gameId: v.id("games") },
+	handler: async (ctx, args) => {
+		return ctx.db.get(args.gameId);
+	},
+});
+
 export const getBySlug = query({
 	args: { slug: v.string() },
 	handler: async (ctx, args) => {

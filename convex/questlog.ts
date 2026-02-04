@@ -3,17 +3,23 @@ import { mutation, query } from "./_generated/server";
 
 const questLogStatus = v.union(
 	v.literal("Playing"),
+	v.literal("Beaten"),
 	v.literal("Completed"),
 	v.literal("OnHold"),
 	v.literal("Dropped"),
 	v.literal("Backlog"),
 );
 
+// DLC/Expansion categories that shouldn't be added to quest log
+const DLC_CATEGORIES = ["DLC", "Expansion", "Standalone Expansion", "Bundle"];
+
 export const add = mutation({
 	args: {
 		clerkId: v.string(),
 		gameId: v.id("games"),
 		status: v.optional(questLogStatus),
+		platform: v.optional(v.string()),
+		difficulty: v.optional(v.string()),
 		startedAt: v.optional(v.number()),
 		completedAt: v.optional(v.number()),
 		notes: v.optional(v.string()),
@@ -28,6 +34,13 @@ export const add = mutation({
 		const game = await ctx.db.get(args.gameId);
 		if (!game) throw new Error("Game not found");
 
+		// Block DLC/Expansions from being added to quest log
+		if (game.categoryLabel && DLC_CATEGORIES.includes(game.categoryLabel)) {
+			throw new Error(
+				`Cannot add ${game.categoryLabel} to quest log. Only main games can be tracked.`,
+			);
+		}
+
 		// Count displayed games for ordering
 		const displayed = await ctx.db
 			.query("questLogs")
@@ -40,6 +53,8 @@ export const add = mutation({
 			userId: user._id,
 			gameId: args.gameId,
 			status: args.status || "Playing",
+			platform: args.platform,
+			difficulty: args.difficulty,
 			startedAt: args.startedAt || Date.now(),
 			completedAt: args.completedAt,
 			notes: args.notes,
@@ -80,6 +95,8 @@ export const update = mutation({
 		clerkId: v.string(),
 		questLogId: v.id("questLogs"),
 		status: v.optional(questLogStatus),
+		platform: v.optional(v.string()),
+		difficulty: v.optional(v.string()),
 		notes: v.optional(v.string()),
 		hoursPlayed: v.optional(v.number()),
 		startedAt: v.optional(v.number()),
@@ -101,16 +118,24 @@ export const update = mutation({
 
 		const updateData: Record<string, unknown> = { updatedAt: Date.now() };
 		if (args.status !== undefined) updateData.status = args.status;
+		if (args.platform !== undefined) updateData.platform = args.platform;
+		if (args.difficulty !== undefined) updateData.difficulty = args.difficulty;
 		if (args.notes !== undefined) updateData.notes = args.notes;
-		if (args.hoursPlayed !== undefined) updateData.hoursPlayed = args.hoursPlayed;
+		if (args.hoursPlayed !== undefined)
+			updateData.hoursPlayed = args.hoursPlayed;
 		if (args.startedAt !== undefined) updateData.startedAt = args.startedAt;
-		if (args.completedAt !== undefined) updateData.completedAt = args.completedAt;
-		if (args.displayOnProfile !== undefined) updateData.displayOnProfile = args.displayOnProfile;
-		if (args.displayOrder !== undefined) updateData.displayOrder = args.displayOrder;
+		if (args.completedAt !== undefined)
+			updateData.completedAt = args.completedAt;
+		if (args.displayOnProfile !== undefined)
+			updateData.displayOnProfile = args.displayOnProfile;
+		if (args.displayOrder !== undefined)
+			updateData.displayOrder = args.displayOrder;
 
-		// Auto-set completedAt
+		// Auto-set completedAt for Beaten, Completed, or Dropped
 		if (
-			(args.status === "Completed" || args.status === "Dropped") &&
+			(args.status === "Beaten" ||
+				args.status === "Completed" ||
+				args.status === "Dropped") &&
 			args.completedAt === undefined
 		) {
 			updateData.completedAt = Date.now();
@@ -153,7 +178,9 @@ export const updateStatus = mutation({
 			status: args.newStatus,
 			quickRating: args.quickRating,
 			completedAt:
-				args.newStatus === "Completed" || args.newStatus === "Dropped"
+				args.newStatus === "Beaten" ||
+				args.newStatus === "Completed" ||
+				args.newStatus === "Dropped"
 					? Date.now()
 					: questLog.completedAt,
 			updatedAt: Date.now(),
@@ -400,8 +427,10 @@ export const getCombinedRating = query({
 
 function getStatusText(status: string): string {
 	switch (status) {
+		case "Beaten":
+			return "beat";
 		case "Completed":
-			return "completed";
+			return "100% completed";
 		case "Dropped":
 			return "dropped";
 		case "OnHold":

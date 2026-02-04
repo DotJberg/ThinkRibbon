@@ -3,8 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import {
 	Calendar,
+	ChevronRight,
 	Edit,
 	FileText,
+	Package,
 	UserMinus,
 	UserPlus,
 	Users,
@@ -69,6 +71,9 @@ function ProfilePage() {
 			? { clerkId: currentUser.id, targetUserId: profile._id }
 			: "skip",
 	);
+	const collectionStats = useQuery(api.collections.getCollectionStats, {
+		username,
+	});
 
 	const followUserMut = useMutation(api.users.followUser);
 	const unfollowUserMut = useMutation(api.users.unfollowUser);
@@ -317,6 +322,107 @@ function ProfilePage() {
 						</p>
 					)}
 				</div>
+
+				{/* Collection Section */}
+				{collectionStats && collectionStats.totalOwned > 0 && (
+					<div className="mb-6 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
+						<div className="flex items-center justify-between mb-4">
+							<div className="flex items-center gap-2">
+								<Package size={20} className="text-purple-400" />
+								<h3 className="font-semibold text-white">Game Collection</h3>
+							</div>
+							<Link
+								to="/collection/$username"
+								params={{ username }}
+								className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+							>
+								View All
+								<ChevronRight size={16} />
+							</Link>
+						</div>
+
+						{/* Stats Grid */}
+						<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3">
+							{/* Total Owned */}
+							<div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+								<div className="text-2xl font-bold text-purple-400">
+									{collectionStats.totalOwned}
+								</div>
+								<div className="text-xs text-gray-400">Owned</div>
+							</div>
+
+							{/* Playing */}
+							{collectionStats.playing > 0 && (
+								<div className="text-center p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+									<div className="text-2xl font-bold text-green-400">
+										{collectionStats.playing}
+									</div>
+									<div className="text-xs text-gray-400">Playing</div>
+								</div>
+							)}
+
+							{/* Beaten */}
+							{collectionStats.beaten > 0 && (
+								<div className="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+									<div className="text-2xl font-bold text-blue-400">
+										{collectionStats.beaten}
+									</div>
+									<div className="text-xs text-gray-400">Beaten</div>
+								</div>
+							)}
+
+							{/* Completed */}
+							{collectionStats.completed > 0 && (
+								<div className="text-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+									<div className="text-2xl font-bold text-amber-400">
+										{collectionStats.completed}
+									</div>
+									<div className="text-xs text-gray-400">Completed</div>
+								</div>
+							)}
+
+							{/* Backlog */}
+							{collectionStats.backlog > 0 && (
+								<div className="text-center p-3 bg-gray-500/10 rounded-lg border border-gray-500/20">
+									<div className="text-2xl font-bold text-gray-400">
+										{collectionStats.backlog}
+									</div>
+									<div className="text-xs text-gray-400">Backlog</div>
+								</div>
+							)}
+
+							{/* On Hold */}
+							{collectionStats.onHold > 0 && (
+								<div className="text-center p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+									<div className="text-2xl font-bold text-yellow-400">
+										{collectionStats.onHold}
+									</div>
+									<div className="text-xs text-gray-400">On Hold</div>
+								</div>
+							)}
+
+							{/* Dropped */}
+							{collectionStats.dropped > 0 && (
+								<div className="text-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+									<div className="text-2xl font-bold text-red-400">
+										{collectionStats.dropped}
+									</div>
+									<div className="text-xs text-gray-400">Dropped</div>
+								</div>
+							)}
+
+							{/* Unplayed */}
+							{collectionStats.unplayed > 0 && (
+								<div className="text-center p-3 bg-slate-500/10 rounded-lg border border-slate-500/20">
+									<div className="text-2xl font-bold text-slate-400">
+										{collectionStats.unplayed}
+									</div>
+									<div className="text-xs text-gray-400">Unplayed</div>
+								</div>
+							)}
+						</div>
+					</div>
+				)}
 
 				{/* Now Playing / Quest Log */}
 				<NowPlaying username={username} isOwnProfile={!!isOwnProfile} />

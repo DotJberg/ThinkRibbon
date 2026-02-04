@@ -10,6 +10,7 @@
 
 import type * as articles from "../articles.js";
 import type * as cleanup from "../cleanup.js";
+import type * as collections from "../collections.js";
 import type * as comments from "../comments.js";
 import type * as crons from "../crons.js";
 import type * as drafts from "../drafts.js";
@@ -18,6 +19,7 @@ import type * as games from "../games.js";
 import type * as igdb from "../igdb.js";
 import type * as images from "../images.js";
 import type * as likes from "../likes.js";
+import type * as migrations_migrateCompletedToBeaten from "../migrations/migrateCompletedToBeaten.js";
 import type * as posts from "../posts.js";
 import type * as questlog from "../questlog.js";
 import type * as reports from "../reports.js";
@@ -33,6 +35,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   articles: typeof articles;
   cleanup: typeof cleanup;
+  collections: typeof collections;
   comments: typeof comments;
   crons: typeof crons;
   drafts: typeof drafts;
@@ -41,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   igdb: typeof igdb;
   images: typeof images;
   likes: typeof likes;
+  "migrations/migrateCompletedToBeaten": typeof migrations_migrateCompletedToBeaten;
   posts: typeof posts;
   questlog: typeof questlog;
   reports: typeof reports;

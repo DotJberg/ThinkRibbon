@@ -7,7 +7,7 @@ import {
 } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Package, Settings, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 
@@ -74,6 +74,15 @@ export default function HeaderUser() {
 							>
 								<User size={18} />
 								<span>My Profile</span>
+							</Link>
+							<Link
+								to="/collection/$username"
+								params={{ username }}
+								onClick={() => setIsOpen(false)}
+								className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+							>
+								<Package size={18} />
+								<span>My Collection</span>
 							</Link>
 							<button
 								type="button"

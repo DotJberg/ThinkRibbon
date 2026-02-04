@@ -7,6 +7,7 @@ import { api } from "../../../convex/_generated/api";
 
 type QuestLogStatus =
 	| "Playing"
+	| "Beaten"
 	| "Completed"
 	| "OnHold"
 	| "Dropped"
@@ -29,10 +30,15 @@ const statusConfig: Record<
 		color: "text-green-400",
 		bgColor: "bg-green-500/20",
 	},
-	Completed: {
-		label: "Completed",
+	Beaten: {
+		label: "Beaten",
 		color: "text-blue-400",
 		bgColor: "bg-blue-500/20",
+	},
+	Completed: {
+		label: "100%",
+		color: "text-purple-400",
+		bgColor: "bg-purple-500/20",
 	},
 	OnHold: {
 		label: "On Hold",
@@ -87,13 +93,14 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 						<Gamepad2 size={20} className="text-purple-400" />
 						<h3 className="font-semibold text-white">Now Playing</h3>
 					</div>
-					<a
-						href={`/questlog/${username}`}
+					<Link
+						to="/questlog/$username"
+						params={{ username }}
 						className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
 					>
-						View Quest Log
+						Quest Log
 						<ChevronRight size={16} />
-					</a>
+					</Link>
 				</div>
 				<p className="text-gray-500 text-sm">
 					{isOwnProfile
@@ -112,13 +119,14 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 						<Gamepad2 size={20} className="text-purple-400" />
 						<h3 className="font-semibold text-white">Now Playing</h3>
 					</div>
-					<a
-						href={`/questlog/${username}`}
+					<Link
+						to="/questlog/$username"
+						params={{ username }}
 						className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
 					>
-						View Quest Log
+						Quest Log
 						<ChevronRight size={16} />
-					</a>
+					</Link>
 				</div>
 
 				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
@@ -207,6 +215,9 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 					questLogId={selectedEntry._id}
 					currentStartedAt={selectedEntry.startedAt}
 					currentCompletedAt={selectedEntry.completedAt}
+					currentPlatform={selectedEntry.platform}
+					currentDifficulty={selectedEntry.difficulty}
+					gamePlatforms={selectedEntry.game?.platforms ?? []}
 				/>
 			)}
 		</>

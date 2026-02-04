@@ -1,11 +1,12 @@
 import { useMutation } from "convex/react";
-import { Calendar, Loader2, Share2, Star, X } from "lucide-react";
+import { Calendar, Loader2, Monitor, Share2, Star, X } from "lucide-react";
 import { useId, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 type QuestLogStatus =
 	| "Playing"
+	| "Beaten"
 	| "Completed"
 	| "OnHold"
 	| "Dropped"
@@ -22,13 +23,26 @@ interface StatusChangeModalProps {
 	questLogId: string;
 	currentStartedAt?: number | null;
 	currentCompletedAt?: number | null;
+	currentPlatform?: string | null;
+	currentDifficulty?: string | null;
+	gamePlatforms?: string[];
 }
+
+const difficultySuggestions = [
+	"Story Mode",
+	"Easy",
+	"Normal",
+	"Hard",
+	"Hardest",
+	"No Difficulty",
+];
 
 type ReviewOption = "none" | "quick" | "full";
 
 const statusOptions: { value: QuestLogStatus; label: string; emoji: string }[] =
 	[
-		{ value: "Completed", label: "Completed", emoji: "🏆" },
+		{ value: "Beaten", label: "Beaten", emoji: "🏆" },
+		{ value: "Completed", label: "100% Complete", emoji: "💯" },
 		{ value: "OnHold", label: "On Hold", emoji: "⏸️" },
 		{ value: "Dropped", label: "Dropped", emoji: "❌" },
 		{ value: "Backlog", label: "Backlog", emoji: "📚" },
@@ -52,12 +66,17 @@ export function StatusChangeModal({
 	questLogId,
 	currentStartedAt,
 	currentCompletedAt,
+	currentPlatform,
+	currentDifficulty,
+	gamePlatforms = [],
 }: StatusChangeModalProps) {
 	const updateQuestLogMut = useMutation(api.questlog.update);
 	const updateQuestLogStatusMut = useMutation(api.questlog.updateStatus);
 	const [newStatus, setNewStatus] = useState<QuestLogStatus>(
-		currentStatus === "Playing" ? "Completed" : currentStatus,
+		currentStatus === "Playing" ? "Beaten" : currentStatus,
 	);
+	const [platform, setPlatform] = useState<string>(currentPlatform ?? "");
+	const [difficulty, setDifficulty] = useState<string>(currentDifficulty ?? "");
 	const [reviewOption, setReviewOption] = useState<ReviewOption>("none");
 	const [quickRating, setQuickRating] = useState<number>(0);
 	const [shareAsPost, setShareAsPost] = useState(false);
@@ -71,11 +90,15 @@ export function StatusChangeModal({
 	);
 	const startedId = useId();
 	const completedId = useId();
+	const platformId = useId();
+	const difficultyId = useId();
+	const difficultyListId = useId();
 
 	if (!isOpen) return null;
 
 	const statusText = {
-		Completed: "completed",
+		Beaten: "beat",
+		Completed: "100% completed",
 		Dropped: "dropped",
 		OnHold: "put on hold",
 		Playing: "started playing",
@@ -103,11 +126,13 @@ export function StatusChangeModal({
 					shareAsPost,
 				});
 			} else {
-				// Use updateQuestLog to update status and dates
+				// Use updateQuestLog to update status, dates, platform, and difficulty
 				await updateQuestLogMut({
 					clerkId,
 					questLogId: questLogId as Id<"questLogs">,
 					status: newStatus,
+					platform: platform || undefined,
+					difficulty: difficulty || undefined,
 					startedAt: startedAt ? new Date(startedAt).getTime() : undefined,
 					completedAt: completedAt
 						? new Date(completedAt).getTime()
@@ -129,7 +154,7 @@ export function StatusChangeModal({
 			<div className="w-full max-w-md max-h-[90vh] bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
 				{/* Header */}
 				<div className="flex items-center justify-between p-5 border-b border-gray-800">
-					<h2 className="text-lg font-bold text-white">Update Status</h2>
+					<h2 className="text-lg font-bold text-white">Update Playthrough</h2>
 					<button
 						type="button"
 						onClick={onClose}
@@ -142,7 +167,7 @@ export function StatusChangeModal({
 				<div className="p-5 space-y-5 overflow-y-auto flex-1">
 					{/* Game Name */}
 					<div className="text-center">
-						<p className="text-gray-400 text-sm">Updating status for</p>
+						<p className="text-gray-400 text-sm">Updating playthrough for</p>
 						<p className="text-white font-semibold text-lg">{gameName}</p>
 					</div>
 
@@ -171,11 +196,11 @@ export function StatusChangeModal({
 						</div>
 					</div>
 
-					{/* Review Options */}
-					<div className="space-y-3 mb-4">
+					{/* Dates */}
+					<div className="space-y-3">
 						<span className="text-sm font-medium text-gray-400 flex items-center gap-2">
 							<Calendar size={14} />
-							Edit Dates
+							Dates
 						</span>
 
 						{/* Started Date */}
@@ -192,11 +217,18 @@ export function StatusChangeModal({
 							/>
 						</div>
 
-						{/* Completed/Dropped Date */}
-						{(newStatus === "Completed" || newStatus === "Dropped") && (
+						{/* Completed/Dropped/Beaten Date */}
+						{(newStatus === "Beaten" ||
+							newStatus === "Completed" ||
+							newStatus === "Dropped") && (
 							<div className="space-y-1">
 								<label htmlFor={completedId} className="text-xs text-gray-500">
-									{newStatus === "Completed" ? "Completed" : "Dropped"} Date
+									{newStatus === "Beaten"
+										? "Finished"
+										: newStatus === "Completed"
+											? "Completed"
+											: "Dropped"}{" "}
+									Date
 								</label>
 								<input
 									id={completedId}
@@ -207,6 +239,72 @@ export function StatusChangeModal({
 								/>
 							</div>
 						)}
+					</div>
+
+					{/* Platform Selection */}
+					{gamePlatforms.length > 0 && (
+						<div className="space-y-2">
+							<label
+								htmlFor={platformId}
+								className="text-sm font-medium text-gray-400 flex items-center gap-2"
+							>
+								<Monitor size={14} />
+								Platform Played On
+							</label>
+							<select
+								id={platformId}
+								value={platform}
+								onChange={(e) => setPlatform(e.target.value)}
+								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+							>
+								<option value="">Select platform...</option>
+								{gamePlatforms.map((p) => (
+									<option key={p} value={p}>
+										{p}
+									</option>
+								))}
+							</select>
+						</div>
+					)}
+
+					{/* Difficulty */}
+					<div className="space-y-2">
+						<label
+							htmlFor={difficultyId}
+							className="text-sm font-medium text-gray-400"
+						>
+							Difficulty (Optional)
+						</label>
+						<input
+							id={difficultyId}
+							type="text"
+							value={difficulty}
+							onChange={(e) => setDifficulty(e.target.value)}
+							placeholder="e.g., Hard, Normal, Story Mode"
+							list={difficultyListId}
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+						/>
+						<datalist id={difficultyListId}>
+							{difficultySuggestions.map((d) => (
+								<option key={d} value={d} />
+							))}
+						</datalist>
+						<div className="flex flex-wrap gap-1">
+							{difficultySuggestions.slice(0, 4).map((d) => (
+								<button
+									key={d}
+									type="button"
+									onClick={() => setDifficulty(d)}
+									className={`px-2 py-0.5 text-xs rounded-full transition-colors ${
+										difficulty === d
+											? "bg-purple-600 text-white"
+											: "bg-gray-700 text-gray-400 hover:text-white"
+									}`}
+								>
+									{d}
+								</button>
+							))}
+						</div>
 					</div>
 
 					{/* Review Options - only show when moving from Playing status */}

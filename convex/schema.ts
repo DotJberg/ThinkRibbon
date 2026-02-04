@@ -215,11 +215,14 @@ export default defineSchema({
 		gameId: v.id("games"),
 		status: v.union(
 			v.literal("Playing"),
+			v.literal("Beaten"),
 			v.literal("Completed"),
 			v.literal("OnHold"),
 			v.literal("Dropped"),
 			v.literal("Backlog"),
 		),
+		platform: v.optional(v.string()), // Platform played on for this playthrough
+		difficulty: v.optional(v.string()), // Difficulty setting (e.g., "Hard", "Story Mode")
 		startedAt: v.optional(v.number()),
 		completedAt: v.optional(v.number()),
 		hoursPlayed: v.optional(v.number()),
@@ -228,11 +231,39 @@ export default defineSchema({
 		displayOnProfile: v.boolean(),
 		displayOrder: v.number(),
 		updatedAt: v.optional(v.number()),
-			})
+	})
 		.index("by_userId_gameId", ["userId", "gameId"])
 		.index("by_userId_status", ["userId", "status"])
 		.index("by_userId_display", ["userId", "displayOnProfile"])
 		.index("by_userId", ["userId"])
+		.index("by_gameId", ["gameId"]),
+
+	collections: defineTable({
+		userId: v.id("users"),
+		gameId: v.id("games"),
+		ownershipType: v.union(
+			v.literal("Physical"),
+			v.literal("Digital"),
+		),
+		status: v.optional(
+			v.union(
+				v.literal("Unplayed"),
+				v.literal("Playing"),
+				v.literal("Beaten"),
+				v.literal("Completed"),
+				v.literal("OnHold"),
+				v.literal("Dropped"),
+				v.literal("Backlog"),
+			),
+		),
+		platform: v.optional(v.string()), // Platform owned on
+		difficulty: v.optional(v.string()), // Difficulty setting planned/used
+		acquiredAt: v.optional(v.number()),
+		notes: v.optional(v.string()), // Deprecated - kept for backwards compatibility
+		updatedAt: v.optional(v.number()),
+	})
+		.index("by_userId", ["userId"])
+		.index("by_userId_gameId", ["userId", "gameId"])
 		.index("by_gameId", ["gameId"]),
 
 	reports: defineTable({

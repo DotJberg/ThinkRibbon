@@ -22,6 +22,7 @@ import { Route as QuestlogUsernameRouteImport } from './routes/questlog/$usernam
 import { Route as ProfileUsernameRouteImport } from './routes/profile/$username'
 import { Route as PostsIdRouteImport } from './routes/posts/$id'
 import { Route as GamesSlugRouteImport } from './routes/games/$slug'
+import { Route as CollectionUsernameRouteImport } from './routes/collection/$username'
 import { Route as ArticlesNewRouteImport } from './routes/articles/new'
 import { Route as ArticlesIdRouteImport } from './routes/articles/$id'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
@@ -94,6 +95,11 @@ const GamesSlugRoute = GamesSlugRouteImport.update({
   path: '/games/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollectionUsernameRoute = CollectionUsernameRouteImport.update({
+  id: '/collection/$username',
+  path: '/collection/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArticlesNewRoute = ArticlesNewRouteImport.update({
   id: '/articles/new',
   path: '/articles/new',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
+  '/collection/$username': typeof CollectionUsernameRoute
   '/games/$slug': typeof GamesSlugRoute
   '/posts/$id': typeof PostsIdRoute
   '/profile/$username': typeof ProfileUsernameRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
+  '/collection/$username': typeof CollectionUsernameRoute
   '/games/$slug': typeof GamesSlugRoute
   '/posts/$id': typeof PostsIdRoute
   '/profile/$username': typeof ProfileUsernameRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
+  '/collection/$username': typeof CollectionUsernameRoute
   '/games/$slug': typeof GamesSlugRoute
   '/posts/$id': typeof PostsIdRoute
   '/profile/$username': typeof ProfileUsernameRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
+    | '/collection/$username'
     | '/games/$slug'
     | '/posts/$id'
     | '/profile/$username'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
+    | '/collection/$username'
     | '/games/$slug'
     | '/posts/$id'
     | '/profile/$username'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
+    | '/collection/$username'
     | '/games/$slug'
     | '/posts/$id'
     | '/profile/$username'
@@ -263,6 +275,7 @@ export interface RootRouteChildren {
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ArticlesIdRoute: typeof ArticlesIdRoute
   ArticlesNewRoute: typeof ArticlesNewRoute
+  CollectionUsernameRoute: typeof CollectionUsernameRoute
   GamesSlugRoute: typeof GamesSlugRoute
   PostsIdRoute: typeof PostsIdRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
@@ -370,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collection/$username': {
+      id: '/collection/$username'
+      path: '/collection/$username'
+      fullPath: '/collection/$username'
+      preLoaderRoute: typeof CollectionUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/articles/new': {
       id: '/articles/new'
       path: '/articles/new'
@@ -423,6 +443,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUploadthingRoute: ApiUploadthingRoute,
   ArticlesIdRoute: ArticlesIdRoute,
   ArticlesNewRoute: ArticlesNewRoute,
+  CollectionUsernameRoute: CollectionUsernameRoute,
   GamesSlugRoute: GamesSlugRoute,
   PostsIdRoute: PostsIdRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,

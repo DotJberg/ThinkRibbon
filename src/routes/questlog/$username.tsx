@@ -18,6 +18,7 @@ import { StatusChangeModal } from "../../components/questlog/StatusChangeModal";
 
 type QuestLogStatus =
 	| "Playing"
+	| "Beaten"
 	| "Completed"
 	| "OnHold"
 	| "Dropped"
@@ -31,6 +32,8 @@ type QuestLogEntry = {
 	_id: string;
 	gameId: string;
 	status: QuestLogStatus;
+	platform?: string;
+	difficulty?: string;
 	startedAt?: number;
 	completedAt?: number;
 	notes?: string;
@@ -41,12 +44,14 @@ type QuestLogEntry = {
 		name: string;
 		slug: string;
 		coverUrl?: string;
+		platforms?: string[];
 	} | null;
 };
 
 const statusLabels: Record<QuestLogStatus, string> = {
 	Playing: "Playing",
-	Completed: "Completed",
+	Beaten: "Beaten",
+	Completed: "100%",
 	OnHold: "On Hold",
 	Dropped: "Dropped",
 	Backlog: "Backlog",
@@ -54,7 +59,8 @@ const statusLabels: Record<QuestLogStatus, string> = {
 
 const statusColors: Record<QuestLogStatus, string> = {
 	Playing: "bg-green-500",
-	Completed: "bg-blue-500",
+	Beaten: "bg-blue-500",
+	Completed: "bg-purple-500",
 	OnHold: "bg-yellow-500",
 	Dropped: "bg-red-500",
 	Backlog: "bg-gray-500",
@@ -280,6 +286,9 @@ function QuestLogPage() {
 					questLogId={editingEntry._id}
 					currentStartedAt={editingEntry.startedAt}
 					currentCompletedAt={editingEntry.completedAt}
+					currentPlatform={editingEntry.platform}
+					currentDifficulty={editingEntry.difficulty}
+					gamePlatforms={editingEntry.game?.platforms ?? []}
 				/>
 			)}
 		</div>

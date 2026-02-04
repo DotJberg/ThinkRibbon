@@ -7,6 +7,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 
 type QuestLogStatus =
 	| "Playing"
+	| "Beaten"
 	| "Completed"
 	| "OnHold"
 	| "Dropped"
@@ -18,12 +19,14 @@ import { StatusChangeModal } from "./StatusChangeModal";
 interface QuestLogButtonProps {
 	gameId: string;
 	gameName: string;
+	gamePlatforms?: string[];
 	onUpdate?: () => void;
 }
 
 const statusLabels: Record<QuestLogStatus, string> = {
 	Playing: "Playing",
-	Completed: "Completed",
+	Beaten: "Beaten",
+	Completed: "100%",
 	OnHold: "On Hold",
 	Dropped: "Dropped",
 	Backlog: "Backlog",
@@ -31,7 +34,8 @@ const statusLabels: Record<QuestLogStatus, string> = {
 
 const statusColors: Record<QuestLogStatus, string> = {
 	Playing: "from-green-600 to-green-500",
-	Completed: "from-blue-600 to-blue-500",
+	Beaten: "from-blue-600 to-blue-500",
+	Completed: "from-purple-600 to-purple-500",
 	OnHold: "from-yellow-600 to-yellow-500",
 	Dropped: "from-red-600 to-red-500",
 	Backlog: "from-gray-600 to-gray-500",
@@ -40,6 +44,7 @@ const statusColors: Record<QuestLogStatus, string> = {
 export function QuestLogButton({
 	gameId,
 	gameName,
+	gamePlatforms = [],
 	onUpdate,
 }: QuestLogButtonProps) {
 	const { user, isSignedIn } = useUser();
@@ -96,6 +101,7 @@ export function QuestLogButton({
 					clerkId={user.id}
 					gameId={gameId}
 					gameName={gameName}
+					gamePlatforms={gamePlatforms}
 				/>
 			</>
 		);
@@ -110,7 +116,7 @@ export function QuestLogButton({
 					onClick={() => setShowStatusModal(true)}
 					className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${statusColors[entry.status]} text-white font-medium rounded-lg shadow-lg hover:opacity-90 transition-all`}
 				>
-					{entry.status === "Completed" ? (
+					{entry.status === "Beaten" || entry.status === "Completed" ? (
 						<Check size={18} />
 					) : (
 						<BookOpen size={18} />
@@ -145,6 +151,9 @@ export function QuestLogButton({
 				questLogId={entry._id}
 				currentStartedAt={entry.startedAt}
 				currentCompletedAt={entry.completedAt}
+				currentPlatform={entry.platform}
+				currentDifficulty={entry.difficulty}
+				gamePlatforms={gamePlatforms}
 			/>
 
 			<AddEntryModal
@@ -154,6 +163,7 @@ export function QuestLogButton({
 				clerkId={user.id}
 				gameId={gameId}
 				gameName={gameName}
+				gamePlatforms={gamePlatforms}
 			/>
 		</>
 	);

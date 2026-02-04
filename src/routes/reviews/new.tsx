@@ -21,16 +21,27 @@ import { StarRating } from "../../components/shared/StarRating";
 
 export const Route = createFileRoute("/reviews/new")({
 	component: NewReviewPage,
-	validateSearch: (search: Record<string, unknown>) => ({
+	validateSearch: (
+		search: Record<string, unknown>,
+	): {
+		gameId?: string;
+		draftId?: string;
+		rating?: number;
+	} => ({
 		gameId: search.gameId as string | undefined,
 		draftId: search.draftId as string | undefined,
+		rating: search.rating ? Number(search.rating) : undefined,
 	}),
 });
 
 function NewReviewPage() {
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
-	const { gameId: _gameId, draftId: initialDraftId } = Route.useSearch();
+	const {
+		gameId: preselectedGameId,
+		draftId: initialDraftId,
+		rating: initialRating,
+	} = Route.useSearch();
 	const id = useId();
 
 	// Game selection state
@@ -55,7 +66,7 @@ function NewReviewPage() {
 	// Form state
 	const [title, setTitle] = useState("");
 	const [content, setContent] = useState(""); // TipTap JSON string
-	const [rating, setRating] = useState(0);
+	const [rating, setRating] = useState(initialRating ?? 0);
 	const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
@@ -89,6 +100,20 @@ function NewReviewPage() {
 	const deleteReviewDraftMut = useMutation(api.drafts.deleteReviewDraft);
 	const searchAndCache = useAction(api.igdb.searchAndCache);
 
+	// Load preselected game if gameId is provided
+	const preselectedGameData = useQuery(
+		api.games.getById,
+		preselectedGameId ? { gameId: preselectedGameId as Id<"games"> } : "skip",
+	);
+
+	// Check for existing review on preselected game
+	const existingReview = useQuery(
+		api.reviews.getUserReviewForGame,
+		user && preselectedGameId
+			? { clerkId: user.id, gameId: preselectedGameId as Id<"games"> }
+			: "skip",
+	);
+
 	// Load drafts from Convex
 	const draftsData = useQuery(
 		api.drafts.getReviewDrafts,
@@ -96,12 +121,28 @@ function NewReviewPage() {
 	);
 	const availableDrafts = draftsData ?? [];
 
-	// Show draft picker when drafts load
+	// Show draft picker when drafts load (but not if we have a preselected game)
 	useEffect(() => {
-		if (availableDrafts.length > 0 && !draftId && !initialDraftId) {
+		if (
+			availableDrafts.length > 0 &&
+			!draftId &&
+			!initialDraftId &&
+			!preselectedGameId
+		) {
 			setShowDraftPicker(true);
 		}
-	}, [availableDrafts.length, draftId, initialDraftId]);
+	}, [availableDrafts.length, draftId, initialDraftId, preselectedGameId]);
+
+	// Set preselected game when data loads
+	useEffect(() => {
+		if (preselectedGameData && !selectedGame) {
+			setSelectedGame({
+				id: preselectedGameData._id,
+				name: preselectedGameData.name,
+				coverUrl: preselectedGameData.coverUrl ?? null,
+			});
+		}
+	}, [preselectedGameData, selectedGame]);
 
 	// Load draft if draftId is provided
 	const allDraftsForLoad = useQuery(
@@ -312,6 +353,41 @@ function NewReviewPage() {
 					<Link to="/sign-in" className="text-purple-400 hover:underline">
 						Sign In
 					</Link>
+				</div>
+			</div>
+		);
+	}
+
+	// Show redirect if user already has a review for this game
+	if (existingReview && preselectedGameData) {
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center p-4">
+				<div className="bg-gray-900 border border-gray-700 rounded-xl max-w-lg w-full p-6 text-center">
+					<div className="w-16 h-16 mx-auto mb-4 bg-yellow-500/20 rounded-full flex items-center justify-center">
+						<FileText className="text-yellow-400" size={32} />
+					</div>
+					<h2 className="text-xl font-semibold text-white mb-2">
+						You already reviewed this game
+					</h2>
+					<p className="text-gray-400 mb-6">
+						You can only have one review per game. Would you like to edit your
+						existing review for {preselectedGameData.name}?
+					</p>
+					<div className="flex gap-3 justify-center">
+						<Link
+							to="/"
+							className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+						>
+							Go Back
+						</Link>
+						<Link
+							to="/reviews/edit/$id"
+							params={{ id: existingReview._id }}
+							className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transition-all"
+						>
+							Edit Review
+						</Link>
+					</div>
 				</div>
 			</div>
 		);

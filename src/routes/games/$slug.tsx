@@ -4,6 +4,7 @@ import { useAction, useQuery } from "convex/react";
 import { ArrowLeft, Calendar, FileText, Gamepad2, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { CollectionButton } from "../../components/collection/CollectionButton";
 import { QuestLogButton } from "../../components/questlog/QuestLogButton";
 import { ReviewCard } from "../../components/reviews/ReviewCard";
 import { StarRatingDisplay } from "../../components/shared/StarRating";
@@ -155,7 +156,17 @@ function GameDetailPage() {
 
 							{isSignedIn && (
 								<div className="flex flex-wrap gap-3">
-									<QuestLogButton gameId={game._id} gameName={game.name} />
+									<QuestLogButton
+										gameId={game._id}
+										gameName={game.name}
+										gamePlatforms={game.platforms}
+									/>
+									<CollectionButton
+										gameId={game._id}
+										gameName={game.name}
+										gamePlatforms={game.platforms}
+										categoryLabel={game.categoryLabel}
+									/>
 									<Link
 										to="/reviews/new"
 										search={{ gameId: game._id, draftId: undefined }}

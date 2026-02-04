@@ -256,17 +256,28 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 			});
 
 			if (newComment) {
+				// Type assertion for the comment response from Convex
+				const comment = newComment as {
+					_id: string;
+					content: string;
+					author: {
+						_id: string;
+						username: string;
+						displayName?: string;
+						avatarUrl?: string;
+					};
+				};
 				setLocalTopComment({
-					id: (newComment as any)._id,
-					content: (newComment as any).content,
+					id: comment._id,
+					content: comment.content,
 					createdAt: Date.now(),
 					likeCount: 0,
 					hasLiked: false,
 					author: {
-						_id: (newComment as any).author._id,
-						username: (newComment as any).author.username,
-						displayName: (newComment as any).author.displayName,
-						avatarUrl: (newComment as any).author.avatarUrl,
+						_id: comment.author._id,
+						username: comment.author.username,
+						displayName: comment.author.displayName,
+						avatarUrl: comment.author.avatarUrl,
 					},
 				});
 			}

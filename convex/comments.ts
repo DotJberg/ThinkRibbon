@@ -193,7 +193,12 @@ export const deleteComment = mutation({
 		if (!comment) throw new Error("Comment not found");
 
 		const author = await ctx.db.get(comment.authorId);
-		if (!author || author.clerkId !== args.clerkId) {
+		const requestingUser = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		const isAdmin = requestingUser?.admin === true;
+		if (!author || (author.clerkId !== args.clerkId && !isAdmin)) {
 			throw new Error("Unauthorized");
 		}
 

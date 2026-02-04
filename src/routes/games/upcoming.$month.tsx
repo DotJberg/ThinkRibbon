@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { formatMonthYearFromNumbers, parseMonthParam } from "@/lib/date-utils";
+import type { GameSearchResult } from "@/types/game";
 import { api } from "../../../convex/_generated/api";
 import { UpcomingGameCard } from "../../components/games/UpcomingGameCard";
 
@@ -9,43 +11,12 @@ export const Route = createFileRoute("/games/upcoming/$month")({
 	component: UpcomingMonthPage,
 });
 
-function parseMonthParam(
-	month: string,
-): { year: number; month: number } | null {
-	const match = month.match(/^(\d{4})-(\d{2})$/);
-	if (!match) return null;
-	return {
-		year: parseInt(match[1], 10),
-		month: parseInt(match[2], 10),
-	};
-}
-
-function formatMonthYear(year: number, month: number): string {
-	const date = new Date(Date.UTC(year, month - 1, 1));
-	return date.toLocaleDateString("en-US", {
-		month: "long",
-		year: "numeric",
-		timeZone: "UTC",
-	});
-}
-
 function UpcomingMonthPage() {
 	const { month } = Route.useParams();
 	const parsed = parseMonthParam(month);
 
 	const [cursor, setCursor] = useState<string | undefined>(undefined);
-	const [allGames, setAllGames] = useState<
-		Array<{
-			_id: string;
-			name: string;
-			slug: string;
-			coverUrl?: string;
-			genres: string[];
-			releaseDate?: number;
-			categoryLabel?: string;
-			hypes?: number;
-		}>
-	>([]);
+	const [allGames, setAllGames] = useState<GameSearchResult[]>([]);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [hasFetchedFromIgdb, setHasFetchedFromIgdb] = useState(false);
 
@@ -129,7 +100,7 @@ function UpcomingMonthPage() {
 		);
 	}
 
-	const monthLabel = formatMonthYear(parsed.year, parsed.month);
+	const monthLabel = formatMonthYearFromNumbers(parsed.year, parsed.month);
 	const isLoading = data === undefined;
 
 	const formattedGames = allGames

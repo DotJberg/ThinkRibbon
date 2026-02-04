@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
 import { Gamepad2, Loader2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { GameSearchResult } from "@/types/game";
 import { api } from "../../../convex/_generated/api";
 import { GameCard } from "../../components/games/GameCard";
 import {
@@ -34,17 +35,7 @@ function GamesPage() {
 	const { q: searchQuery = "", feed: selectedFeed = "latest-reviewed" } =
 		Route.useSearch();
 
-	const [searchResults, setSearchResults] = useState<
-		Array<{
-			_id: string;
-			name: string;
-			slug: string;
-			coverUrl?: string;
-			genres: string[];
-			releaseDate?: number;
-			categoryLabel?: string;
-		}>
-	>([]);
+	const [searchResults, setSearchResults] = useState<GameSearchResult[]>([]);
 	const [isSearching, setIsSearching] = useState(false);
 
 	// Local state for input (to avoid URL update on every keystroke)

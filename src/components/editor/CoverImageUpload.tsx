@@ -2,7 +2,8 @@
 
 import { AlertCircle, Image as ImageIcon, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
-import { IMAGE_CONSTRAINTS, resizeImageToFit } from "@/lib/image-utils";
+import { useImageResize } from "@/hooks/useImageResize";
+import { IMAGE_CONSTRAINTS } from "@/lib/image-utils";
 import { useUploadThing } from "@/lib/uploadthing";
 
 interface CoverImageUploadProps {
@@ -19,21 +20,26 @@ export function CoverImageUpload({
 	uploadEndpoint,
 }: CoverImageUploadProps) {
 	const [isUploading, setIsUploading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [resizeInfo, setResizeInfo] = useState<string | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const { processFile, error, resizeInfo, clearError, clearResizeInfo } =
+		useImageResize({
+			maxWidth: IMAGE_CONSTRAINTS.cover.maxWidth,
+			maxHeight: IMAGE_CONSTRAINTS.cover.maxHeight,
+			maxBytes: 4 * 1024 * 1024, // 4MB
+			maxFileSizeLabel: "4MB",
+		});
 
 	const { startUpload } = useUploadThing(uploadEndpoint, {
 		onClientUploadComplete: (res) => {
 			if (res?.[0]) {
 				const { url, fileKey } = res[0].serverData;
 				onUpload(url, fileKey || "");
-				setResizeInfo(null);
+				clearResizeInfo();
 			}
 			setIsUploading(false);
 		},
-		onUploadError: (err) => {
-			setError(err.message || "Upload failed");
+		onUploadError: () => {
 			setIsUploading(false);
 		},
 	});
@@ -43,59 +49,28 @@ export function CoverImageUpload({
 			const file = e.target.files?.[0];
 			if (!file) return;
 
-			setError(null);
-			setResizeInfo(null);
+			const processedFile = await processFile(file);
+			if (!processedFile) return;
 
-			// Check file type
-			if (!file.type.startsWith("image/")) {
-				setError("Please select an image file");
-				return;
-			}
-
+			// Proceed with upload
+			setIsUploading(true);
 			try {
-				// Resize image if needed
-				const { maxWidth, maxHeight } = IMAGE_CONSTRAINTS.cover;
-				const resizedFile = await resizeImageToFit(file, maxWidth, maxHeight);
-
-				// Check if resize happened
-				if (resizedFile !== file) {
-					setResizeInfo(
-						`Image was resized to fit within ${maxWidth}x${maxHeight}`,
-					);
-				}
-
-				// Check final file size after resize
-				const maxBytes = 4 * 1024 * 1024; // 4MB
-				if (resizedFile.size > maxBytes) {
-					setError(
-						`File size (${(resizedFile.size / 1024 / 1024).toFixed(1)}MB) exceeds 4MB limit even after resizing. Try a smaller image.`,
-					);
-					return;
-				}
-
-				// Proceed with upload
-				setIsUploading(true);
-				try {
-					await startUpload([resizedFile]);
-				} catch {
-					setError("Upload failed. Please try again.");
-					setIsUploading(false);
-				}
-			} catch (err) {
-				setError((err as Error).message || "Failed to process image");
+				await startUpload([processedFile]);
+			} catch {
+				setIsUploading(false);
 			}
 		},
-		[startUpload],
+		[processFile, startUpload],
 	);
 
 	const handleRemove = useCallback(() => {
 		onRemove();
-		setError(null);
-		setResizeInfo(null);
+		clearError();
+		clearResizeInfo();
 		if (fileInputRef.current) {
 			fileInputRef.current.value = "";
 		}
-	}, [onRemove]);
+	}, [onRemove, clearError, clearResizeInfo]);
 
 	const handleImageError = (
 		e: React.SyntheticEvent<HTMLImageElement, Event>,

@@ -8,7 +8,8 @@ import {
 	X,
 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
-import { IMAGE_CONSTRAINTS, resizeImageToFit } from "@/lib/image-utils";
+import { useImageResize } from "@/hooks/useImageResize";
+import { IMAGE_CONSTRAINTS } from "@/lib/image-utils";
 import { useUploadThing } from "@/lib/uploadthing";
 
 interface ImageUploadModalProps {
@@ -29,13 +30,19 @@ export function ImageUploadModal({
 	const [preview, setPreview] = useState<string | null>(null);
 	const [caption, setCaption] = useState("");
 	const [isUploading, setIsUploading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [resizeInfo, setResizeInfo] = useState<string | null>(null);
 	const [dimensions, setDimensions] = useState<{
 		width: number;
 		height: number;
 	} | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const { processFile, error, resizeInfo, clearError, clearResizeInfo } =
+		useImageResize({
+			maxWidth: IMAGE_CONSTRAINTS.inline.maxWidth,
+			maxHeight: IMAGE_CONSTRAINTS.inline.maxHeight,
+			maxBytes: 2 * 1024 * 1024, // 2MB
+			maxFileSizeLabel: "2MB",
+		});
 
 	const { startUpload } = useUploadThing(uploadEndpoint, {
 		onClientUploadComplete: (res) => {
@@ -45,8 +52,7 @@ export function ImageUploadModal({
 				resetState();
 			}
 		},
-		onUploadError: (err) => {
-			setError(err.message || "Upload failed");
+		onUploadError: () => {
 			setIsUploading(false);
 		},
 	});
@@ -55,11 +61,11 @@ export function ImageUploadModal({
 		setFile(null);
 		setPreview(null);
 		setCaption("");
-		setError(null);
-		setResizeInfo(null);
+		clearError();
+		clearResizeInfo();
 		setDimensions(null);
 		setIsUploading(false);
-	}, []);
+	}, [clearError, clearResizeInfo]);
 
 	const handleClose = useCallback(() => {
 		resetState();
@@ -71,76 +77,42 @@ export function ImageUploadModal({
 			const selectedFile = e.target.files?.[0];
 			if (!selectedFile) return;
 
-			setError(null);
-			setResizeInfo(null);
+			const processedFile = await processFile(selectedFile);
+			if (!processedFile) return;
 
-			// Check file type
-			if (!selectedFile.type.startsWith("image/")) {
-				setError("Please select an image file");
-				return;
-			}
+			// Create preview
+			const reader = new FileReader();
+			reader.onload = (event) => {
+				const dataUrl = event.target?.result as string;
+				setPreview(dataUrl);
 
-			try {
-				// Resize image if needed (this also reduces file size)
-				const { maxWidth, maxHeight } = IMAGE_CONSTRAINTS.inline;
-				const resizedFile = await resizeImageToFit(
-					selectedFile,
-					maxWidth,
-					maxHeight,
-				);
-
-				// Check if resize happened
-				if (resizedFile !== selectedFile) {
-					setResizeInfo(
-						`Image was resized to fit within ${maxWidth}x${maxHeight}`,
-					);
-				}
-
-				// Check final file size after resize
-				const maxBytes = 2 * 1024 * 1024; // 2MB
-				if (resizedFile.size > maxBytes) {
-					setError(
-						`File size (${(resizedFile.size / 1024 / 1024).toFixed(1)}MB) exceeds 2MB limit even after resizing. Try a smaller image.`,
-					);
-					return;
-				}
-
-				// Create preview
-				const reader = new FileReader();
-				reader.onload = (event) => {
-					const dataUrl = event.target?.result as string;
-					setPreview(dataUrl);
-
-					// Get dimensions for display
-					const img = new window.Image();
-					img.onload = () => {
-						setDimensions({ width: img.width, height: img.height });
-					};
-					img.src = dataUrl;
+				// Get dimensions for display
+				const img = new window.Image();
+				img.onload = () => {
+					setDimensions({ width: img.width, height: img.height });
 				};
-				reader.readAsDataURL(resizedFile);
+				img.src = dataUrl;
+			};
+			reader.readAsDataURL(processedFile);
 
-				setFile(resizedFile);
-			} catch (err) {
-				setError((err as Error).message || "Failed to process image");
-			}
+			setFile(processedFile);
 		},
-		[],
+		[processFile],
 	);
 
 	const handleUpload = useCallback(async () => {
 		if (!file) return;
 
 		setIsUploading(true);
-		setError(null);
+		clearError();
 
 		try {
 			await startUpload([file]);
 		} catch {
-			setError("Upload failed. Please try again.");
+			// Error handling is done in onUploadError callback
 			setIsUploading(false);
 		}
-	}, [file, startUpload]);
+	}, [file, startUpload, clearError]);
 
 	if (!open) return null;
 

@@ -109,10 +109,16 @@ async function fetchOgMetadata(url: string): Promise<LinkMetadata | null> {
 
 		return {
 			url,
-			title: title ? decodeHtmlEntities(title) : undefined,
-			description: description ? decodeHtmlEntities(description) : undefined,
+			title: title
+				? sanitizeForStorage(decodeHtmlEntities(title), 200)
+				: undefined,
+			description: description
+				? sanitizeForStorage(decodeHtmlEntities(description), 500)
+				: undefined,
 			imageUrl,
-			siteName: siteName ? decodeHtmlEntities(siteName) : undefined,
+			siteName: siteName
+				? sanitizeForStorage(decodeHtmlEntities(siteName), 100)
+				: undefined,
 			domain,
 		};
 	} catch {
@@ -129,6 +135,17 @@ function decodeHtmlEntities(text: string): string {
 		.replace(/&quot;/g, '"')
 		.replace(/&#39;/g, "'")
 		.replace(/&nbsp;/g, " ");
+}
+
+// Sanitize text content for storage to prevent XSS
+function sanitizeForStorage(text: string, maxLength = 500): string {
+	return text
+		.replace(/<[^>]*>/g, "") // Strip HTML tags
+		.replace(/javascript:/gi, "") // Remove javascript: protocol
+		.replace(/data:/gi, "") // Remove data: protocol
+		.replace(/on\w+=/gi, "") // Remove event handlers
+		.trim()
+		.slice(0, maxLength);
 }
 
 // Internal mutation to store the link preview

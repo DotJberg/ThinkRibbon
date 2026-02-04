@@ -1,33 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, ChevronRight } from "lucide-react";
+import { formatMonthYear, getMonthYearKey } from "@/lib/date-utils";
+import type { FormattedGame } from "@/types/game";
 import { UpcomingGameCard } from "./UpcomingGameCard";
 
-interface Game {
-	id: string;
-	name: string;
-	slug: string;
-	coverUrl: string | null;
-	genres: string[];
-	releaseDate: Date;
-	categoryLabel?: string;
-}
-
 interface UpcomingGamesGridProps {
-	games: Game[];
+	games: FormattedGame[];
 	monthTotals?: Record<string, number>;
-}
-
-function getMonthYearKey(date: Date): string {
-	// Use UTC to match server-side grouping
-	return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-function formatMonthYear(date: Date): string {
-	return date.toLocaleDateString("en-US", {
-		month: "long",
-		year: "numeric",
-		timeZone: "UTC",
-	});
 }
 
 export function UpcomingGamesGrid({
@@ -35,14 +14,17 @@ export function UpcomingGamesGrid({
 	monthTotals = {},
 }: UpcomingGamesGridProps) {
 	// Group games by month
-	const groupedGames = games.reduce<Record<string, Game[]>>((acc, game) => {
-		const key = getMonthYearKey(game.releaseDate);
-		if (!acc[key]) {
-			acc[key] = [];
-		}
-		acc[key].push(game);
-		return acc;
-	}, {});
+	const groupedGames = games.reduce<Record<string, FormattedGame[]>>(
+		(acc, game) => {
+			const key = getMonthYearKey(game.releaseDate);
+			if (!acc[key]) {
+				acc[key] = [];
+			}
+			acc[key].push(game);
+			return acc;
+		},
+		{},
+	);
 
 	// Sort months chronologically
 	const sortedMonths = Object.keys(groupedGames).sort();

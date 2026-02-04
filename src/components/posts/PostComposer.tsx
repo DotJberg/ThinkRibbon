@@ -90,28 +90,31 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 	const isOverLimit = remaining < 0;
 	const isEmpty = content.trim().length === 0 && selectedFiles.length === 0;
 
-	const handleAddFiles = (files: FileList | null) => {
-		if (!files) return;
-		const newFiles = Array.from(files).slice(
-			0,
-			POST_IMAGE_CONSTRAINTS.maxCount - selectedFiles.length,
-		);
-		if (newFiles.length === 0) return;
-
-		const updated = [...selectedFiles, ...newFiles].slice(
-			0,
-			POST_IMAGE_CONSTRAINTS.maxCount,
-		);
-		setSelectedFiles(updated);
-
-		// Generate previews for new files
-		for (const file of newFiles) {
-			const url = URL.createObjectURL(file);
-			setPreviews((prev) =>
-				[...prev, url].slice(0, POST_IMAGE_CONSTRAINTS.maxCount),
+	const handleAddFiles = useCallback(
+		(files: FileList | null) => {
+			if (!files) return;
+			const newFiles = Array.from(files).slice(
+				0,
+				POST_IMAGE_CONSTRAINTS.maxCount - selectedFiles.length,
 			);
-		}
-	};
+			if (newFiles.length === 0) return;
+
+			const updated = [...selectedFiles, ...newFiles].slice(
+				0,
+				POST_IMAGE_CONSTRAINTS.maxCount,
+			);
+			setSelectedFiles(updated);
+
+			// Generate previews for new files
+			for (const file of newFiles) {
+				const url = URL.createObjectURL(file);
+				setPreviews((prev) =>
+					[...prev, url].slice(0, POST_IMAGE_CONSTRAINTS.maxCount),
+				);
+			}
+		},
+		[selectedFiles],
+	);
 
 	const handleRemoveFile = (index: number) => {
 		URL.revokeObjectURL(previews[index]);

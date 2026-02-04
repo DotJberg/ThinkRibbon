@@ -26,6 +26,21 @@ interface IGDBGame {
 // In-memory token cache (per action invocation; short-lived)
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
+// Sanitize user input for IGDB queries to prevent injection attacks
+function sanitizeIgdbInput(input: string): string {
+	return input
+		.replace(/\\/g, "\\\\") // Escape backslashes first
+		.replace(/"/g, '\\"') // Escape double quotes
+		.replace(/\*/g, "\\*") // Escape wildcards
+		.replace(/;/g, "") // Remove semicolons (query separator)
+		.trim();
+}
+
+// Validate slug format (alphanumeric with hyphens only)
+function isValidSlug(slug: string): boolean {
+	return /^[a-z0-9-]+$/.test(slug);
+}
+
 async function getTwitchToken(): Promise<string> {
 	if (cachedToken && Date.now() < cachedToken.expiresAt - 300000) {
 		return cachedToken.token;
@@ -167,10 +182,13 @@ export const searchAndCache = action({
 		// IGDB search often buries exact matches under popular franchises
 		const fetchLimit = Math.max(searchLimit * 5, 50);
 
+		// Sanitize user input to prevent query injection
+		const sanitizedQuery = sanitizeIgdbInput(args.query);
+
 		// Step 1a: Name-based search for exact/prefix matches (IGDB search often buries these)
 		const nameQuery = `
 			fields id;
-			where name ~ *"${args.query}"*;
+			where name ~ *"${sanitizedQuery}"*;
 			limit ${fetchLimit};
 		`;
 
@@ -181,7 +199,7 @@ export const searchAndCache = action({
 
 		// Step 1b: Fuzzy search to get additional results
 		const searchQuery = `
-			search "${args.query}";
+			search "${sanitizedQuery}";
 			fields id;
 			limit ${fetchLimit};
 		`;
@@ -291,6 +309,11 @@ export const searchAndCache = action({
 export const fetchBySlug = action({
 	args: { slug: v.string() },
 	handler: async (ctx, args) => {
+		// Validate slug format to prevent injection
+		if (!isValidSlug(args.slug)) {
+			return null;
+		}
+
 		const query = `
 			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, game_type.type;
 			where slug = "${args.slug}";

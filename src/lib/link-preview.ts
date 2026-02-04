@@ -9,6 +9,14 @@ export interface LinkPreviewData {
 	domain: string;
 }
 
+// In-memory cache with 5-minute TTL
+const previewCache = new Map<
+	string,
+	{ data: LinkPreviewData | null; expiresAt: number }
+>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const FETCH_TIMEOUT_MS = 5000; // 5 seconds
+
 // Extract first URL from content
 export function extractFirstUrl(content: string): string | null {
 	const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/g;
@@ -30,23 +38,48 @@ function getDomain(url: string): string {
 export async function fetchLinkPreview(
 	url: string,
 ): Promise<LinkPreviewData | null> {
+	// Check cache first
+	const cached = previewCache.get(url);
+	if (cached && Date.now() < cached.expiresAt) {
+		return cached.data;
+	}
+
 	try {
 		const apiUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}`;
 
-		const response = await fetch(apiUrl);
+		// Add timeout using AbortController
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+		let response: Response;
+		try {
+			response = await fetch(apiUrl, { signal: controller.signal });
+		} finally {
+			clearTimeout(timeoutId);
+		}
+
 		if (!response.ok) {
+			// Cache null result to avoid repeated failed requests
+			previewCache.set(url, {
+				data: null,
+				expiresAt: Date.now() + CACHE_TTL_MS,
+			});
 			return null;
 		}
 
 		const data = await response.json();
 
 		if (data.status !== "success" || !data.data) {
+			previewCache.set(url, {
+				data: null,
+				expiresAt: Date.now() + CACHE_TTL_MS,
+			});
 			return null;
 		}
 
 		const { title, description, image, publisher } = data.data;
 
-		return {
+		const result: LinkPreviewData = {
 			url,
 			title: title || undefined,
 			description: description || undefined,
@@ -54,11 +87,24 @@ export async function fetchLinkPreview(
 			siteName: publisher || undefined,
 			domain: getDomain(url),
 		};
+
+		// Cache successful result
+		previewCache.set(url, {
+			data: result,
+			expiresAt: Date.now() + CACHE_TTL_MS,
+		});
+
+		return result;
 	} catch {
 		// Fallback: return basic info if API fails
-		return {
+		const fallback: LinkPreviewData = {
 			url,
 			domain: getDomain(url),
 		};
+
+		// Cache fallback with shorter TTL (1 minute) to retry sooner
+		previewCache.set(url, { data: fallback, expiresAt: Date.now() + 60000 });
+
+		return fallback;
 	}
 }

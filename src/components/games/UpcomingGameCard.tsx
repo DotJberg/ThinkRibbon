@@ -1,51 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, Clock, Gamepad2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { formatCountdown, formatReleaseDate } from "@/lib/date-utils";
+import type { FormattedGame } from "@/types/game";
 
 interface UpcomingGameCardProps {
-	game: {
-		id: string;
-		name: string;
-		slug: string;
-		coverUrl: string | null;
-		genres: string[];
-		releaseDate: Date;
-		categoryLabel?: string;
-	};
-}
-
-function formatCountdown(releaseDate: Date): string {
-	const now = new Date();
-	const diff = releaseDate.getTime() - now.getTime();
-
-	if (diff <= 0) return "Released!";
-
-	const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-	const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-	if (days > 30) {
-		const months = Math.floor(days / 30);
-		const remainingDays = days % 30;
-		if (remainingDays > 0) {
-			return `${months}mo ${remainingDays}d`;
-		}
-		return `${months} month${months > 1 ? "s" : ""}`;
-	}
-
-	if (days > 0) {
-		return `${days}d ${hours}h`;
-	}
-
-	const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-	return `${hours}h ${minutes}m`;
-}
-
-function formatReleaseDate(date: Date): string {
-	return date.toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	});
+	game: FormattedGame;
 }
 
 export function UpcomingGameCard({ game }: UpcomingGameCardProps) {

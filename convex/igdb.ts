@@ -370,3 +370,156 @@ export const fetchRecent = action({
 		return results;
 	},
 });
+
+export const fetchUpcoming = action({
+	args: {
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const fetchLimit = args.limit || 100;
+		const now = Math.floor(Date.now() / 1000);
+		// Fetch games releasing in the next 12 months
+		const oneYearFromNow = now + 365 * 24 * 60 * 60;
+
+		const query = `
+			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, game_type.type, version_parent, hypes;
+			where first_release_date > ${now} & first_release_date < ${oneYearFromNow} & cover != null & platforms != null & version_parent = null & hypes > 0;
+			sort hypes desc;
+			limit ${fetchLimit};
+		`;
+
+		let igdbGames = await igdbRequest<(IGDBGame & { hypes?: number })[]>(
+			"games",
+			query,
+		);
+
+		// Filter out mods/fan games
+		igdbGames = igdbGames.filter((game) => {
+			const lowerName = game.name.toLowerCase();
+			const modPatterns = [
+				"reforged",
+				"randomizer",
+				"convergence",
+				"ascended",
+				"dark moon",
+				" mod",
+				"demake",
+				" gb",
+				" nes",
+				" snes",
+				"(fan",
+				"fan game",
+				"fan-made",
+			];
+			return !modPatterns.some((pattern) => lowerName.includes(pattern));
+		});
+
+		const results = [];
+		for (const igdbGame of igdbGames) {
+			const gameData = {
+				...igdbToGameData(igdbGame),
+				hypes: igdbGame.hypes || 0,
+			};
+			const id: Id<"games"> = await ctx.runMutation(
+				internal.games.upsertFromIgdb,
+				{
+					igdbId: gameData.igdbId,
+					name: gameData.name,
+					slug: gameData.slug,
+					summary: gameData.summary,
+					coverUrl: gameData.coverUrl,
+					releaseDate: gameData.releaseDate,
+					genres: gameData.genres,
+					platforms: gameData.platforms,
+					rating: gameData.rating,
+					categoryLabel: gameData.categoryLabel,
+					hypes: gameData.hypes,
+				},
+			);
+			results.push({ _id: id, ...gameData });
+		}
+
+		return results;
+	},
+});
+
+export const fetchUpcomingByMonth = action({
+	args: {
+		year: v.number(),
+		month: v.number(), // 1-12
+		limit: v.optional(v.number()),
+		offset: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const fetchLimit = args.limit || 20;
+		const offset = args.offset || 0;
+
+		// Calculate month start and end timestamps
+		const monthStart = new Date(args.year, args.month - 1, 1);
+		const monthEnd = new Date(args.year, args.month, 0, 23, 59, 59);
+
+		const startTimestamp = Math.floor(monthStart.getTime() / 1000);
+		const endTimestamp = Math.floor(monthEnd.getTime() / 1000);
+
+		const query = `
+			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, game_type.type, version_parent, hypes;
+			where first_release_date >= ${startTimestamp} & first_release_date <= ${endTimestamp} & cover != null & platforms != null & version_parent = null;
+			sort hypes desc;
+			limit ${fetchLimit};
+			offset ${offset};
+		`;
+
+		let igdbGames = await igdbRequest<(IGDBGame & { hypes?: number })[]>(
+			"games",
+			query,
+		);
+
+		// Filter out mods/fan games
+		igdbGames = igdbGames.filter((game) => {
+			const lowerName = game.name.toLowerCase();
+			const modPatterns = [
+				"reforged",
+				"randomizer",
+				"convergence",
+				"ascended",
+				"dark moon",
+				" mod",
+				"demake",
+				" gb",
+				" nes",
+				" snes",
+				"(fan",
+				"fan game",
+				"fan-made",
+			];
+			return !modPatterns.some((pattern) => lowerName.includes(pattern));
+		});
+
+		const results = [];
+		for (const igdbGame of igdbGames) {
+			const gameData = {
+				...igdbToGameData(igdbGame),
+				hypes: igdbGame.hypes || 0,
+			};
+			const id: Id<"games"> = await ctx.runMutation(
+				internal.games.upsertFromIgdb,
+				{
+					igdbId: gameData.igdbId,
+					name: gameData.name,
+					slug: gameData.slug,
+					summary: gameData.summary,
+					coverUrl: gameData.coverUrl,
+					releaseDate: gameData.releaseDate,
+					genres: gameData.genres,
+					platforms: gameData.platforms,
+					rating: gameData.rating,
+					categoryLabel: gameData.categoryLabel,
+					hypes: gameData.hypes,
+				},
+			);
+			results.push({ _id: id, ...gameData });
+		}
+
+		return results;
+	},
+});

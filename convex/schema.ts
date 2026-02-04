@@ -35,6 +35,7 @@ export default defineSchema({
 		genres: v.array(v.string()),
 		platforms: v.array(v.string()),
 		rating: v.optional(v.number()),
+		hypes: v.optional(v.number()), // IGDB hype count for upcoming games
 		cachedAt: v.number(),
 		updatedAt: v.optional(v.number()),
 		categoryLabel: v.optional(v.string()), // DLC, Expansion, Remake, etc.

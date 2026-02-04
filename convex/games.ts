@@ -12,6 +12,7 @@ export const upsertFromIgdb = internalMutation({
 		genres: v.array(v.string()),
 		platforms: v.array(v.string()),
 		rating: v.optional(v.number()),
+		hypes: v.optional(v.number()),
 		categoryLabel: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
@@ -198,6 +199,99 @@ export const getHighestRated = query({
 		}
 
 		return { games: paginated, nextCursor };
+	},
+});
+
+// Get upcoming games (release date in the future), sorted by hypes within each month
+export const getUpcoming = query({
+	args: {
+		limitPerMonth: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const now = Date.now();
+		const limitPerMonth = args.limitPerMonth ?? 6;
+
+		const allGames = await ctx.db.query("games").collect();
+
+		// Filter to games with future release dates
+		const upcomingGames = allGames
+			.filter((game) => game.releaseDate && game.releaseDate > now)
+			.sort((a, b) => (b.hypes || 0) - (a.hypes || 0)); // Sort by hypes desc
+
+		// Group by month and limit per month
+		const gamesByMonth: Record<string, typeof upcomingGames> = {};
+		const monthTotals: Record<string, number> = {};
+
+		for (const game of upcomingGames) {
+			const date = new Date(game.releaseDate!);
+			// Use UTC to avoid timezone inconsistencies with client
+			const monthKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+
+			if (!gamesByMonth[monthKey]) {
+				gamesByMonth[monthKey] = [];
+				monthTotals[monthKey] = 0;
+			}
+
+			monthTotals[monthKey]++;
+
+			if (gamesByMonth[monthKey].length < limitPerMonth) {
+				gamesByMonth[monthKey].push(game);
+			}
+		}
+
+		// Flatten back to array, sorted by release date
+		const limitedGames = Object.entries(gamesByMonth)
+			.sort(([a], [b]) => a.localeCompare(b))
+			.flatMap(([_, games]) =>
+				games.sort((a, b) => (a.releaseDate || 0) - (b.releaseDate || 0)),
+			);
+
+		return { games: limitedGames, monthTotals };
+	},
+});
+
+// Get upcoming games for a specific month
+export const getUpcomingByMonth = query({
+	args: {
+		year: v.number(),
+		month: v.number(), // 1-12
+		cursor: v.optional(v.string()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const limit = args.limit || 20;
+
+		// Calculate month boundaries in UTC
+		const monthStart = Date.UTC(args.year, args.month - 1, 1);
+		const monthEnd = Date.UTC(args.year, args.month, 0, 23, 59, 59, 999);
+
+		const allGames = await ctx.db.query("games").collect();
+
+		// Filter to games in this month
+		const monthGames = allGames
+			.filter(
+				(game) =>
+					game.releaseDate &&
+					game.releaseDate >= monthStart &&
+					game.releaseDate <= monthEnd,
+			)
+			.sort((a, b) => (b.hypes || 0) - (a.hypes || 0)); // Sort by hypes desc
+
+		// Apply cursor
+		let startIdx = 0;
+		if (args.cursor) {
+			const idx = monthGames.findIndex((g) => g._id === args.cursor);
+			if (idx !== -1) startIdx = idx + 1;
+		}
+
+		const paginated = monthGames.slice(startIdx, startIdx + limit + 1);
+		let nextCursor: string | undefined;
+		if (paginated.length > limit) {
+			const last = paginated.pop()!;
+			nextCursor = last._id;
+		}
+
+		return { games: paginated, nextCursor, total: monthGames.length };
 	},
 });
 

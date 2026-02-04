@@ -1,10 +1,10 @@
-import { ChevronDown, Clock, Star } from "lucide-react";
+import { Calendar, ChevronDown, Clock, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export type GamesFeedType = "latest-reviewed" | "highest-rated";
+export type GamesFeedType = "latest-reviewed" | "highest-rated" | "upcoming";
 
 interface FeedOption {
-	type: GamesFeedType;
+	type: Exclude<GamesFeedType, "upcoming">;
 	label: string;
 	icon: React.ReactNode;
 	description: string;
@@ -37,7 +37,9 @@ export function GamesFeedSelector({
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
-	const selectedOption = feedOptions.find((f) => f.type === selectedFeed);
+	const selectedOption =
+		feedOptions.find((f) => f.type === selectedFeed) || feedOptions[0];
+	const isUpcomingSelected = selectedFeed === "upcoming";
 
 	// Close dropdown when clicking outside
 	useEffect(() => {
@@ -55,51 +57,72 @@ export function GamesFeedSelector({
 	}, []);
 
 	return (
-		<div ref={dropdownRef} className="relative">
+		<div className="flex items-center gap-2">
+			{/* Dropdown for Latest Reviewed / Highest Rated */}
+			<div ref={dropdownRef} className="relative">
+				<button
+					type="button"
+					onClick={() => setIsOpen(!isOpen)}
+					className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+						isUpcomingSelected
+							? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+							: "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+					}`}
+				>
+					{selectedOption.icon}
+					{selectedOption.label}
+					<ChevronDown
+						size={16}
+						className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+					/>
+				</button>
+
+				{isOpen && (
+					<div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
+						{feedOptions.map((option) => (
+							<button
+								key={option.type}
+								type="button"
+								onClick={() => {
+									onFeedChange(option.type);
+									setIsOpen(false);
+								}}
+								className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
+									selectedFeed === option.type
+										? "bg-purple-600/20 text-white"
+										: "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+								}`}
+							>
+								<span
+									className={`mt-0.5 ${selectedFeed === option.type ? "text-purple-400" : "text-gray-500"}`}
+								>
+									{option.icon}
+								</span>
+								<div>
+									<div className="font-medium">{option.label}</div>
+									<div className="text-xs text-gray-500">
+										{option.description}
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				)}
+			</div>
+
+			{/* Separate Upcoming Button */}
 			<button
 				type="button"
-				onClick={() => setIsOpen(!isOpen)}
-				className="flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+				onClick={() => onFeedChange("upcoming")}
+				className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+					isUpcomingSelected
+						? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+						: "bg-gray-800 text-gray-300 hover:bg-gray-700"
+				}`}
 			>
-				{selectedOption?.icon}
-				{selectedOption?.label}
-				<ChevronDown
-					size={16}
-					className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
-				/>
+				<Calendar size={18} />
+				Upcoming
 			</button>
-
-			{isOpen && (
-				<div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
-					{feedOptions.map((option) => (
-						<button
-							key={option.type}
-							type="button"
-							onClick={() => {
-								onFeedChange(option.type);
-								setIsOpen(false);
-							}}
-							className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
-								selectedFeed === option.type
-									? "bg-purple-600/20 text-white"
-									: "text-gray-300 hover:bg-gray-700/50 hover:text-white"
-							}`}
-						>
-							<span
-								className={`mt-0.5 ${selectedFeed === option.type ? "text-purple-400" : "text-gray-500"}`}
-							>
-								{option.icon}
-							</span>
-							<div>
-								<div className="font-medium">{option.label}</div>
-								<div className="text-xs text-gray-500">
-									{option.description}
-								</div>
-							</div>
-						</button>
-					))}
-				</div>
-			)}
 		</div>
 	);
 }

@@ -1,8 +1,8 @@
 import { useUser } from "@clerk/clerk-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
 import { ArrowLeft, Calendar, FileText, Gamepad2, Star } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { CollectionButton } from "../../components/collection/CollectionButton";
 import { QuestLogButton } from "../../components/questlog/QuestLogButton";
@@ -18,8 +18,19 @@ export const Route = createFileRoute("/games/$slug")({
 function GameDetailPage() {
 	const { slug } = Route.useParams();
 	const { isSignedIn } = useUser();
+	const router = useRouter();
 	const [activeTab, setActiveTab] = useState<"reviews" | "articles">("reviews");
 	const hasTriggeredRefresh = useRef(false);
+
+	// Smart back navigation - goes back in history or falls back to /games
+	const handleBack = useCallback(() => {
+		// Check if we have history to go back to
+		if (window.history.length > 1) {
+			router.history.back();
+		} else {
+			router.navigate({ to: "/games" });
+		}
+	}, [router]);
 
 	// Convex queries and actions
 	const game = useQuery(api.games.getBySlug, { slug });
@@ -88,13 +99,14 @@ function GameDetailPage() {
 			<div className="relative">
 				<div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900" />
 				<div className="container mx-auto px-4 py-8">
-					<Link
-						to="/games"
+					<button
+						type="button"
+						onClick={handleBack}
 						className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors relative z-10"
 					>
 						<ArrowLeft size={20} />
-						Back to Games
-					</Link>
+						Back
+					</button>
 
 					<div className="flex flex-col md:flex-row gap-8 relative z-10">
 						{/* Cover */}

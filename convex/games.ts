@@ -56,37 +56,62 @@ export const getWithReviews = query({
 
 		const allGames = await ctx.db.query("games").collect();
 
-		// Filter to games that have at least one published review
-		const gamesWithReviews = [];
+		// Filter to games that have at least one rating (full review or quick rating)
+		const gamesWithRatings = [];
 		for (const game of allGames) {
+			// Get full reviews
 			const reviews = await ctx.db
 				.query("reviews")
 				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
 				.collect();
 			const publishedReviews = reviews.filter((r) => r.published);
-			if (publishedReviews.length > 0) {
-				const sum = publishedReviews.reduce((acc, r) => acc + r.rating, 0);
-				gamesWithReviews.push({
+
+			// Get quick ratings from quest logs
+			const questLogs = await ctx.db
+				.query("questLogs")
+				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
+				.collect();
+			const withQuickRating = questLogs.filter((q) => q.quickRating != null);
+
+			const reviewCount = publishedReviews.length;
+			const quickCount = withQuickRating.length;
+			const totalCount = reviewCount + quickCount;
+
+			if (totalCount > 0) {
+				const reviewSum = publishedReviews.reduce((acc, r) => acc + r.rating, 0);
+				const quickSum = withQuickRating.reduce(
+					(acc, q) => acc + (q.quickRating || 0),
+					0,
+				);
+
+				const reviewAvg = reviewCount > 0 ? reviewSum / reviewCount : 0;
+				const quickAvg = quickCount > 0 ? quickSum / quickCount : 0;
+
+				const averageRating =
+					(reviewAvg * reviewCount + quickAvg * quickCount) / totalCount;
+
+				gamesWithRatings.push({
 					...game,
-					_count: { reviews: publishedReviews.length },
-					averageRating: sum / publishedReviews.length,
+					_count: { reviews: totalCount },
+					averageRating: Math.round(averageRating * 10) / 10,
 				});
 			}
 		}
 
 		// Sort by updatedAt desc
-		gamesWithReviews.sort(
-			(a, b) => (b.updatedAt || b._creationTime) - (a.updatedAt || a._creationTime),
+		gamesWithRatings.sort(
+			(a, b) =>
+				(b.updatedAt || b._creationTime) - (a.updatedAt || a._creationTime),
 		);
 
 		// Apply cursor
 		let startIdx = 0;
 		if (args.cursor) {
-			const idx = gamesWithReviews.findIndex((g) => g._id === args.cursor);
+			const idx = gamesWithRatings.findIndex((g) => g._id === args.cursor);
 			if (idx !== -1) startIdx = idx + 1;
 		}
 
-		const paginated = gamesWithReviews.slice(startIdx, startIdx + limit + 1);
+		const paginated = gamesWithRatings.slice(startIdx, startIdx + limit + 1);
 		let nextCursor: string | undefined;
 		if (paginated.length > limit) {
 			const last = paginated.pop()!;
@@ -109,17 +134,41 @@ export const getHighestRated = query({
 
 		const gamesWithRatings = [];
 		for (const game of allGames) {
+			// Get full reviews
 			const reviews = await ctx.db
 				.query("reviews")
 				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
 				.collect();
 			const published = reviews.filter((r) => r.published);
-			if (published.length > 0) {
-				const sum = published.reduce((acc, r) => acc + r.rating, 0);
+
+			// Get quick ratings from quest logs
+			const questLogs = await ctx.db
+				.query("questLogs")
+				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
+				.collect();
+			const withQuickRating = questLogs.filter((q) => q.quickRating != null);
+
+			const reviewCount = published.length;
+			const quickCount = withQuickRating.length;
+			const totalCount = reviewCount + quickCount;
+
+			if (totalCount > 0) {
+				const reviewSum = published.reduce((acc, r) => acc + r.rating, 0);
+				const quickSum = withQuickRating.reduce(
+					(acc, q) => acc + (q.quickRating || 0),
+					0,
+				);
+
+				const reviewAvg = reviewCount > 0 ? reviewSum / reviewCount : 0;
+				const quickAvg = quickCount > 0 ? quickSum / quickCount : 0;
+
+				const averageRating =
+					(reviewAvg * reviewCount + quickAvg * quickCount) / totalCount;
+
 				gamesWithRatings.push({
 					...game,
-					_count: { reviews: published.length },
-					averageRating: sum / published.length,
+					_count: { reviews: totalCount },
+					averageRating: Math.round(averageRating * 10) / 10,
 				});
 			}
 		}

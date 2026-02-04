@@ -28,7 +28,7 @@ function GameDetailPage() {
 		game ? { gameId: game._id } : "skip",
 	);
 	const ratingInfo = useQuery(
-		api.reviews.getAverageRating,
+		api.questlog.getCombinedRating,
 		game ? { gameId: game._id } : "skip",
 	);
 
@@ -107,10 +107,10 @@ function GameDetailPage() {
 										{year}
 									</span>
 								)}
-								{ratingInfo && ratingInfo.reviewCount > 0 && (
+								{ratingInfo && ratingInfo.totalRatings > 0 && (
 									<StarRatingDisplay
-										rating={ratingInfo.averageRating}
-										reviewCount={ratingInfo.reviewCount}
+										rating={ratingInfo.averageRating ?? 0}
+										reviewCount={ratingInfo.totalRatings}
 									/>
 								)}
 							</div>

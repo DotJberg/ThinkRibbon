@@ -292,6 +292,25 @@ export default defineSchema({
 		.index("by_target", ["targetType", "targetId"])
 		.index("by_createdAt", ["createdAt"]),
 
+	notifications: defineTable({
+		userId: v.id("users"),
+		actorId: v.id("users"),
+		type: v.union(
+			v.literal("like_post"),
+			v.literal("like_article"),
+			v.literal("like_review"),
+			v.literal("like_comment"),
+			v.literal("comment_post"),
+			v.literal("comment_article"),
+			v.literal("comment_review"),
+			v.literal("reply_comment"),
+		),
+		targetId: v.string(),
+		viewedAt: v.optional(v.number()),
+	})
+		.index("by_userId", ["userId"])
+		.index("by_viewedAt", ["viewedAt"]),
+
 	completedReports: defineTable({
 		reporterId: v.id("users"),
 		targetType: v.union(

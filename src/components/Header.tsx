@@ -17,6 +17,7 @@ import { useState } from "react";
 import { api } from "../../convex/_generated/api";
 import guidelinesMd from "../../user_guideline.md?raw";
 import ClerkHeader from "../integrations/clerk/header-user.tsx";
+import NotificationBell from "./NotificationBell.tsx";
 
 const firstLine = guidelinesMd.split("\n")[0];
 const dateStr = firstLine?.split(" - ")[1]?.trim();
@@ -129,6 +130,7 @@ export default function Header() {
 				</nav>
 
 				<div className="flex items-center gap-3">
+					{isSignedIn && <NotificationBell />}
 					<ClerkHeader />
 				</div>
 			</header>
@@ -291,7 +293,8 @@ export default function Header() {
 					</Link>
 				</nav>
 
-				<div className="p-4 border-t border-gray-800 bg-gray-800/50">
+				<div className="p-4 border-t border-gray-800 bg-gray-800/50 flex items-center gap-3">
+					{isSignedIn && <NotificationBell />}
 					<ClerkHeader />
 				</div>
 			</aside>

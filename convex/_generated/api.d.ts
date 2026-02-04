@@ -21,6 +21,7 @@ import type * as images from "../images.js";
 import type * as likes from "../likes.js";
 import type * as linkPreviews from "../linkPreviews.js";
 import type * as migrations_migrateCompletedToBeaten from "../migrations/migrateCompletedToBeaten.js";
+import type * as notifications from "../notifications.js";
 import type * as posts from "../posts.js";
 import type * as questlog from "../questlog.js";
 import type * as reports from "../reports.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   likes: typeof likes;
   linkPreviews: typeof linkPreviews;
   "migrations/migrateCompletedToBeaten": typeof migrations_migrateCompletedToBeaten;
+  notifications: typeof notifications;
   posts: typeof posts;
   questlog: typeof questlog;
   reports: typeof reports;

@@ -1,5 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import { createNotification } from "./notifications";
 
 export const toggle = mutation({
 	args: {
@@ -39,6 +41,46 @@ export const toggle = mutation({
 			targetType: args.targetType,
 			targetId: args.targetId,
 		});
+
+		// Create notification for the content owner
+		const typeMap = {
+			post: "like_post",
+			article: "like_article",
+			review: "like_review",
+			comment: "like_comment",
+		} as const;
+
+		let ownerId: Id<"users"> | null = null;
+		if (args.targetType === "comment") {
+			const comment = await ctx.db.get(
+				args.targetId as Id<"comments">,
+			);
+			ownerId = comment?.authorId ?? null;
+		} else if (args.targetType === "post") {
+			const post = await ctx.db.get(args.targetId as Id<"posts">);
+			ownerId = post?.authorId ?? null;
+		} else if (args.targetType === "article") {
+			const article = await ctx.db.get(
+				args.targetId as Id<"articles">,
+			);
+			ownerId = article?.authorId ?? null;
+		} else if (args.targetType === "review") {
+			const review = await ctx.db.get(
+				args.targetId as Id<"reviews">,
+			);
+			ownerId = review?.authorId ?? null;
+		}
+
+		if (ownerId) {
+			await createNotification(
+				ctx,
+				ownerId,
+				user._id,
+				typeMap[args.targetType],
+				args.targetId,
+			);
+		}
+
 		return { liked: true };
 	},
 });

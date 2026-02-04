@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { createNotification } from "./notifications";
 
 export const create = mutation({
 	args: {
@@ -29,6 +30,53 @@ export const create = mutation({
 			parentId: args.parentId,
 			updatedAt: Date.now(),
 		});
+
+		// Notify the content owner
+		const typeMap = {
+			post: "comment_post",
+			article: "comment_article",
+			review: "comment_review",
+		} as const;
+
+		let contentOwnerId: Id<"users"> | null = null;
+		if (args.targetType === "post") {
+			const post = await ctx.db.get(args.targetId as Id<"posts">);
+			contentOwnerId = post?.authorId ?? null;
+		} else if (args.targetType === "article") {
+			const article = await ctx.db.get(
+				args.targetId as Id<"articles">,
+			);
+			contentOwnerId = article?.authorId ?? null;
+		} else if (args.targetType === "review") {
+			const review = await ctx.db.get(
+				args.targetId as Id<"reviews">,
+			);
+			contentOwnerId = review?.authorId ?? null;
+		}
+
+		if (contentOwnerId) {
+			await createNotification(
+				ctx,
+				contentOwnerId,
+				user._id,
+				typeMap[args.targetType],
+				args.targetId,
+			);
+		}
+
+		// If replying to a comment, also notify the parent comment author
+		if (args.parentId) {
+			const parentComment = await ctx.db.get(args.parentId);
+			if (parentComment) {
+				await createNotification(
+					ctx,
+					parentComment.authorId,
+					user._id,
+					"reply_comment",
+					args.parentId,
+				);
+			}
+		}
 
 		const comment = await ctx.db.get(commentId);
 		return {

@@ -39,6 +39,14 @@ interface FeedItem {
 		url: string;
 		caption: string | undefined;
 	}>;
+	linkPreview?: {
+		url: string;
+		title: string | undefined;
+		description: string | undefined;
+		imageUrl: string | undefined;
+		siteName: string | undefined;
+		domain: string;
+	};
 	likeCount: number;
 	commentCount: number;
 	topComment?: {
@@ -158,6 +166,25 @@ async function enrichItems(
 			.withIndex("by_postId", (q: any) => q.eq("postId", post._id))
 			.collect();
 
+		// Fetch link preview only if no images
+		let linkPreview = undefined;
+		if (postImages.length === 0) {
+			const preview = await ctx.db
+				.query("postLinkPreviews")
+				.withIndex("by_postId", (q: any) => q.eq("postId", post._id))
+				.first();
+			if (preview) {
+				linkPreview = {
+					url: preview.url,
+					title: preview.title,
+					description: preview.description,
+					imageUrl: preview.imageUrl,
+					siteName: preview.siteName,
+					domain: preview.domain,
+				};
+			}
+		}
+
 		const topComment = await getTopComment(
 			ctx,
 			"post",
@@ -183,6 +210,7 @@ async function enrichItems(
 				url: img.url,
 				caption: img.caption,
 			})),
+			linkPreview,
 			likeCount: likes.length,
 			commentCount: comments.length,
 			hasLiked: currentUserId

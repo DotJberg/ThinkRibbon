@@ -2,8 +2,6 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
-
-// Force rebuild
 export const create = mutation({
 	args: {
 		content: v.string(),
@@ -16,6 +14,16 @@ export const create = mutation({
 					caption: v.optional(v.string()),
 				}),
 			),
+		),
+		linkPreview: v.optional(
+			v.object({
+				url: v.string(),
+				title: v.optional(v.string()),
+				description: v.optional(v.string()),
+				imageUrl: v.optional(v.string()),
+				siteName: v.optional(v.string()),
+				domain: v.string(),
+			}),
 		),
 	},
 	handler: async (ctx, args) => {
@@ -42,7 +50,21 @@ export const create = mutation({
 			}
 		}
 
-		return postId;
+		// Store link preview if provided (only if no images)
+		const hasImages = args.images && args.images.length > 0;
+		if (!hasImages && args.linkPreview) {
+			await ctx.db.insert("postLinkPreviews", {
+				postId,
+				url: args.linkPreview.url,
+				title: args.linkPreview.title,
+				description: args.linkPreview.description,
+				imageUrl: args.linkPreview.imageUrl,
+				siteName: args.linkPreview.siteName,
+				domain: args.linkPreview.domain,
+			});
+		}
+
+		return { postId };
 	},
 });
 
@@ -283,6 +305,15 @@ export const deletePost = mutation({
 			.collect();
 		for (const img of postImages) {
 			await ctx.db.delete(img._id);
+		}
+
+		// Cascade: delete link previews
+		const linkPreviews = await ctx.db
+			.query("postLinkPreviews")
+			.withIndex("by_postId", (q) => q.eq("postId", args.postId))
+			.collect();
+		for (const lp of linkPreviews) {
+			await ctx.db.delete(lp._id);
 		}
 
 		// Cascade: delete likes

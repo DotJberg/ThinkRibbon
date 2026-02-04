@@ -1,18 +1,24 @@
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
-import { ImagePlus, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { ExternalLink, ImagePlus, Loader2, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import {
 	POST_IMAGE_CONSTRAINTS,
 	resizeImageIfNeeded,
 } from "../../lib/image-utils";
+import {
+	extractFirstUrl,
+	fetchLinkPreview,
+	type LinkPreviewData,
+} from "../../lib/link-preview";
 import { useUploadThing } from "../../lib/uploadthing";
 
 interface PostComposerProps {
 	onSubmit: (
 		content: string,
 		images: { url: string; fileKey: string }[],
+		linkPreview?: LinkPreviewData,
 	) => Promise<void>;
 	maxLength?: number;
 }
@@ -23,9 +29,55 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [previews, setPreviews] = useState<string[]>([]);
+	const [linkPreview, setLinkPreview] = useState<LinkPreviewData | null>(null);
+	const [isFetchingPreview, setIsFetchingPreview] = useState(false);
+	const [lastFetchedUrl, setLastFetchedUrl] = useState<string | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const { startUpload, isUploading } = useUploadThing("postImage");
+
+	// Fetch link preview when content contains a URL (debounced)
+	const fetchPreview = useCallback(async (url: string) => {
+		setIsFetchingPreview(true);
+		try {
+			const preview = await fetchLinkPreview(url);
+			setLinkPreview(preview);
+			setLastFetchedUrl(url);
+		} catch {
+			setLinkPreview(null);
+		} finally {
+			setIsFetchingPreview(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		// Don't fetch preview if there are images
+		if (selectedFiles.length > 0) {
+			setLinkPreview(null);
+			return;
+		}
+
+		const url = extractFirstUrl(content);
+
+		// Clear preview if no URL or URL changed
+		if (!url) {
+			setLinkPreview(null);
+			setLastFetchedUrl(null);
+			return;
+		}
+
+		// Don't re-fetch if same URL
+		if (url === lastFetchedUrl) {
+			return;
+		}
+
+		// Debounce the fetch
+		const timeout = setTimeout(() => {
+			fetchPreview(url);
+		}, 500);
+
+		return () => clearTimeout(timeout);
+	}, [content, selectedFiles.length, lastFetchedUrl, fetchPreview]);
 
 	const dbUser = useQuery(
 		api.users.getByClerkId,
@@ -92,7 +144,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 				}
 			}
 
-			await onSubmit(content, uploadedImages);
+			await onSubmit(content, uploadedImages, linkPreview || undefined);
 			setContent("");
 			// Clean up previews
 			for (const url of previews) {
@@ -100,6 +152,8 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 			}
 			setSelectedFiles([]);
 			setPreviews([]);
+			setLinkPreview(null);
+			setLastFetchedUrl(null);
 		} catch (error) {
 			console.error("Failed to create post:", error);
 		} finally {
@@ -166,6 +220,56 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 									</button>
 								</div>
 							))}
+						</div>
+					)}
+
+					{/* Link preview */}
+					{previews.length === 0 && (isFetchingPreview || linkPreview) && (
+						<div className="mt-3 border border-gray-700 rounded-lg overflow-hidden">
+							{isFetchingPreview ? (
+								<div className="p-4 flex items-center justify-center text-gray-400">
+									<Loader2 size={16} className="animate-spin mr-2" />
+									<span className="text-sm">Loading preview...</span>
+								</div>
+							) : linkPreview ? (
+								<div className="relative">
+									{linkPreview.imageUrl && (
+										<div className="aspect-video bg-gray-800 overflow-hidden">
+											<img
+												src={linkPreview.imageUrl}
+												alt={linkPreview.title || "Link preview"}
+												className="w-full h-full object-cover"
+											/>
+										</div>
+									)}
+									<div className="p-3 bg-gray-800/50">
+										<div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
+											<ExternalLink size={12} />
+											<span>{linkPreview.siteName || linkPreview.domain}</span>
+										</div>
+										{linkPreview.title && (
+											<h4 className="text-sm font-medium text-white line-clamp-2">
+												{linkPreview.title}
+											</h4>
+										)}
+										{linkPreview.description && (
+											<p className="text-xs text-gray-400 line-clamp-2 mt-1">
+												{linkPreview.description}
+											</p>
+										)}
+									</div>
+									<button
+										type="button"
+										onClick={() => {
+											setLinkPreview(null);
+											setLastFetchedUrl(null);
+										}}
+										className="absolute top-2 right-2 p-1 bg-black/70 rounded-full text-white hover:bg-black/90 transition-colors"
+									>
+										<X size={14} />
+									</button>
+								</div>
+							) : null}
 						</div>
 					)}
 

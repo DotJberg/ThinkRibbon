@@ -11,6 +11,7 @@ import {
 	FeedSelector,
 } from "../components/feed/FeedSelector";
 import { PostComposer } from "../components/posts/PostComposer";
+import type { LinkPreviewData } from "../lib/link-preview";
 
 export const Route = createFileRoute("/")({
 	component: HomePage,
@@ -78,6 +79,7 @@ function HomePage() {
 	const handleCreatePost = async (
 		content: string,
 		images: { url: string; fileKey: string }[],
+		linkPreview?: LinkPreviewData,
 	) => {
 		if (!user) return;
 		await createPostMut({
@@ -90,8 +92,18 @@ function HomePage() {
 							fileKey: img.fileKey,
 						}))
 					: undefined,
+			linkPreview:
+				images.length === 0 && linkPreview
+					? {
+							url: linkPreview.url,
+							title: linkPreview.title,
+							description: linkPreview.description,
+							imageUrl: linkPreview.imageUrl,
+							siteName: linkPreview.siteName,
+							domain: linkPreview.domain,
+						}
+					: undefined,
 		});
-		// No manual re-fetch needed - Convex reactivity auto-updates
 	};
 
 	return (

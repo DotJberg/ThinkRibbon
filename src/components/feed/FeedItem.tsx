@@ -19,6 +19,7 @@ import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { EditPostModal } from "../posts/EditPostModal";
+import { LinkPreviewCard } from "../posts/LinkPreviewCard";
 import { PostImageGrid } from "../posts/PostImageGrid";
 import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
 import { ReportModal } from "../shared/ReportModal";
@@ -47,6 +48,14 @@ interface FeedItem {
 		url: string;
 		caption?: string;
 	}>;
+	linkPreview?: {
+		url: string;
+		title?: string;
+		description?: string;
+		imageUrl?: string;
+		siteName?: string;
+		domain: string;
+	};
 	containsSpoilers?: boolean;
 	rating?: number;
 	game?: {
@@ -524,6 +533,16 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 					<p className="whitespace-pre-wrap">{item.content}</p>
 					{item.images && item.images.length > 0 && (
 						<PostImageGrid images={item.images} />
+					)}
+					{(!item.images || item.images.length === 0) && item.linkPreview && (
+						<LinkPreviewCard
+							url={item.linkPreview.url}
+							title={item.linkPreview.title}
+							description={item.linkPreview.description}
+							imageUrl={item.linkPreview.imageUrl}
+							siteName={item.linkPreview.siteName}
+							domain={item.linkPreview.domain}
+						/>
 					)}
 				</div>
 			)}

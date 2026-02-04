@@ -64,6 +64,16 @@ export default defineSchema({
 		postId: v.id("posts"),
 			}).index("by_postId", ["postId"]),
 
+	postLinkPreviews: defineTable({
+		postId: v.id("posts"),
+		url: v.string(),
+		title: v.optional(v.string()),
+		description: v.optional(v.string()),
+		imageUrl: v.optional(v.string()),
+		siteName: v.optional(v.string()),
+		domain: v.string(),
+	}).index("by_postId", ["postId"]),
+
 	articles: defineTable({
 		title: v.string(),
 		content: v.string(),

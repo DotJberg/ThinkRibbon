@@ -8,8 +8,17 @@ import { AddToCollectionModal } from "./AddToCollectionModal";
 
 type OwnershipType = "Physical" | "Digital";
 
-// DLC/Expansion categories that can't be added to collection
-const DLC_CATEGORIES = ["DLC", "Expansion", "Standalone Expansion", "Bundle"];
+// DLC/Expansion/Addon categories that can't be added to collection
+const DLC_CATEGORIES = [
+	"DLC",
+	"Expansion",
+	"Standalone Expansion",
+	"Bundle",
+	"Pack",
+	"Pack / Addon",
+	"Mod",
+	"Update",
+];
 
 interface CollectionButtonProps {
 	gameId: string;

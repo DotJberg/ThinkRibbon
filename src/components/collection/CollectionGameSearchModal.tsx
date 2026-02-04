@@ -4,8 +4,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { AddToCollectionModal } from "./AddToCollectionModal";
 
-// DLC/Expansion categories that can't be added to collection
-const DLC_CATEGORIES = ["DLC", "Expansion", "Standalone Expansion", "Bundle"];
+// DLC/Expansion/Addon categories that can't be added to collection
+const DLC_CATEGORIES = [
+	"DLC",
+	"Expansion",
+	"Standalone Expansion",
+	"Bundle",
+	"Pack",
+	"Pack / Addon",
+	"Mod",
+	"Update",
+];
 
 interface CollectionGameSearchModalProps {
 	isOpen: boolean;

@@ -16,8 +16,17 @@ const collectionStatus = v.union(
 	v.literal("Backlog"),
 );
 
-// DLC/Expansion categories that shouldn't be added to collection
-const DLC_CATEGORIES = ["DLC", "Expansion", "Standalone Expansion", "Bundle"];
+// DLC/Expansion/Addon categories that shouldn't be added to collection
+const DLC_CATEGORIES = [
+	"DLC",
+	"Expansion",
+	"Standalone Expansion",
+	"Bundle",
+	"Pack",
+	"Pack / Addon",
+	"Mod",
+	"Update",
+];
 
 export const add = mutation({
 	args: {

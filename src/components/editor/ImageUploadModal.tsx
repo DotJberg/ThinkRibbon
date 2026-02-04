@@ -8,7 +8,7 @@ import {
 	X,
 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
-import { IMAGE_CONSTRAINTS, validateImageDimensions } from "@/lib/image-utils";
+import { IMAGE_CONSTRAINTS, resizeImageToFit } from "@/lib/image-utils";
 import { useUploadThing } from "@/lib/uploadthing";
 
 interface ImageUploadModalProps {
@@ -67,7 +67,7 @@ export function ImageUploadModal({
 	}, [onClose, resetState]);
 
 	const handleFileSelect = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
+		async (e: React.ChangeEvent<HTMLInputElement>) => {
 			const selectedFile = e.target.files?.[0];
 			if (!selectedFile) return;
 
@@ -80,37 +80,50 @@ export function ImageUploadModal({
 				return;
 			}
 
-			// Check file size (2MB for inline images)
-			const maxSize = IMAGE_CONSTRAINTS.inline.maxFileSize;
-			const maxBytes = 2 * 1024 * 1024; // 2MB
-			if (selectedFile.size > maxBytes) {
-				setError(`File size must be less than ${maxSize}`);
-				return;
-			}
+			try {
+				// Resize image if needed (this also reduces file size)
+				const { maxWidth, maxHeight } = IMAGE_CONSTRAINTS.inline;
+				const resizedFile = await resizeImageToFit(
+					selectedFile,
+					maxWidth,
+					maxHeight,
+				);
 
-			// Create preview and check dimensions
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				const dataUrl = event.target?.result as string;
-				setPreview(dataUrl);
+				// Check if resize happened
+				if (resizedFile !== selectedFile) {
+					setResizeInfo(
+						`Image was resized to fit within ${maxWidth}x${maxHeight}`,
+					);
+				}
 
-				// Check dimensions
-				const img = new window.Image();
-				img.onload = () => {
-					const { width, height } = img;
-					setDimensions({ width, height });
+				// Check final file size after resize
+				const maxBytes = 2 * 1024 * 1024; // 2MB
+				if (resizedFile.size > maxBytes) {
+					setError(
+						`File size (${(resizedFile.size / 1024 / 1024).toFixed(1)}MB) exceeds 2MB limit even after resizing. Try a smaller image.`,
+					);
+					return;
+				}
 
-					const validation = validateImageDimensions(width, height, "inline");
+				// Create preview
+				const reader = new FileReader();
+				reader.onload = (event) => {
+					const dataUrl = event.target?.result as string;
+					setPreview(dataUrl);
 
-					if (validation.needsResize && validation.message) {
-						setResizeInfo(validation.message);
-					}
+					// Get dimensions for display
+					const img = new window.Image();
+					img.onload = () => {
+						setDimensions({ width: img.width, height: img.height });
+					};
+					img.src = dataUrl;
 				};
-				img.src = dataUrl;
-			};
-			reader.readAsDataURL(selectedFile);
+				reader.readAsDataURL(resizedFile);
 
-			setFile(selectedFile);
+				setFile(resizedFile);
+			} catch (err) {
+				setError((err as Error).message || "Failed to process image");
+			}
 		},
 		[],
 	);

@@ -2,7 +2,7 @@
 
 import { AlertCircle, Image as ImageIcon, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
-import { IMAGE_CONSTRAINTS, validateImageDimensions } from "@/lib/image-utils";
+import { IMAGE_CONSTRAINTS, resizeImageToFit } from "@/lib/image-utils";
 import { useUploadThing } from "@/lib/uploadthing";
 
 interface CoverImageUploadProps {
@@ -52,38 +52,38 @@ export function CoverImageUpload({
 				return;
 			}
 
-			// Check file size (4MB for cover images)
-			const maxBytes = 4 * 1024 * 1024;
-			if (file.size > maxBytes) {
-				setError(
-					`File size must be less than ${IMAGE_CONSTRAINTS.cover.maxFileSize}`,
-				);
-				return;
-			}
+			try {
+				// Resize image if needed
+				const { maxWidth, maxHeight } = IMAGE_CONSTRAINTS.cover;
+				const resizedFile = await resizeImageToFit(file, maxWidth, maxHeight);
 
-			// Check dimensions
-			const dataUrl = await readFileAsDataUrl(file);
-			const img = new window.Image();
+				// Check if resize happened
+				if (resizedFile !== file) {
+					setResizeInfo(
+						`Image was resized to fit within ${maxWidth}x${maxHeight}`,
+					);
+				}
 
-			img.onload = async () => {
-				const { width, height } = img;
-				const validation = validateImageDimensions(width, height, "cover");
-
-				if (validation.needsResize && validation.message) {
-					setResizeInfo(validation.message);
+				// Check final file size after resize
+				const maxBytes = 4 * 1024 * 1024; // 4MB
+				if (resizedFile.size > maxBytes) {
+					setError(
+						`File size (${(resizedFile.size / 1024 / 1024).toFixed(1)}MB) exceeds 4MB limit even after resizing. Try a smaller image.`,
+					);
+					return;
 				}
 
 				// Proceed with upload
 				setIsUploading(true);
 				try {
-					await startUpload([file]);
+					await startUpload([resizedFile]);
 				} catch {
 					setError("Upload failed. Please try again.");
 					setIsUploading(false);
 				}
-			};
-
-			img.src = dataUrl;
+			} catch (err) {
+				setError((err as Error).message || "Failed to process image");
+			}
 		},
 		[startUpload],
 	);
@@ -187,13 +187,4 @@ export function CoverImageUpload({
 			)}
 		</div>
 	);
-}
-
-function readFileAsDataUrl(file: File): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = (e) => resolve(e.target?.result as string);
-		reader.onerror = reject;
-		reader.readAsDataURL(file);
-	});
 }

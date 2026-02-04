@@ -1,9 +1,10 @@
 import { useRouter } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
 import { AlertCircle, Loader2, Save, Upload, X } from "lucide-react";
-import { useId, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import { UploadButton } from "../../lib/uploadthing";
+import { useUploadThing } from "../../lib/uploadthing";
+import { ImageCropModal } from "./ImageCropModal";
 
 interface EditProfileModalProps {
 	isOpen: boolean;
@@ -43,6 +44,93 @@ export function EditProfileModal({
 	const [isSaving, setIsSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	// Crop modal state
+	const [cropModalOpen, setCropModalOpen] = useState(false);
+	const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+	const [cropType, setCropType] = useState<"avatar" | "banner">("avatar");
+	const [isUploading, setIsUploading] = useState(false);
+
+	const avatarInputRef = useRef<HTMLInputElement>(null);
+	const bannerInputRef = useRef<HTMLInputElement>(null);
+
+	const { startUpload: uploadAvatar } = useUploadThing("profilePicture", {
+		onClientUploadComplete: (res) => {
+			if (res?.[0]) {
+				const url = res[0].ufsUrl || res[0].url;
+				setAvatarUrl(url);
+			}
+			setIsUploading(false);
+		},
+		onUploadError: (err) => {
+			setError(err.message || "Avatar upload failed");
+			setIsUploading(false);
+		},
+	});
+
+	const { startUpload: uploadBanner } = useUploadThing("banner", {
+		onClientUploadComplete: (res) => {
+			if (res?.[0]) {
+				const url = res[0].ufsUrl || res[0].url;
+				setBannerUrl(url);
+			}
+			setIsUploading(false);
+		},
+		onUploadError: (err) => {
+			setError(err.message || "Banner upload failed");
+			setIsUploading(false);
+		},
+	});
+
+	const handleFileSelect = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "banner") => {
+			const file = e.target.files?.[0];
+			if (!file) return;
+
+			if (!file.type.startsWith("image/")) {
+				setError("Please select an image file");
+				return;
+			}
+
+			const reader = new FileReader();
+			reader.onload = () => {
+				setCropImageSrc(reader.result as string);
+				setCropType(type);
+				setCropModalOpen(true);
+			};
+			reader.readAsDataURL(file);
+
+			// Reset input so same file can be selected again
+			e.target.value = "";
+		},
+		[],
+	);
+
+	const handleCropComplete = useCallback(
+		async (croppedFile: File) => {
+			setCropModalOpen(false);
+			setCropImageSrc(null);
+			setIsUploading(true);
+			setError(null);
+
+			try {
+				if (cropType === "avatar") {
+					await uploadAvatar([croppedFile]);
+				} else {
+					await uploadBanner([croppedFile]);
+				}
+			} catch {
+				setError("Upload failed. Please try again.");
+				setIsUploading(false);
+			}
+		},
+		[cropType, uploadAvatar, uploadBanner],
+	);
+
+	const handleCropCancel = useCallback(() => {
+		setCropModalOpen(false);
+		setCropImageSrc(null);
+	}, []);
+
 	if (!isOpen) return null;
 
 	const handleSave = async () => {
@@ -70,28 +158,6 @@ export function EditProfileModal({
 		} finally {
 			setIsSaving(false);
 		}
-	};
-
-	const validateImage = (
-		file: File,
-		maxWidth: number,
-		maxHeight: number,
-	): Promise<File> => {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			img.src = URL.createObjectURL(file);
-			img.onload = () => {
-				URL.revokeObjectURL(img.src);
-				if (img.width > maxWidth || img.height > maxHeight) {
-					reject(
-						new Error(`Image must be smaller than ${maxWidth}x${maxHeight}px`),
-					);
-				} else {
-					resolve(file);
-				}
-			};
-			img.onerror = () => reject(new Error("Invalid image file"));
-		});
 	};
 
 	return (
@@ -122,8 +188,11 @@ export function EditProfileModal({
 						<span className="text-sm font-medium text-gray-400">
 							Banner Image
 						</span>
-						<div
-							className="relative rounded-xl overflow-hidden bg-gray-800 border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors"
+						<button
+							type="button"
+							onClick={() => bannerInputRef.current?.click()}
+							disabled={isUploading}
+							className="relative w-full rounded-xl overflow-hidden bg-gray-800 border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							style={{ aspectRatio: "3/1" }}
 						>
 							{bannerUrl && (
@@ -133,37 +202,22 @@ export function EditProfileModal({
 									className="absolute inset-0 w-full h-full object-cover pointer-events-none"
 								/>
 							)}
-							<div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 pointer-events-none bg-black/30">
-								<Upload size={24} className="mb-2" />
+							<div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-black/30">
+								{isUploading && cropType === "banner" ? (
+									<Loader2 size={24} className="mb-2 animate-spin" />
+								) : (
+									<Upload size={24} className="mb-2" />
+								)}
 								<p>{bannerUrl ? "Change Banner" : "Upload Banner (3:1)"}</p>
 							</div>
-							<UploadButton
-								endpoint="banner"
-								onClientUploadComplete={(res) => {
-									const url = res[0].ufsUrl || res[0].url;
-									setBannerUrl(url);
-								}}
-								onUploadError={(error: Error) => {
-									setError(error.message);
-								}}
-								onBeforeUploadBegin={async (files) => {
-									try {
-										return await Promise.all(
-											files.map((f) => validateImage(f, 1500, 500)),
-										);
-									} catch (e) {
-										setError((e as Error).message);
-										throw e;
-									}
-								}}
-								appearance={{
-									button:
-										"!absolute !inset-0 !w-full !h-full !bg-transparent !border-0 !ring-0 !shadow-none cursor-pointer",
-									allowedContent: "hidden",
-									container: "absolute inset-0 w-full h-full",
-								}}
-							/>
-						</div>
+						</button>
+						<input
+							ref={bannerInputRef}
+							type="file"
+							accept="image/*"
+							onChange={(e) => handleFileSelect(e, "banner")}
+							className="hidden"
+						/>
 						<p className="text-xs text-gray-500">
 							Recommended size: 1500x500px (3:1). Max 8MB.
 						</p>
@@ -171,7 +225,12 @@ export function EditProfileModal({
 
 					{/* Avatar Upload */}
 					<div className="flex items-center gap-6">
-						<div className="relative w-24 h-24">
+						<button
+							type="button"
+							onClick={() => avatarInputRef.current?.click()}
+							disabled={isUploading}
+							className="relative w-24 h-24 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
 							<div className="w-full h-full rounded-full overflow-hidden bg-gray-800 border-2 border-gray-700 hover:border-purple-500 transition-colors">
 								{avatarUrl ? (
 									<img
@@ -185,36 +244,21 @@ export function EditProfileModal({
 									</div>
 								)}
 							</div>
-							<div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center pointer-events-none">
-								<Upload size={20} className="text-white" />
+							<div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+								{isUploading && cropType === "avatar" ? (
+									<Loader2 size={20} className="text-white animate-spin" />
+								) : (
+									<Upload size={20} className="text-white" />
+								)}
 							</div>
-							<UploadButton
-								endpoint="profilePicture"
-								onClientUploadComplete={(res) => {
-									const url = res[0].ufsUrl || res[0].url;
-									setAvatarUrl(url);
-								}}
-								onUploadError={(error: Error) => {
-									setError(error.message);
-								}}
-								onBeforeUploadBegin={async (files) => {
-									try {
-										return await Promise.all(
-											files.map((f) => validateImage(f, 400, 400)),
-										);
-									} catch (e) {
-										setError((e as Error).message);
-										throw e;
-									}
-								}}
-								appearance={{
-									button:
-										"!absolute !inset-0 !w-full !h-full !bg-transparent !border-0 !ring-0 !shadow-none !rounded-full cursor-pointer",
-									allowedContent: "hidden",
-									container: "absolute inset-0 w-full h-full",
-								}}
-							/>
-						</div>
+						</button>
+						<input
+							ref={avatarInputRef}
+							type="file"
+							accept="image/*"
+							onChange={(e) => handleFileSelect(e, "avatar")}
+							className="hidden"
+						/>
 						<div className="flex-1 space-y-2">
 							<h3 className="font-medium text-white">Profile Photo</h3>
 							<p className="text-sm text-gray-500">
@@ -286,6 +330,23 @@ export function EditProfileModal({
 					</button>
 				</div>
 			</div>
+
+			{/* Crop Modal */}
+			{cropImageSrc && (
+				<ImageCropModal
+					isOpen={cropModalOpen}
+					imageSrc={cropImageSrc}
+					aspect={cropType === "avatar" ? 1 : 3}
+					cropShape={cropType === "avatar" ? "round" : "rect"}
+					outputWidth={cropType === "avatar" ? 400 : 1500}
+					outputHeight={cropType === "avatar" ? 400 : 500}
+					onComplete={handleCropComplete}
+					onCancel={handleCropCancel}
+					title={
+						cropType === "avatar" ? "Crop Profile Photo" : "Crop Banner Image"
+					}
+				/>
+			)}
 		</div>
 	);
 }

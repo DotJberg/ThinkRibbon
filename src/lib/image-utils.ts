@@ -1,5 +1,7 @@
 // Client-safe image utilities (no server dependencies)
 
+import type { Area } from "react-easy-crop";
+
 // Image dimension constraints
 export const IMAGE_CONSTRAINTS = {
 	cover: {
@@ -64,6 +66,17 @@ export function validateImageDimensions(
 // Resize an image file on the client if its longest side exceeds maxPx.
 // Returns the original file unchanged if no resize is needed.
 export function resizeImageIfNeeded(file: File, maxPx = 1600): Promise<File> {
+	return resizeImageToFit(file, maxPx, maxPx);
+}
+
+// Resize an image to fit within maxWidth x maxHeight while maintaining aspect ratio.
+// Returns the original file unchanged if no resize is needed.
+export function resizeImageToFit(
+	file: File,
+	maxWidth: number,
+	maxHeight: number,
+	quality = 0.85,
+): Promise<File> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		const url = URL.createObjectURL(file);
@@ -72,14 +85,27 @@ export function resizeImageIfNeeded(file: File, maxPx = 1600): Promise<File> {
 			URL.revokeObjectURL(url);
 
 			const { width, height } = img;
-			if (width <= maxPx && height <= maxPx) {
+
+			// Check if resize is needed
+			if (width <= maxWidth && height <= maxHeight) {
 				resolve(file);
 				return;
 			}
 
-			const scale = maxPx / Math.max(width, height);
-			const targetW = Math.round(width * scale);
-			const targetH = Math.round(height * scale);
+			// Calculate target dimensions maintaining aspect ratio
+			const aspectRatio = width / height;
+			let targetW = width;
+			let targetH = height;
+
+			if (targetW > maxWidth) {
+				targetW = maxWidth;
+				targetH = Math.round(targetW / aspectRatio);
+			}
+
+			if (targetH > maxHeight) {
+				targetH = maxHeight;
+				targetW = Math.round(targetH * aspectRatio);
+			}
 
 			const canvas = document.createElement("canvas");
 			canvas.width = targetW;
@@ -93,7 +119,7 @@ export function resizeImageIfNeeded(file: File, maxPx = 1600): Promise<File> {
 			ctx.drawImage(img, 0, 0, targetW, targetH);
 
 			const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
-			const quality = outputType === "image/jpeg" ? 0.85 : undefined;
+			const outputQuality = outputType === "image/jpeg" ? quality : undefined;
 
 			canvas.toBlob(
 				(blob) => {
@@ -104,7 +130,7 @@ export function resizeImageIfNeeded(file: File, maxPx = 1600): Promise<File> {
 					resolve(new File([blob], file.name, { type: outputType }));
 				},
 				outputType,
-				quality,
+				outputQuality,
 			);
 		};
 
@@ -114,5 +140,64 @@ export function resizeImageIfNeeded(file: File, maxPx = 1600): Promise<File> {
 		};
 
 		img.src = url;
+	});
+}
+
+// Crop an image using the area from react-easy-crop and output a File
+export function cropImage(
+	imageSrc: string,
+	cropArea: Area,
+	outputWidth: number,
+	outputHeight: number,
+	quality = 0.9,
+): Promise<File> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.crossOrigin = "anonymous";
+
+		img.onload = () => {
+			const canvas = document.createElement("canvas");
+			canvas.width = outputWidth;
+			canvas.height = outputHeight;
+			const ctx = canvas.getContext("2d");
+
+			if (!ctx) {
+				reject(new Error("Failed to get canvas context"));
+				return;
+			}
+
+			// Draw the cropped area onto the canvas
+			ctx.drawImage(
+				img,
+				cropArea.x,
+				cropArea.y,
+				cropArea.width,
+				cropArea.height,
+				0,
+				0,
+				outputWidth,
+				outputHeight,
+			);
+
+			canvas.toBlob(
+				(blob) => {
+					if (!blob) {
+						reject(new Error("Failed to create blob from canvas"));
+						return;
+					}
+					resolve(
+						new File([blob], "cropped-image.jpg", { type: "image/jpeg" }),
+					);
+				},
+				"image/jpeg",
+				quality,
+			);
+		};
+
+		img.onerror = () => {
+			reject(new Error("Failed to load image for cropping"));
+		};
+
+		img.src = imageSrc;
 	});
 }

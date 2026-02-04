@@ -12,6 +12,7 @@ interface FeedItem {
 	editCount?: number;
 	author: {
 		_id: Id<"users">;
+		clerkId: string;
 		username: string;
 		displayName: string | undefined;
 		avatarUrl: string | undefined;
@@ -172,6 +173,7 @@ async function enrichItems(
 			editCount: post.editCount,
 			author: {
 				_id: author._id,
+				clerkId: author.clerkId,
 				username: author.username,
 				displayName: author.displayName,
 				avatarUrl: author.avatarUrl,
@@ -234,6 +236,7 @@ async function enrichItems(
 			editCount: article.editCount,
 			author: {
 				_id: author._id,
+				clerkId: author.clerkId,
 				username: author.username,
 				displayName: author.displayName,
 				avatarUrl: author.avatarUrl,
@@ -289,6 +292,7 @@ async function enrichItems(
 			editCount: review.editCount,
 			author: {
 				_id: author._id,
+				clerkId: author.clerkId,
 				username: author.username,
 				displayName: author.displayName,
 				avatarUrl: author.avatarUrl,

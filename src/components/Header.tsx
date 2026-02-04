@@ -1,16 +1,19 @@
 import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
 import {
 	BookOpen,
 	FileText,
 	Gamepad2,
 	Home,
 	Menu,
+	Shield,
 	Star,
 	User,
 	X,
 } from "lucide-react";
 import { useState } from "react";
+import { api } from "../../convex/_generated/api";
 import guidelinesMd from "../../user_guideline.md?raw";
 import ClerkHeader from "../integrations/clerk/header-user.tsx";
 
@@ -27,6 +30,11 @@ const isNew = dateStr === currentMonthYear;
 export default function Header() {
 	const { user, isSignedIn } = useUser();
 	const [isOpen, setIsOpen] = useState(false);
+
+	const isAdmin = useQuery(
+		api.users.isAdmin,
+		user?.id ? { clerkId: user.id } : "skip",
+	);
 
 	return (
 		<>
@@ -85,6 +93,15 @@ export default function Header() {
 							>
 								Write Article
 							</Link>
+							{isAdmin && (
+								<Link
+									to="/admin"
+									className="text-gray-300 hover:text-white transition-colors font-medium"
+									activeProps={{ className: "text-white font-medium" }}
+								>
+									Admin
+								</Link>
+							)}
 						</>
 					)}
 					<Link
@@ -215,6 +232,21 @@ export default function Header() {
 								<User size={20} />
 								<span className="font-medium">My Profile</span>
 							</Link>
+
+							{isAdmin && (
+								<Link
+									to="/admin"
+									onClick={() => setIsOpen(false)}
+									className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+									activeProps={{
+										className:
+											"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+									}}
+								>
+									<Shield size={20} />
+									<span className="font-medium">Admin Panel</span>
+								</Link>
+							)}
 						</>
 					)}
 					<Link

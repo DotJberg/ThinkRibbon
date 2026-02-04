@@ -1,19 +1,27 @@
 import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
+	Edit3,
 	FileText,
+	Flag,
 	Gamepad2,
 	Heart,
 	MessageCircle,
+	MoreHorizontal,
 	Reply,
 	Send,
 	Star,
+	Trash2,
 	TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+import { EditPostModal } from "../posts/EditPostModal";
 import { PostImageGrid } from "../posts/PostImageGrid";
+import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
+import { ReportModal } from "../shared/ReportModal";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
 
@@ -26,6 +34,7 @@ interface FeedItem {
 	editCount?: number;
 	author: {
 		_id: string;
+		clerkId: string;
 		username: string;
 		displayName: string | undefined;
 		avatarUrl: string | undefined;
@@ -95,6 +104,9 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 	const { user, isSignedIn } = useUser();
 	const toggleLike = useMutation(api.likes.toggle);
 	const createCommentMut = useMutation(api.comments.create);
+	const deletePostMut = useMutation(api.posts.deletePost);
+	const deleteArticleMut = useMutation(api.articles.deleteArticle);
+	const deleteReviewMut = useMutation(api.reviews.deleteReview);
 	const [showCommentInput, setShowCommentInput] = useState(false);
 	const [commentText, setCommentText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,13 +122,48 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 		item.topComment?.hasLiked ?? false,
 	);
 	const [isLikingComment, setIsLikingComment] = useState(false);
+	const [showMenu, setShowMenu] = useState(false);
+	const [showEditModal, setShowEditModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showReportModal, setShowReportModal] = useState(false);
+	const [isDeleted, setIsDeleted] = useState(false);
+
+	const isAdmin = useQuery(
+		api.users.isAdmin,
+		user?.id ? { clerkId: user.id } : "skip",
+	);
+
+	const isAuthor = user && item.author.clerkId === user.id;
+	const canEdit = isAuthor || isAdmin;
+	const canReport = isSignedIn;
+
+	const handleDelete = async () => {
+		if (!user) return;
+		if (item.type === "post") {
+			await deletePostMut({
+				postId: item.id as Id<"posts">,
+				clerkId: user.id,
+			});
+		} else if (item.type === "article") {
+			await deleteArticleMut({
+				articleId: item.id as Id<"articles">,
+				clerkId: user.id,
+			});
+		} else if (item.type === "review") {
+			await deleteReviewMut({
+				reviewId: item.id as Id<"reviews">,
+				clerkId: user.id,
+			});
+		}
+		setIsDeleted(true);
+	};
 
 	const typeConfig = {
 		post: {
 			icon: TrendingUp,
 			color: "purple",
 			label: "Post",
-			link: null,
+			link: `/posts/${item.id}`,
 		},
 		review: {
 			icon: Star,
@@ -225,6 +272,8 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 		}
 	};
 
+	if (isDeleted) return null;
+
 	return (
 		<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:bg-gray-800/70 transition-colors">
 			{/* Header */}
@@ -268,19 +317,107 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 					</div>
 				</div>
 
-				{/* Type Badge */}
-				<span
-					className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${
-						item.type === "post"
-							? "bg-purple-500/20 text-purple-300"
-							: item.type === "review"
-								? "bg-yellow-500/20 text-yellow-300"
-								: "bg-blue-500/20 text-blue-300"
-					}`}
-				>
-					<Icon size={12} />
-					{config.label}
-				</span>
+				<div className="flex items-center gap-2">
+					{/* Type Badge */}
+					<span
+						className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${
+							item.type === "post"
+								? "bg-purple-500/20 text-purple-300"
+								: item.type === "review"
+									? "bg-yellow-500/20 text-yellow-300"
+									: "bg-blue-500/20 text-blue-300"
+						}`}
+					>
+						<Icon size={12} />
+						{config.label}
+					</span>
+
+					{/* Action Menu */}
+					{(canEdit || canReport) && (
+						<div className="relative">
+							<button
+								type="button"
+								onClick={() => setShowMenu(!showMenu)}
+								className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors"
+							>
+								<MoreHorizontal size={18} />
+							</button>
+							{showMenu && (
+								<>
+									{/* biome-ignore lint/a11y/noStaticElementInteractions: Dropdown backdrop */}
+									{/* biome-ignore lint/a11y/useKeyWithClickEvents: Click only for backdrop */}
+									<div
+										className="fixed inset-0 z-40"
+										onClick={() => setShowMenu(false)}
+									/>
+									<div className="absolute right-0 top-full mt-1 z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 min-w-[140px]">
+										{canEdit && item.type === "post" && (
+											<button
+												type="button"
+												onClick={() => {
+													setShowMenu(false);
+													setShowEditModal(true);
+												}}
+												className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+											>
+												<Edit3 size={14} />
+												Edit
+											</button>
+										)}
+										{canEdit && item.type === "article" && (
+											<Link
+												to="/articles/edit/$id"
+												params={{ id: item.id }}
+												onClick={() => setShowMenu(false)}
+												className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+											>
+												<Edit3 size={14} />
+												Edit
+											</Link>
+										)}
+										{canEdit && item.type === "review" && (
+											<Link
+												to="/reviews/edit/$id"
+												params={{ id: item.id }}
+												onClick={() => setShowMenu(false)}
+												className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+											>
+												<Edit3 size={14} />
+												Edit
+											</Link>
+										)}
+										{canEdit && (
+											<button
+												type="button"
+												onClick={() => {
+													setShowMenu(false);
+													setShowDeleteModal(true);
+												}}
+												className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors"
+											>
+												<Trash2 size={14} />
+												Delete
+											</button>
+										)}
+										{canReport && (
+											<button
+												type="button"
+												onClick={() => {
+													setShowMenu(false);
+													setShowReportModal(true);
+												}}
+												className="w-full flex items-center gap-2 px-3 py-2 text-sm text-orange-400 hover:bg-gray-700 hover:text-orange-300 transition-colors"
+											>
+												<Flag size={14} />
+												Report
+											</button>
+										)}
+									</div>
+								</>
+							)}
+						</div>
+					)}
+				</div>
 			</div>
 
 			{/* Title (for articles and reviews) */}
@@ -590,6 +727,31 @@ export function FeedItemCard({ item, onCommentAdded }: FeedItemCardProps) {
 					to comment
 				</div>
 			)}
+
+			{/* Modals */}
+			{item.type === "post" && (
+				<EditPostModal
+					isOpen={showEditModal}
+					onClose={() => setShowEditModal(false)}
+					postId={item.id as Id<"posts">}
+					currentContent={item.content}
+				/>
+			)}
+
+			<DeleteConfirmationModal
+				isOpen={showDeleteModal}
+				onClose={() => setShowDeleteModal(false)}
+				onConfirm={handleDelete}
+				title={`Delete ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`}
+				description={`Are you sure you want to delete this ${item.type}? This action cannot be undone.`}
+			/>
+
+			<ReportModal
+				isOpen={showReportModal}
+				onClose={() => setShowReportModal(false)}
+				targetType={item.type}
+				targetId={item.id}
+			/>
 		</div>
 	);
 }

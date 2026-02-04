@@ -18,9 +18,9 @@ import type * as games from "../games.js";
 import type * as igdb from "../igdb.js";
 import type * as images from "../images.js";
 import type * as likes from "../likes.js";
-import type * as migrate from "../migrate.js";
 import type * as posts from "../posts.js";
 import type * as questlog from "../questlog.js";
+import type * as reports from "../reports.js";
 import type * as reviews from "../reviews.js";
 import type * as users from "../users.js";
 
@@ -41,9 +41,9 @@ declare const fullApi: ApiFromModules<{
   igdb: typeof igdb;
   images: typeof images;
   likes: typeof likes;
-  migrate: typeof migrate;
   posts: typeof posts;
   questlog: typeof questlog;
+  reports: typeof reports;
   reviews: typeof reviews;
   users: typeof users;
 }>;

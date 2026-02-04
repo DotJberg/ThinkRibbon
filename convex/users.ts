@@ -240,3 +240,14 @@ export const getFollowCounts = query({
 		return { followers: followers.length, following: following.length };
 	},
 });
+
+export const isAdmin = query({
+	args: { clerkId: v.string() },
+	handler: async (ctx, args) => {
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		return user?.admin === true;
+	},
+});

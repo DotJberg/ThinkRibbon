@@ -169,6 +169,7 @@ export const getByUser = query({
 					...post,
 					author: {
 						_id: targetUser._id,
+						clerkId: targetUser.clerkId,
 						username: targetUser.username,
 						displayName: targetUser.displayName,
 						avatarUrl: targetUser.avatarUrl,
@@ -198,7 +199,12 @@ export const updatePost = mutation({
 		if (!post) throw new Error("Post not found");
 
 		const author = await ctx.db.get(post.authorId);
-		if (!author || author.clerkId !== args.clerkId) {
+		const requestingUser = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		const isAdmin = requestingUser?.admin === true;
+		if (!author || (author.clerkId !== args.clerkId && !isAdmin)) {
 			throw new Error("Unauthorized");
 		}
 
@@ -252,7 +258,12 @@ export const deletePost = mutation({
 		if (!post) throw new Error("Post not found");
 
 		const author = await ctx.db.get(post.authorId);
-		if (!author || author.clerkId !== args.clerkId) {
+		const requestingUser = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		const isAdmin = requestingUser?.admin === true;
+		if (!author || (author.clerkId !== args.clerkId && !isAdmin)) {
 			throw new Error("Unauthorized");
 		}
 

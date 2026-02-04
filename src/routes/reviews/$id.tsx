@@ -5,6 +5,7 @@ import {
 	ArrowLeft,
 	Calendar,
 	Edit3,
+	Flag,
 	Gamepad2,
 	History,
 	MessageCircle,
@@ -17,6 +18,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { LikeButton } from "../../components/shared/LikeButton";
+import { ReportModal } from "../../components/shared/ReportModal";
 import { SafeImage } from "../../components/shared/SafeImage";
 import {
 	SpoilerBadge,
@@ -41,6 +43,7 @@ function ReviewDetailPage() {
 	const [showMenu, setShowMenu] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showHistoryModal, setShowHistoryModal] = useState(false);
+	const [showReportModal, setShowReportModal] = useState(false);
 	const toggleLike = useMutation(api.likes.toggle);
 	const deleteReviewMut = useMutation(api.reviews.deleteReview);
 
@@ -50,8 +53,17 @@ function ReviewDetailPage() {
 		showHistoryModal ? { reviewId: id as Id<"reviews"> } : "skip",
 	);
 
+	// Check if user is admin
+	const isAdmin = useQuery(
+		api.users.isAdmin,
+		user?.id ? { clerkId: user.id } : "skip",
+	);
+
 	const isAuthor = user && review?.author?.clerkId === user.id;
 	const hasEdits = (review?.editCount ?? 0) > 0;
+	const canEdit = isAuthor || isAdmin;
+	const canReport = isSignedIn && !isAuthor;
+	const showMenuButton = canEdit || hasEdits || canReport;
 
 	const handleDelete = async () => {
 		if (!user || !review) return;
@@ -176,7 +188,7 @@ function ReviewDetailPage() {
 								{review.containsSpoilers && <SpoilerBadge />}
 
 								{/* Action menu */}
-								{(isAuthor || hasEdits) && (
+								{showMenuButton && (
 									<div className="relative">
 										<button
 											type="button"
@@ -194,7 +206,7 @@ function ReviewDetailPage() {
 													onClick={() => setShowMenu(false)}
 												/>
 												<div className="absolute right-0 top-full mt-1 z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 min-w-[160px]">
-													{isAuthor && (
+													{canEdit && (
 														<Link
 															to="/reviews/edit/$id"
 															params={{ id }}
@@ -218,7 +230,7 @@ function ReviewDetailPage() {
 															View History
 														</button>
 													)}
-													{isAuthor && (
+													{canEdit && (
 														<button
 															type="button"
 															onClick={() => {
@@ -229,6 +241,19 @@ function ReviewDetailPage() {
 														>
 															<Trash2 size={16} />
 															Delete
+														</button>
+													)}
+													{canReport && (
+														<button
+															type="button"
+															onClick={() => {
+																setShowMenu(false);
+																setShowReportModal(true);
+															}}
+															className="w-full flex items-center gap-2 px-4 py-2 text-sm text-orange-400 hover:bg-gray-700 hover:text-orange-300 transition-colors"
+														>
+															<Flag size={16} />
+															Report
 														</button>
 													)}
 												</div>
@@ -333,6 +358,13 @@ function ReviewDetailPage() {
 				contentType="review"
 				current={historyData?.current ?? null}
 				versions={historyData?.versions ?? []}
+			/>
+
+			<ReportModal
+				isOpen={showReportModal}
+				onClose={() => setShowReportModal(false)}
+				targetType="review"
+				targetId={review._id}
 			/>
 		</div>
 	);

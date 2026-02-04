@@ -11,7 +11,7 @@ export default defineSchema({
 		bannerUrl: v.optional(v.string()),
 		bio: v.optional(v.string()),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
+		admin: v.optional(v.boolean()),
 	})
 		.index("by_clerkId", ["clerkId"])
 		.index("by_email", ["email"])
@@ -20,7 +20,6 @@ export default defineSchema({
 	follows: defineTable({
 		followerId: v.id("users"),
 		followingId: v.id("users"),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_followerId", ["followerId"])
 		.index("by_followingId", ["followingId"])
@@ -38,7 +37,6 @@ export default defineSchema({
 		rating: v.optional(v.number()),
 		cachedAt: v.number(),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_igdbId", ["igdbId"])
 		.index("by_slug", ["slug"])
@@ -49,7 +47,6 @@ export default defineSchema({
 		authorId: v.id("users"),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_authorId", ["authorId"]),
 
@@ -78,7 +75,6 @@ export default defineSchema({
 		authorId: v.id("users"),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_authorId", ["authorId"])
 		.index("by_published", ["published"]),
@@ -106,7 +102,6 @@ export default defineSchema({
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		articleId: v.id("articles"),
-		legacyId: v.optional(v.string()),
 	}).index("by_articleId", ["articleId"]),
 
 	reviews: defineTable({
@@ -122,7 +117,6 @@ export default defineSchema({
 		gameId: v.id("games"),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_authorId", ["authorId"])
 		.index("by_gameId", ["gameId"])
@@ -145,7 +139,6 @@ export default defineSchema({
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		reviewId: v.id("reviews"),
-		legacyId: v.optional(v.string()),
 	}).index("by_reviewId", ["reviewId"]),
 
 	comments: defineTable({
@@ -159,7 +152,6 @@ export default defineSchema({
 		targetId: v.string(),
 		parentId: v.optional(v.id("comments")),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_authorId", ["authorId"])
 		.index("by_target", ["targetType", "targetId"])
@@ -174,7 +166,6 @@ export default defineSchema({
 			v.literal("comment"),
 		),
 		targetId: v.string(),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_userId", ["userId"])
 		.index("by_target", ["targetType", "targetId"])
@@ -190,7 +181,6 @@ export default defineSchema({
 		gameIds: v.array(v.string()),
 		authorId: v.id("users"),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	}).index("by_authorId", ["authorId"]),
 
 	articleDraftImages: defineTable({
@@ -198,7 +188,6 @@ export default defineSchema({
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		draftId: v.id("articleDrafts"),
-		legacyId: v.optional(v.string()),
 	}).index("by_draftId", ["draftId"]),
 
 	reviewDrafts: defineTable({
@@ -211,7 +200,6 @@ export default defineSchema({
 		gameId: v.optional(v.string()),
 		authorId: v.id("users"),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	}).index("by_authorId", ["authorId"]),
 
 	reviewDraftImages: defineTable({
@@ -219,7 +207,6 @@ export default defineSchema({
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		draftId: v.id("reviewDrafts"),
-		legacyId: v.optional(v.string()),
 	}).index("by_draftId", ["draftId"]),
 
 	questLogs: defineTable({
@@ -240,11 +227,41 @@ export default defineSchema({
 		displayOnProfile: v.boolean(),
 		displayOrder: v.number(),
 		updatedAt: v.optional(v.number()),
-		legacyId: v.optional(v.string()),
 	})
 		.index("by_userId_gameId", ["userId", "gameId"])
 		.index("by_userId_status", ["userId", "status"])
 		.index("by_userId_display", ["userId", "displayOnProfile"])
 		.index("by_userId", ["userId"])
 		.index("by_gameId", ["gameId"]),
+
+	reports: defineTable({
+		reporterId: v.id("users"),
+		targetType: v.union(
+			v.literal("post"),
+			v.literal("article"),
+			v.literal("review"),
+		),
+		targetId: v.string(),
+		message: v.string(),
+		createdAt: v.number(),
+	})
+		.index("by_reporterId", ["reporterId"])
+		.index("by_target", ["targetType", "targetId"])
+		.index("by_createdAt", ["createdAt"]),
+
+	completedReports: defineTable({
+		reporterId: v.id("users"),
+		targetType: v.union(
+			v.literal("post"),
+			v.literal("article"),
+			v.literal("review"),
+		),
+		targetId: v.string(),
+		message: v.string(),
+		createdAt: v.number(),
+		addressedById: v.id("users"),
+		addressedAt: v.number(),
+	})
+		.index("by_addressedById", ["addressedById"])
+		.index("by_addressedAt", ["addressedAt"]),
 });

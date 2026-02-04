@@ -281,7 +281,7 @@ export const fetchBySlug = action({
 	args: { slug: v.string() },
 	handler: async (ctx, args) => {
 		const query = `
-			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating;
+			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, category, parent_game;
 			where slug = "${args.slug}";
 			limit 1;
 		`;
@@ -290,7 +290,21 @@ export const fetchBySlug = action({
 		if (igdbGames.length === 0) return null;
 
 		const gameData = igdbToGameData(igdbGames[0]);
-		const id: Id<"games"> = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
+		const id: Id<"games"> = await ctx.runMutation(
+			internal.games.upsertFromIgdb,
+			{
+				igdbId: gameData.igdbId,
+				name: gameData.name,
+				slug: gameData.slug,
+				summary: gameData.summary,
+				coverUrl: gameData.coverUrl,
+				releaseDate: gameData.releaseDate,
+				genres: gameData.genres,
+				platforms: gameData.platforms,
+				rating: gameData.rating,
+				categoryLabel: gameData.categoryLabel,
+			},
+		);
 		return { _id: id, ...gameData };
 	},
 });

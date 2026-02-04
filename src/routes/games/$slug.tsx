@@ -1,12 +1,14 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { ArrowLeft, Calendar, FileText, Gamepad2, Star } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { QuestLogButton } from "../../components/questlog/QuestLogButton";
 import { ReviewCard } from "../../components/reviews/ReviewCard";
 import { StarRatingDisplay } from "../../components/shared/StarRating";
+
+const STALE_THRESHOLD_DAYS = 30;
 
 export const Route = createFileRoute("/games/$slug")({
 	component: GameDetailPage,
@@ -16,9 +18,26 @@ function GameDetailPage() {
 	const { slug } = Route.useParams();
 	const { isSignedIn } = useUser();
 	const [activeTab, setActiveTab] = useState<"reviews" | "articles">("reviews");
+	const hasTriggeredRefresh = useRef(false);
 
-	// Convex queries
+	// Convex queries and actions
 	const game = useQuery(api.games.getBySlug, { slug });
+	const refreshGame = useAction(api.igdb.fetchBySlug);
+
+	// Stale-while-revalidate: refresh game data if cached for too long
+	useEffect(() => {
+		if (!game || hasTriggeredRefresh.current) return;
+
+		const cachedAt = game.cachedAt;
+		const staleCutoff = Date.now() - STALE_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
+
+		if (cachedAt < staleCutoff) {
+			hasTriggeredRefresh.current = true;
+			refreshGame({ slug }).catch((err) => {
+				console.error("Failed to refresh game data:", err);
+			});
+		}
+	}, [game, slug, refreshGame]);
 	const reviewsData = useQuery(
 		api.reviews.getByGame,
 		game ? { gameId: game._id, limit: 20 } : "skip",

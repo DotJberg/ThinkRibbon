@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 
 export const upsertFromIgdb = internalMutation({
 	args: {
@@ -191,5 +191,69 @@ export const getHighestRated = query({
 		}
 
 		return { games: paginated, nextCursor };
+	},
+});
+
+// Cleanup orphaned games that aren't referenced by any other table
+// and were cached more than `maxAgeDays` days ago
+export const cleanupOrphanedGames = mutation({
+	args: {
+		maxAgeDays: v.optional(v.number()),
+		dryRun: v.optional(v.boolean()),
+	},
+	handler: async (ctx, args) => {
+		const maxAgeDays = args.maxAgeDays ?? 14;
+		const dryRun = args.dryRun ?? false;
+		const cutoffTime = Date.now() - maxAgeDays * 24 * 60 * 60 * 1000;
+
+		const allGames = await ctx.db.query("games").collect();
+
+		const orphanedGames = [];
+		for (const game of allGames) {
+			// Skip games that were cached recently
+			if (game.cachedAt > cutoffTime) continue;
+
+			// Check if game is referenced by reviews
+			const hasReviews = await ctx.db
+				.query("reviews")
+				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
+				.first();
+			if (hasReviews) continue;
+
+			// Check if game is in any quest log
+			const hasQuestLog = await ctx.db
+				.query("questLogs")
+				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
+				.first();
+			if (hasQuestLog) continue;
+
+			// Check if game is tagged in any article
+			const hasArticle = await ctx.db
+				.query("articleGames")
+				.withIndex("by_gameId", (q) => q.eq("gameId", game._id))
+				.first();
+			if (hasArticle) continue;
+
+			// This game is orphaned
+			orphanedGames.push(game);
+		}
+
+		// Delete orphaned games (unless dry run)
+		if (!dryRun) {
+			for (const game of orphanedGames) {
+				await ctx.db.delete(game._id);
+			}
+		}
+
+		return {
+			totalGames: allGames.length,
+			orphanedCount: orphanedGames.length,
+			deleted: dryRun ? 0 : orphanedGames.length,
+			dryRun,
+			orphanedGames: orphanedGames.map((g) => ({
+				name: g.name,
+				cachedAt: new Date(g.cachedAt).toISOString(),
+			})),
+		};
 	},
 });

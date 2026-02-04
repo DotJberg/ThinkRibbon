@@ -10,6 +10,7 @@ import {
 	Shield,
 	Star,
 	User,
+	Users,
 	X,
 } from "lucide-react";
 import { useState } from "react";
@@ -73,6 +74,13 @@ export default function Header() {
 						activeProps={{ className: "text-white font-medium" }}
 					>
 						Games
+					</Link>
+					<Link
+						to="/users"
+						className="text-gray-300 hover:text-white transition-colors font-medium"
+						activeProps={{ className: "text-white font-medium" }}
+					>
+						People
 					</Link>
 
 					{isSignedIn && (
@@ -184,6 +192,19 @@ export default function Header() {
 					>
 						<Gamepad2 size={20} />
 						<span className="font-medium">Browse Games</span>
+					</Link>
+
+					<Link
+						to="/users"
+						onClick={() => setIsOpen(false)}
+						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+						activeProps={{
+							className:
+								"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+						}}
+					>
+						<Users size={20} />
+						<span className="font-medium">Find People</span>
 					</Link>
 
 					{isSignedIn && (

@@ -297,3 +297,186 @@ export const isAdmin = query({
 		return user?.admin === true;
 	},
 });
+
+// Get users for discovery page with stats
+export const getDiscoverUsers = query({
+	args: { limit: v.optional(v.number()) },
+	handler: async (ctx, args) => {
+		const limit = args.limit || 20;
+
+		// Get all users
+		const allUsers = await ctx.db.query("users").collect();
+
+		// Shuffle for randomness using Fisher-Yates
+		const shuffled = [...allUsers];
+		for (let i = shuffled.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+		}
+
+		const users = shuffled.slice(0, limit);
+
+		// Enrich with stats
+		const enriched = await Promise.all(
+			users.map(async (user) => {
+				// Count reviews
+				const reviews = await ctx.db
+					.query("reviews")
+					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
+					.collect();
+				const publishedReviews = reviews.filter((r) => r.published);
+
+				// Count articles
+				const articles = await ctx.db
+					.query("articles")
+					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
+					.collect();
+				const publishedArticles = articles.filter((a) => a.published);
+
+				// Count posts
+				const posts = await ctx.db
+					.query("posts")
+					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
+					.collect();
+
+				// Count collection items
+				const collectionItems = await ctx.db
+					.query("collections")
+					.withIndex("by_userId", (q) => q.eq("userId", user._id))
+					.collect();
+
+				// Count quest log entries
+				const questLogEntries = await ctx.db
+					.query("questLogs")
+					.withIndex("by_userId", (q) => q.eq("userId", user._id))
+					.collect();
+
+				// Get follower count
+				const followers = await ctx.db
+					.query("follows")
+					.withIndex("by_followingId", (q) => q.eq("followingId", user._id))
+					.collect();
+
+				return {
+					_id: user._id,
+					username: user.username,
+					displayName: user.displayName,
+					avatarUrl: user.avatarUrl,
+					bio: user.bio,
+					_count: {
+						reviews: publishedReviews.length,
+						articles: publishedArticles.length,
+						posts: posts.length,
+						collection: collectionItems.length,
+						questLog: questLogEntries.length,
+						followers: followers.length,
+					},
+				};
+			}),
+		);
+
+		return enriched;
+	},
+});
+
+// Search users by username or display name
+export const searchUsers = query({
+	args: { query: v.string(), limit: v.optional(v.number()) },
+	handler: async (ctx, args) => {
+		const limit = args.limit || 20;
+		const searchQuery = args.query.toLowerCase().trim();
+
+		if (!searchQuery) {
+			return [];
+		}
+
+		// Get all users and filter by name match
+		const allUsers = await ctx.db.query("users").collect();
+
+		const matchingUsers = allUsers
+			.filter((user) => {
+				const username = user.username.toLowerCase();
+				const displayName = (user.displayName || "").toLowerCase();
+				return (
+					username.includes(searchQuery) || displayName.includes(searchQuery)
+				);
+			})
+			.sort((a, b) => {
+				// Prioritize exact username matches, then prefix matches
+				const aUsername = a.username.toLowerCase();
+				const bUsername = b.username.toLowerCase();
+				const aDisplay = (a.displayName || "").toLowerCase();
+				const bDisplay = (b.displayName || "").toLowerCase();
+
+				// Exact matches first
+				if (aUsername === searchQuery) return -1;
+				if (bUsername === searchQuery) return 1;
+
+				// Prefix matches second
+				if (aUsername.startsWith(searchQuery) && !bUsername.startsWith(searchQuery)) return -1;
+				if (bUsername.startsWith(searchQuery) && !aUsername.startsWith(searchQuery)) return 1;
+
+				// Display name matches
+				if (aDisplay.startsWith(searchQuery) && !bDisplay.startsWith(searchQuery)) return -1;
+				if (bDisplay.startsWith(searchQuery) && !aDisplay.startsWith(searchQuery)) return 1;
+
+				return 0;
+			})
+			.slice(0, limit);
+
+		// Enrich with stats
+		const enriched = await Promise.all(
+			matchingUsers.map(async (user) => {
+				const reviews = await ctx.db
+					.query("reviews")
+					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
+					.collect();
+				const publishedReviews = reviews.filter((r) => r.published);
+
+				const articles = await ctx.db
+					.query("articles")
+					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
+					.collect();
+				const publishedArticles = articles.filter((a) => a.published);
+
+				const posts = await ctx.db
+					.query("posts")
+					.withIndex("by_authorId", (q) => q.eq("authorId", user._id))
+					.collect();
+
+				const collectionItems = await ctx.db
+					.query("collections")
+					.withIndex("by_userId", (q) => q.eq("userId", user._id))
+					.collect();
+
+				const questLogEntries = await ctx.db
+					.query("questLogs")
+					.withIndex("by_userId", (q) => q.eq("userId", user._id))
+					.collect();
+
+				const followers = await ctx.db
+					.query("follows")
+					.withIndex("by_followingId", (q) => q.eq("followingId", user._id))
+					.collect();
+
+				return {
+					_id: user._id,
+					username: user.username,
+					displayName: user.displayName,
+					avatarUrl: user.avatarUrl,
+					bio: user.bio,
+					_count: {
+						reviews: publishedReviews.length,
+						articles: publishedArticles.length,
+						posts: posts.length,
+						collection: collectionItems.length,
+						questLog: questLogEntries.length,
+						followers: followers.length,
+					},
+				};
+			}),
+		);
+
+		return enriched;
+	},
+});

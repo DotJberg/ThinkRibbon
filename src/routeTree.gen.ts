@@ -13,6 +13,7 @@ import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsersIndexRouteImport } from './routes/users/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as DraftsIndexRouteImport } from './routes/drafts/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -49,6 +50,11 @@ const GuidelinesRoute = GuidelinesRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersIndexRoute = UsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesIndexRoute = GamesIndexRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/drafts/': typeof DraftsIndexRoute
   '/games/': typeof GamesIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/drafts': typeof DraftsIndexRoute
   '/games': typeof GamesIndexRoute
+  '/users': typeof UsersIndexRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/drafts/': typeof DraftsIndexRoute
   '/games/': typeof GamesIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/drafts/'
     | '/games/'
+    | '/users/'
     | '/api/cron/cleanup'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/drafts'
     | '/games'
+    | '/users'
     | '/api/cron/cleanup'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/drafts/'
     | '/games/'
+    | '/users/'
     | '/api/cron/cleanup'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   DraftsIndexRoute: typeof DraftsIndexRoute
   GamesIndexRoute: typeof GamesIndexRoute
+  UsersIndexRoute: typeof UsersIndexRoute
   ApiCronCleanupRoute: typeof ApiCronCleanupRoute
   ArticlesEditIdRoute: typeof ArticlesEditIdRoute
   GamesUpcomingMonthRoute: typeof GamesUpcomingMonthRoute
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/': {
+      id: '/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/': {
@@ -473,6 +493,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   DraftsIndexRoute: DraftsIndexRoute,
   GamesIndexRoute: GamesIndexRoute,
+  UsersIndexRoute: UsersIndexRoute,
   ApiCronCleanupRoute: ApiCronCleanupRoute,
   ArticlesEditIdRoute: ArticlesEditIdRoute,
   GamesUpcomingMonthRoute: GamesUpcomingMonthRoute,

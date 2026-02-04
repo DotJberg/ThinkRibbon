@@ -14,6 +14,7 @@ import { api } from "../../../convex/_generated/api";
 import type { FeedItem } from "../../components/feed/FeedItem";
 import { FeedItemCard } from "../../components/feed/FeedItem";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
+import { FollowListModal } from "../../components/profile/FollowListModal";
 import { NowPlaying } from "../../components/profile/NowPlaying";
 import { SafeImage } from "../../components/shared/SafeImage";
 
@@ -26,6 +27,9 @@ function ProfilePage() {
 	const { user: currentUser, isSignedIn } = useUser();
 	const [isFollowingLoading, setIsFollowingLoading] = useState(false);
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+	const [followListType, setFollowListType] = useState<
+		"followers" | "following" | null
+	>(null);
 
 	const isOwnProfile = isSignedIn && currentUser?.username === username;
 
@@ -275,19 +279,27 @@ function ProfilePage() {
 								className="flex items-center gap-4 mt-2 text-sm"
 								style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
 							>
-								<span className="flex items-center gap-1 text-gray-400">
+								<button
+									type="button"
+									onClick={() => setFollowListType("followers")}
+									className="flex items-center gap-1 text-gray-400 hover:text-gray-300 transition-colors"
+								>
 									<Users size={14} />
 									<span className="text-white font-medium">
 										{followCounts?.followers ?? 0}
 									</span>{" "}
 									followers
-								</span>
-								<span className="text-gray-400">
+								</button>
+								<button
+									type="button"
+									onClick={() => setFollowListType("following")}
+									className="text-gray-400 hover:text-gray-300 transition-colors"
+								>
 									<span className="text-white font-medium">
 										{followCounts?.following ?? 0}
 									</span>{" "}
 									following
-								</span>
+								</button>
 								<span className="flex items-center gap-1 text-gray-500">
 									<Calendar size={14} />
 									Joined {joinDate}
@@ -324,22 +336,30 @@ function ProfilePage() {
 			</div>
 
 			{profile && (
-				<EditProfileModal
-					isOpen={isEditModalOpen}
-					onClose={() => setIsEditModalOpen(false)}
-					onSave={() => {
-						// Convex reactivity handles refresh automatically
-					}}
-					user={{
-						id: profile._id,
-						clerkId: profile.clerkId,
-						username: profile.username,
-						displayName: profile.displayName ?? null,
-						bio: profile.bio ?? null,
-						avatarUrl: profile.avatarUrl ?? null,
-						bannerUrl: profile.bannerUrl ?? null,
-					}}
-				/>
+				<>
+					<EditProfileModal
+						isOpen={isEditModalOpen}
+						onClose={() => setIsEditModalOpen(false)}
+						onSave={() => {
+							// Convex reactivity handles refresh automatically
+						}}
+						user={{
+							id: profile._id,
+							clerkId: profile.clerkId,
+							username: profile.username,
+							displayName: profile.displayName ?? null,
+							bio: profile.bio ?? null,
+							avatarUrl: profile.avatarUrl ?? null,
+							bannerUrl: profile.bannerUrl ?? null,
+						}}
+					/>
+					<FollowListModal
+						isOpen={followListType !== null}
+						onClose={() => setFollowListType(null)}
+						userId={profile._id}
+						type={followListType ?? "followers"}
+					/>
+				</>
 			)}
 		</div>
 	);

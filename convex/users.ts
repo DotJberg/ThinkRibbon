@@ -241,6 +241,52 @@ export const getFollowCounts = query({
 	},
 });
 
+export const getFollowersList = query({
+	args: { userId: v.id("users") },
+	handler: async (ctx, args) => {
+		const follows = await ctx.db
+			.query("follows")
+			.withIndex("by_followingId", (q) => q.eq("followingId", args.userId))
+			.collect();
+
+		const users = await Promise.all(
+			follows.map((f) => ctx.db.get(f.followerId)),
+		);
+
+		return users
+			.filter((u) => u !== null)
+			.map((u) => ({
+				_id: u._id,
+				username: u.username,
+				displayName: u.displayName,
+				avatarUrl: u.avatarUrl,
+			}));
+	},
+});
+
+export const getFollowingList = query({
+	args: { userId: v.id("users") },
+	handler: async (ctx, args) => {
+		const follows = await ctx.db
+			.query("follows")
+			.withIndex("by_followerId", (q) => q.eq("followerId", args.userId))
+			.collect();
+
+		const users = await Promise.all(
+			follows.map((f) => ctx.db.get(f.followingId)),
+		);
+
+		return users
+			.filter((u) => u !== null)
+			.map((u) => ({
+				_id: u._id,
+				username: u.username,
+				displayName: u.displayName,
+				avatarUrl: u.avatarUrl,
+			}));
+	},
+});
+
 export const isAdmin = query({
 	args: { clerkId: v.string() },
 	handler: async (ctx, args) => {

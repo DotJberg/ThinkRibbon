@@ -15,7 +15,6 @@ import type * as crons from "../crons.js";
 import type * as drafts from "../drafts.js";
 import type * as feed from "../feed.js";
 import type * as games from "../games.js";
-import type * as http from "../http.js";
 import type * as igdb from "../igdb.js";
 import type * as images from "../images.js";
 import type * as likes from "../likes.js";
@@ -39,7 +38,6 @@ declare const fullApi: ApiFromModules<{
   drafts: typeof drafts;
   feed: typeof feed;
   games: typeof games;
-  http: typeof http;
   igdb: typeof igdb;
   images: typeof images;
   likes: typeof likes;

@@ -212,7 +212,10 @@ function ProfilePage() {
 						{/* Info */}
 						<div className="flex-1">
 							<div className="flex items-center gap-4 flex-wrap">
-								<h1 className="text-2xl font-bold text-white">
+								<h1
+									className="text-2xl font-bold text-white"
+									style={{ textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}
+								>
 									{profile.displayName || profile.username}
 								</h1>
 								{isOwnProfile ? (
@@ -260,10 +263,18 @@ function ProfilePage() {
 									)
 								)}
 							</div>
-							<p className="text-gray-500">@{profile.username}</p>
+							<p
+								className="text-gray-500"
+								style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+							>
+								@{profile.username}
+							</p>
 
 							{/* Stats */}
-							<div className="flex items-center gap-4 mt-2 text-sm">
+							<div
+								className="flex items-center gap-4 mt-2 text-sm"
+								style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+							>
 								<span className="flex items-center gap-1 text-gray-400">
 									<Users size={14} />
 									<span className="text-white font-medium">
@@ -286,7 +297,12 @@ function ProfilePage() {
 					</div>
 
 					{profile.bio && (
-						<p className="mt-4 text-gray-300 max-w-2xl">{profile.bio}</p>
+						<p
+							className="mt-4 text-gray-300 max-w-2xl"
+							style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+						>
+							{profile.bio}
+						</p>
 					)}
 				</div>
 

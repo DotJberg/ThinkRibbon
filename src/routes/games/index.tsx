@@ -23,6 +23,7 @@ function GamesPage() {
 			coverUrl?: string;
 			genres: string[];
 			releaseDate?: number;
+			categoryLabel?: string;
 		}>
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
@@ -72,6 +73,7 @@ function GamesPage() {
 				coverUrl: g.coverUrl ?? null,
 				genres: g.genres,
 				releaseDate: g.releaseDate ? new Date(g.releaseDate) : null,
+				categoryLabel: g.categoryLabel,
 			}))
 		: selectedFeed === "latest-reviewed"
 			? latestReviewedGames.map((g) => ({
@@ -83,6 +85,7 @@ function GamesPage() {
 					releaseDate: g.releaseDate ? new Date(g.releaseDate) : null,
 					_count: g._count,
 					averageRating: g.averageRating,
+					categoryLabel: g.categoryLabel,
 				}))
 			: highestRatedGames.map((g) => ({
 					id: g._id,
@@ -93,6 +96,7 @@ function GamesPage() {
 					releaseDate: g.releaseDate ? new Date(g.releaseDate) : null,
 					_count: g._count,
 					averageRating: g.averageRating,
+					categoryLabel: g.categoryLabel,
 				}));
 
 	return (

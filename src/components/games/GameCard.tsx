@@ -14,6 +14,7 @@ interface GameCardProps {
 			reviews: number;
 		};
 		averageRating?: number;
+		categoryLabel?: string; // DLC, Expansion, Remake, etc.
 	};
 }
 
@@ -40,6 +41,13 @@ export function GameCard({ game }: GameCardProps) {
 					) : (
 						<div className="w-full h-full flex items-center justify-center">
 							<Gamepad2 className="w-12 h-12 text-gray-500" />
+						</div>
+					)}
+
+					{/* Category Badge (DLC, Expansion, etc.) */}
+					{game.categoryLabel && (
+						<div className="absolute top-2 left-2 px-2 py-0.5 bg-purple-600/90 backdrop-blur-sm rounded text-xs font-medium text-white">
+							{game.categoryLabel}
 						</div>
 					)}
 

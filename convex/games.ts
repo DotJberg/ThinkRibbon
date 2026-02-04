@@ -12,6 +12,7 @@ export const upsertFromIgdb = internalMutation({
 		genres: v.array(v.string()),
 		platforms: v.array(v.string()),
 		rating: v.optional(v.number()),
+		categoryLabel: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
 		const existing = await ctx.db

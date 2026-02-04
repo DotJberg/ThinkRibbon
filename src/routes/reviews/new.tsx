@@ -47,6 +47,7 @@ function NewReviewPage() {
 			slug: string;
 			coverUrl?: string;
 			genres: string[];
+			categoryLabel?: string;
 		}>
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
@@ -476,6 +477,11 @@ function NewReviewPage() {
 											<span className="text-white font-medium">
 												{game.name}
 											</span>
+											{game.categoryLabel && (
+												<span className="px-1.5 py-0.5 bg-purple-600/80 rounded text-xs font-medium text-white">
+													{game.categoryLabel}
+												</span>
+											)}
 										</button>
 									))}
 								</div>

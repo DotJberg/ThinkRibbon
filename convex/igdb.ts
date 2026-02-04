@@ -19,7 +19,29 @@ interface IGDBGame {
 	genres?: { id: number; name: string }[];
 	platforms?: { id: number; name: string }[];
 	rating?: number;
+	category?: number; // 0=Main, 1=DLC, 2=Expansion, 3=Bundle, 4=Standalone Expansion, etc.
+	version_parent?: number; // If set, this is an edition/variant of another game
+	parent_game?: number; // If set, this is DLC/expansion of another game
 }
+
+// IGDB category values
+const IGDB_CATEGORY = {
+	MAIN_GAME: 0,
+	DLC: 1,
+	EXPANSION: 2,
+	BUNDLE: 3,
+	STANDALONE_EXPANSION: 4,
+	MOD: 5,
+	EPISODE: 6,
+	SEASON: 7,
+	REMAKE: 8,
+	REMASTER: 9,
+	EXPANDED_GAME: 10,
+	PORT: 11,
+	FORK: 12,
+	PACK: 13,
+	UPDATE: 14,
+} as const;
 
 // In-memory token cache (per action invocation; short-lived)
 let cachedToken: { token: string; expiresAt: number } | null = null;
@@ -61,6 +83,13 @@ async function igdbRequest<T>(endpoint: string, query: string): Promise<T> {
 	const token = await getTwitchToken();
 	const clientId = process.env.TWITCH_CLIENT_ID!;
 
+	// Clean up query - remove extra whitespace/tabs
+	const cleanQuery = query
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0)
+		.join(" ");
+
 	const response = await fetch(`https://api.igdb.com/v4/${endpoint}`, {
 		method: "POST",
 		headers: {
@@ -68,7 +97,7 @@ async function igdbRequest<T>(endpoint: string, query: string): Promise<T> {
 			Authorization: `Bearer ${token}`,
 			"Content-Type": "text/plain",
 		},
-		body: query,
+		body: cleanQuery,
 	});
 
 	if (!response.ok) {
@@ -85,7 +114,46 @@ function buildCoverUrl(
 	return `https://images.igdb.com/igdb/image/upload/t_${size}/${imageId}.jpg`;
 }
 
+function getCategoryLabel(category: number | undefined): string | undefined {
+	switch (category) {
+		case IGDB_CATEGORY.DLC:
+			return "DLC";
+		case IGDB_CATEGORY.EXPANSION:
+			return "Expansion";
+		case IGDB_CATEGORY.BUNDLE:
+			return "Bundle";
+		case IGDB_CATEGORY.STANDALONE_EXPANSION:
+			return "Standalone DLC";
+		case IGDB_CATEGORY.MOD:
+			return "Mod";
+		case IGDB_CATEGORY.EPISODE:
+			return "Episode";
+		case IGDB_CATEGORY.SEASON:
+			return "Season";
+		case IGDB_CATEGORY.REMAKE:
+			return "Remake";
+		case IGDB_CATEGORY.REMASTER:
+			return "Remaster";
+		case IGDB_CATEGORY.EXPANDED_GAME:
+			return "Expanded Edition";
+		case IGDB_CATEGORY.PORT:
+			return "Port";
+		case IGDB_CATEGORY.PACK:
+			return "Pack";
+		case IGDB_CATEGORY.UPDATE:
+			return "Update";
+		default:
+			return undefined; // Main game or unknown
+	}
+}
+
 function igdbToGameData(igdbGame: IGDBGame) {
+	// Determine category label - use parent_game as fallback for DLC detection
+	let categoryLabel = getCategoryLabel(igdbGame.category);
+	if (!categoryLabel && igdbGame.parent_game) {
+		categoryLabel = "DLC"; // Has a parent game = DLC or expansion
+	}
+
 	return {
 		igdbId: igdbGame.id,
 		name: igdbGame.name,
@@ -100,6 +168,7 @@ function igdbToGameData(igdbGame: IGDBGame) {
 		genres: igdbGame.genres?.map((g) => g.name) || [],
 		platforms: igdbGame.platforms?.map((p) => p.name) || [],
 		rating: igdbGame.rating || undefined,
+		categoryLabel,
 	};
 }
 
@@ -107,20 +176,100 @@ export const searchAndCache = action({
 	args: { query: v.string(), limit: v.optional(v.number()) },
 	handler: async (ctx, args) => {
 		const searchLimit = args.limit || 10;
-		const query = `
+		// Fetch more results to account for filtering
+		const fetchLimit = searchLimit * 3;
+
+		// Step 1: Search to get game IDs (IGDB search doesn't return all fields)
+		const searchQuery = `
 			search "${args.query}";
-			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating;
-			where version_parent = null;
-			limit ${searchLimit};
+			fields id;
+			limit ${fetchLimit};
 		`;
 
-		const igdbGames = await igdbRequest<IGDBGame[]>("games", query);
+		const searchResults = await igdbRequest<Array<{ id: number }>>(
+			"games",
+			searchQuery,
+		);
+
+		if (searchResults.length === 0) {
+			return [];
+		}
+
+		// Step 2: Fetch full details for found games
+		const gameIds = searchResults.map((g) => g.id).join(",");
+		const detailsQuery = `
+			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, category, version_parent, parent_game;
+			where id = (${gameIds});
+			limit ${fetchLimit};
+		`;
+
+		let igdbGames = await igdbRequest<IGDBGame[]>("games", detailsQuery);
+
+		// Filter out:
+		// 1. Edition variants (have version_parent) - Collector's Edition, Deluxe Edition, etc.
+		// 2. Mods and fan games (check by name pattern and other signals)
+		igdbGames = igdbGames.filter((game) => {
+			// Filter out editions (version_parent means it's a variant of another game)
+			if (game.version_parent) return false;
+
+			// Filter out likely mods/fan games by name patterns
+			const lowerName = game.name.toLowerCase();
+			const modPatterns = [
+				"reforged",
+				"randomizer",
+				"convergence",
+				"ascended",
+				"dark moon",
+				" mod",
+				"demake",
+				" gb", // Game Boy demakes like "Elden Ring GB"
+				" nes",
+				" snes",
+				"(fan",
+				"fan game",
+				"fan-made",
+			];
+			if (modPatterns.some((pattern) => lowerName.includes(pattern))) {
+				return false;
+			}
+
+			// Filter out games without platforms (often indicates unofficial/fan content)
+			if (!game.platforms || game.platforms.length === 0) {
+				return false;
+			}
+
+			return true;
+		});
+
+		// Sort by release date
+		igdbGames.sort((a, b) => {
+			const dateA = a.first_release_date ?? Number.MAX_SAFE_INTEGER;
+			const dateB = b.first_release_date ?? Number.MAX_SAFE_INTEGER;
+			return dateA - dateB;
+		});
+
+		// Limit to requested amount
+		igdbGames = igdbGames.slice(0, searchLimit);
 
 		// Cache all results via internal mutation
 		const results = [];
 		for (const igdbGame of igdbGames) {
 			const gameData = igdbToGameData(igdbGame);
-			const id: Id<"games"> = await ctx.runMutation(internal.games.upsertFromIgdb, gameData);
+			const id: Id<"games"> = await ctx.runMutation(
+				internal.games.upsertFromIgdb,
+				{
+					igdbId: gameData.igdbId,
+					name: gameData.name,
+					slug: gameData.slug,
+					summary: gameData.summary,
+					coverUrl: gameData.coverUrl,
+					releaseDate: gameData.releaseDate,
+					genres: gameData.genres,
+					platforms: gameData.platforms,
+					rating: gameData.rating,
+					categoryLabel: gameData.categoryLabel,
+				},
+			);
 			results.push({ _id: id, ...gameData });
 		}
 

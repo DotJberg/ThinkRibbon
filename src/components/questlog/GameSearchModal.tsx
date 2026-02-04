@@ -184,9 +184,16 @@ export function GameSearchModal({
 
 									{/* Game Info */}
 									<div className="flex-1 min-w-0">
-										<h3 className="font-semibold text-white truncate group-hover:text-purple-300 transition-colors">
-											{game.name}
-										</h3>
+										<div className="flex items-center gap-2">
+											<h3 className="font-semibold text-white truncate group-hover:text-purple-300 transition-colors">
+												{game.name}
+											</h3>
+											{game.categoryLabel && (
+												<span className="flex-shrink-0 px-1.5 py-0.5 bg-purple-600/80 rounded text-xs font-medium text-white">
+													{game.categoryLabel}
+												</span>
+											)}
+										</div>
 										{game.releaseDate && (
 											<p className="text-sm text-gray-500">
 												{new Date(game.releaseDate).getFullYear()}

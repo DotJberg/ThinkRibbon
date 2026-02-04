@@ -37,7 +37,8 @@ export default defineSchema({
 		rating: v.optional(v.number()),
 		cachedAt: v.number(),
 		updatedAt: v.optional(v.number()),
-			})
+		categoryLabel: v.optional(v.string()), // DLC, Expansion, Remake, etc.
+	})
 		.index("by_igdbId", ["igdbId"])
 		.index("by_slug", ["slug"])
 		.index("by_name", ["name"]),

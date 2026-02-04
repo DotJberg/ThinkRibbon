@@ -20,7 +20,7 @@ export default defineSchema({
 	follows: defineTable({
 		followerId: v.id("users"),
 		followingId: v.id("users"),
-	})
+			})
 		.index("by_followerId", ["followerId"])
 		.index("by_followingId", ["followingId"])
 		.index("by_pair", ["followerId", "followingId"]),
@@ -37,7 +37,7 @@ export default defineSchema({
 		rating: v.optional(v.number()),
 		cachedAt: v.number(),
 		updatedAt: v.optional(v.number()),
-	})
+			})
 		.index("by_igdbId", ["igdbId"])
 		.index("by_slug", ["slug"])
 		.index("by_name", ["name"]),
@@ -47,7 +47,7 @@ export default defineSchema({
 		authorId: v.id("users"),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
-	})
+			})
 		.index("by_authorId", ["authorId"]),
 
 	postVersions: defineTable({
@@ -61,7 +61,7 @@ export default defineSchema({
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		postId: v.id("posts"),
-	}).index("by_postId", ["postId"]),
+			}).index("by_postId", ["postId"]),
 
 	articles: defineTable({
 		title: v.string(),
@@ -75,7 +75,7 @@ export default defineSchema({
 		authorId: v.id("users"),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
-	})
+			})
 		.index("by_authorId", ["authorId"])
 		.index("by_published", ["published"]),
 
@@ -93,7 +93,7 @@ export default defineSchema({
 	articleGames: defineTable({
 		articleId: v.id("articles"),
 		gameId: v.id("games"),
-	})
+			})
 		.index("by_articleId", ["articleId"])
 		.index("by_gameId", ["gameId"]),
 
@@ -102,7 +102,7 @@ export default defineSchema({
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		articleId: v.id("articles"),
-	}).index("by_articleId", ["articleId"]),
+			}).index("by_articleId", ["articleId"]),
 
 	reviews: defineTable({
 		title: v.string(),
@@ -117,7 +117,7 @@ export default defineSchema({
 		gameId: v.id("games"),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
-	})
+			})
 		.index("by_authorId", ["authorId"])
 		.index("by_gameId", ["gameId"])
 		.index("by_authorId_gameId", ["authorId", "gameId"])
@@ -139,7 +139,7 @@ export default defineSchema({
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		reviewId: v.id("reviews"),
-	}).index("by_reviewId", ["reviewId"]),
+			}).index("by_reviewId", ["reviewId"]),
 
 	comments: defineTable({
 		content: v.string(),
@@ -152,7 +152,7 @@ export default defineSchema({
 		targetId: v.string(),
 		parentId: v.optional(v.id("comments")),
 		updatedAt: v.optional(v.number()),
-	})
+			})
 		.index("by_authorId", ["authorId"])
 		.index("by_target", ["targetType", "targetId"])
 		.index("by_parentId", ["parentId"]),
@@ -166,7 +166,7 @@ export default defineSchema({
 			v.literal("comment"),
 		),
 		targetId: v.string(),
-	})
+			})
 		.index("by_userId", ["userId"])
 		.index("by_target", ["targetType", "targetId"])
 		.index("by_user_target", ["userId", "targetType", "targetId"]),
@@ -181,14 +181,14 @@ export default defineSchema({
 		gameIds: v.array(v.string()),
 		authorId: v.id("users"),
 		updatedAt: v.optional(v.number()),
-	}).index("by_authorId", ["authorId"]),
+			}).index("by_authorId", ["authorId"]),
 
 	articleDraftImages: defineTable({
 		url: v.string(),
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		draftId: v.id("articleDrafts"),
-	}).index("by_draftId", ["draftId"]),
+			}).index("by_draftId", ["draftId"]),
 
 	reviewDrafts: defineTable({
 		title: v.optional(v.string()),
@@ -200,14 +200,14 @@ export default defineSchema({
 		gameId: v.optional(v.string()),
 		authorId: v.id("users"),
 		updatedAt: v.optional(v.number()),
-	}).index("by_authorId", ["authorId"]),
+			}).index("by_authorId", ["authorId"]),
 
 	reviewDraftImages: defineTable({
 		url: v.string(),
 		fileKey: v.string(),
 		caption: v.optional(v.string()),
 		draftId: v.id("reviewDrafts"),
-	}).index("by_draftId", ["draftId"]),
+			}).index("by_draftId", ["draftId"]),
 
 	questLogs: defineTable({
 		userId: v.id("users"),
@@ -227,7 +227,7 @@ export default defineSchema({
 		displayOnProfile: v.boolean(),
 		displayOrder: v.number(),
 		updatedAt: v.optional(v.number()),
-	})
+			})
 		.index("by_userId_gameId", ["userId", "gameId"])
 		.index("by_userId_status", ["userId", "status"])
 		.index("by_userId_display", ["userId", "displayOnProfile"])

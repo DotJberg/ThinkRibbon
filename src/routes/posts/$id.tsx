@@ -33,6 +33,12 @@ function PostDetailPage() {
 	const navigate = useNavigate();
 	const { user, isSignedIn } = useUser();
 	const post = useQuery(api.posts.getById, { id: id as Id<"posts"> });
+	const hasLiked = useQuery(
+		api.likes.hasLiked,
+		user && post
+			? { clerkId: user.id, targetType: "post" as const, targetId: post._id }
+			: "skip",
+	);
 	const commentsData = useQuery(
 		api.comments.getByTarget,
 		post
@@ -260,6 +266,7 @@ function PostDetailPage() {
 
 					<div className="flex items-center gap-6 border-t border-gray-700/50 pt-4">
 						<LikeButton
+							initialLiked={hasLiked ?? false}
 							likeCount={post._count.likes}
 							onToggle={
 								user

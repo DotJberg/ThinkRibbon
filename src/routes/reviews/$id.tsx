@@ -42,6 +42,16 @@ function ReviewDetailPage() {
 	const review = useQuery(api.reviews.getById, {
 		reviewId: id as Id<"reviews">,
 	});
+	const hasLiked = useQuery(
+		api.likes.hasLiked,
+		user && review
+			? {
+					clerkId: user.id,
+					targetType: "review" as const,
+					targetId: review._id,
+				}
+			: "skip",
+	);
 	const isLoading = review === undefined;
 	const commentsData = useQuery(
 		api.comments.getByTarget,
@@ -366,6 +376,7 @@ function ReviewDetailPage() {
 					{/* Actions */}
 					<div className="flex items-center gap-4 mt-6">
 						<LikeButton
+							initialLiked={hasLiked ?? false}
 							likeCount={review._count.likes}
 							onToggle={
 								user

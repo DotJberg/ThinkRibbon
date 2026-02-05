@@ -40,6 +40,16 @@ function ArticleDetailPage() {
 	const article = useQuery(api.articles.getById, {
 		articleId: id as Id<"articles">,
 	});
+	const hasLiked = useQuery(
+		api.likes.hasLiked,
+		user && article
+			? {
+					clerkId: user.id,
+					targetType: "article" as const,
+					targetId: article._id,
+				}
+			: "skip",
+	);
 	const isLoading = article === undefined;
 	const commentsData = useQuery(
 		api.comments.getByTarget,
@@ -370,6 +380,7 @@ function ArticleDetailPage() {
 					{/* Actions */}
 					<div className="flex items-center gap-4 mt-6">
 						<LikeButton
+							initialLiked={hasLiked ?? false}
 							likeCount={article._count.likes}
 							onToggle={
 								user

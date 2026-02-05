@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface LikeButtonProps {
 	initialLiked?: boolean;
@@ -17,6 +17,14 @@ export function LikeButton({
 	const [liked, setLiked] = useState(initialLiked);
 	const [count, setCount] = useState(likeCount);
 	const [isLoading, setIsLoading] = useState(false);
+
+	useEffect(() => {
+		setLiked(initialLiked);
+	}, [initialLiked]);
+
+	useEffect(() => {
+		setCount(likeCount);
+	}, [likeCount]);
 
 	const handleClick = async () => {
 		if (disabled || isLoading) return;

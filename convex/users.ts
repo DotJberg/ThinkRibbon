@@ -358,6 +358,7 @@ export const getDiscoverUsers = query({
 
 		const questLogCountByUser = new Map<string, number>();
 		for (const questLog of allQuestLogs) {
+			if (questLog.status !== "Playing") continue;
 			const userId = questLog.userId as string;
 			questLogCountByUser.set(userId, (questLogCountByUser.get(userId) || 0) + 1);
 		}
@@ -479,6 +480,7 @@ export const searchUsers = query({
 
 		const questLogCountByUser = new Map<string, number>();
 		for (const questLog of allQuestLogs) {
+			if (questLog.status !== "Playing") continue;
 			const userId = questLog.userId as string;
 			questLogCountByUser.set(userId, (questLogCountByUser.get(userId) || 0) + 1);
 		}

@@ -143,6 +143,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showReportModal, setShowReportModal] = useState(false);
 	const [isDeleted, setIsDeleted] = useState(false);
+	const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
 
 	const isAdmin = useQuery(
 		api.users.isAdmin,
@@ -275,9 +276,12 @@ export const FeedItemCard = memo(function FeedItemCard({
 				authorClerkId: user.id,
 				targetType: item.type,
 				targetId: item.id,
+				...(replyToCommentId
+					? { parentId: replyToCommentId as Id<"comments"> }
+					: {}),
 			});
 
-			if (newComment) {
+			if (newComment && !replyToCommentId) {
 				// Type assertion for the comment response from Convex
 				const comment = newComment as {
 					_id: string;
@@ -306,13 +310,22 @@ export const FeedItemCard = memo(function FeedItemCard({
 			setLocalCommentCount((prev) => prev + 1);
 			setCommentText("");
 			setShowCommentInput(false);
+			setReplyToCommentId(null);
 			onCommentAdded?.();
 		} catch (error) {
 			console.error("Failed to add comment:", error);
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [commentText, user, createCommentMut, item.type, item.id, onCommentAdded]);
+	}, [
+		commentText,
+		user,
+		createCommentMut,
+		item.type,
+		item.id,
+		replyToCommentId,
+		onCommentAdded,
+	]);
 
 	if (isDeleted) return null;
 
@@ -677,7 +690,10 @@ export const FeedItemCard = memo(function FeedItemCard({
 									className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-400"
 									onClick={(e) => {
 										e.preventDefault();
-										// Reply handler
+										if (localTopComment.id) {
+											setReplyToCommentId(localTopComment.id);
+											setShowCommentInput(true);
+										}
 									}}
 								>
 									<Reply className="w-3 h-3" />
@@ -737,7 +753,10 @@ export const FeedItemCard = memo(function FeedItemCard({
 				</button>
 				<button
 					type="button"
-					onClick={() => setShowCommentInput(!showCommentInput)}
+					onClick={() => {
+						setShowCommentInput(!showCommentInput);
+						setReplyToCommentId(null);
+					}}
 					className="flex items-center gap-1 hover:text-purple-400 transition-colors"
 				>
 					<MessageCircle size={16} />
@@ -747,45 +766,70 @@ export const FeedItemCard = memo(function FeedItemCard({
 
 			{/* Inline Comment Input */}
 			{showCommentInput && isSignedIn && (
-				<div className="mt-3 flex items-center gap-2">
-					<div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
-						<SafeImage
-							src={user?.imageUrl}
-							alt=""
-							className="w-full h-full object-cover"
-							fallback={
-								<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
-									{(user?.fullName || user?.username || "U")[0].toUpperCase()}
+				<div className="mt-3">
+					{replyToCommentId && localTopComment && (
+						<div className="flex items-center gap-2 mb-1 ml-10 text-xs text-gray-400">
+							<span>
+								Replying to{" "}
+								<span className="text-purple-400">
+									@
+									{localTopComment.author.displayName ||
+										localTopComment.author.username}
 								</span>
-							}
-						/>
-					</div>
-					<div className="flex-1 flex items-center gap-2 bg-gray-700/50 rounded-full pl-4 pr-2 py-2">
-						<input
-							type="text"
-							value={commentText}
-							onChange={(e) => setCommentText(e.target.value)}
-							placeholder="Write a comment..."
-							className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
-							onKeyDown={(e) => {
-								if (e.key === "Enter" && !e.shiftKey) {
-									e.preventDefault();
-									handleSubmitComment();
+							</span>
+							<button
+								type="button"
+								onClick={() => setReplyToCommentId(null)}
+								className="text-gray-500 hover:text-gray-300"
+							>
+								Cancel
+							</button>
+						</div>
+					)}
+					<div className="flex items-center gap-2">
+						<div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
+							<SafeImage
+								src={user?.imageUrl}
+								alt=""
+								className="w-full h-full object-cover"
+								fallback={
+									<span className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
+										{(user?.fullName || user?.username || "U")[0].toUpperCase()}
+									</span>
 								}
-							}}
-						/>
-						<EmojiPickerButton
-							size={14}
-							onEmojiSelect={(emoji) => setCommentText((prev) => prev + emoji)}
-						/>
-						<button
-							type="button"
-							onClick={handleSubmitComment}
-							disabled={!commentText.trim() || isSubmitting}
-							className="p-1.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-500 hover:to-pink-500 transition-all"
-						>
-							<Send size={14} />
-						</button>
+							/>
+						</div>
+						<div className="flex-1 flex items-center gap-2 bg-gray-700/50 rounded-full pl-4 pr-2 py-2">
+							<input
+								type="text"
+								value={commentText}
+								onChange={(e) => setCommentText(e.target.value)}
+								placeholder={
+									replyToCommentId ? "Write a reply..." : "Write a comment..."
+								}
+								className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
+								onKeyDown={(e) => {
+									if (e.key === "Enter" && !e.shiftKey) {
+										e.preventDefault();
+										handleSubmitComment();
+									}
+								}}
+							/>
+							<EmojiPickerButton
+								size={14}
+								onEmojiSelect={(emoji) =>
+									setCommentText((prev) => prev + emoji)
+								}
+							/>
+							<button
+								type="button"
+								onClick={handleSubmitComment}
+								disabled={!commentText.trim() || isSubmitting}
+								className="p-1.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-500 hover:to-pink-500 transition-all"
+							>
+								<Send size={14} />
+							</button>
+						</div>
 					</div>
 				</div>
 			)}

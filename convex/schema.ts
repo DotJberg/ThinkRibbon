@@ -166,6 +166,16 @@ export default defineSchema({
 		targetId: v.string(),
 		parentId: v.optional(v.id("comments")),
 		updatedAt: v.optional(v.number()),
+		linkPreview: v.optional(
+			v.object({
+				url: v.string(),
+				title: v.optional(v.string()),
+				description: v.optional(v.string()),
+				imageUrl: v.optional(v.string()),
+				siteName: v.optional(v.string()),
+				domain: v.string(),
+			}),
+		),
 			})
 		.index("by_authorId", ["authorId"])
 		.index("by_target", ["targetType", "targetId"])

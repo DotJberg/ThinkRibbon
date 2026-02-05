@@ -1,7 +1,11 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { GenericMutationCtx, GenericQueryCtx } from "convex/server";
 import type { Id } from "./_generated/dataModel";
+import type { DataModel } from "./_generated/dataModel";
 import { createNotification } from "./notifications";
+import { extractFirstUrl } from "./linkPreviews";
+import { internal } from "./_generated/api";
 
 export const create = mutation({
 	args: {
@@ -78,6 +82,16 @@ export const create = mutation({
 			}
 		}
 
+		// Schedule link preview fetch if comment contains a URL
+		const url = extractFirstUrl(args.content);
+		if (url) {
+			await ctx.scheduler.runAfter(
+				0,
+				internal.linkPreviews.fetchAndStoreCommentLinkPreview,
+				{ commentId, url },
+			);
+		}
+
 		const comment = await ctx.db.get(commentId);
 		return {
 			...comment,
@@ -90,6 +104,58 @@ export const create = mutation({
 		};
 	},
 });
+
+async function enrichReplies(
+	ctx: GenericQueryCtx<DataModel>,
+	parentId: Id<"comments">,
+	currentUserId: Id<"users"> | null,
+): Promise<Array<Record<string, unknown>>> {
+	const replies = await ctx.db
+		.query("comments")
+		.withIndex("by_parentId", (q) => q.eq("parentId", parentId))
+		.collect();
+
+	return Promise.all(
+		replies
+			.sort((a, b) => a._creationTime - b._creationTime)
+			.map(async (reply) => {
+				const replyAuthor = await ctx.db.get(reply.authorId);
+				const replyLikes = await ctx.db
+					.query("likes")
+					.withIndex("by_target", (q) =>
+						q.eq("targetType", "comment").eq("targetId", reply._id),
+					)
+					.collect();
+				const replyHasLiked = currentUserId
+					? replyLikes.some((l) => l.userId === currentUserId)
+					: false;
+
+				const nestedReplies = await enrichReplies(
+					ctx,
+					reply._id,
+					currentUserId,
+				);
+
+				return {
+					...reply,
+					author: replyAuthor
+						? {
+								_id: replyAuthor._id,
+								username: replyAuthor.username,
+								displayName: replyAuthor.displayName,
+								avatarUrl: replyAuthor.avatarUrl,
+							}
+						: null,
+					_count: {
+						likes: replyLikes.length,
+						replies: nestedReplies.length,
+					},
+					hasLiked: replyHasLiked,
+					replies: nestedReplies,
+				};
+			}),
+	);
+}
 
 export const getByTarget = query({
 	args: {
@@ -172,45 +238,14 @@ export const getByTarget = query({
 					)
 					.collect();
 
-				const replies = await ctx.db
-					.query("comments")
-					.withIndex("by_parentId", (q) => q.eq("parentId", comment._id))
-					.collect();
-
 				const hasLiked = currentUserId
 					? likes.some((l) => l.userId === currentUserId)
 					: false;
 
-				// Enrich replies
-				const enrichedReplies = await Promise.all(
-					replies
-						.sort((a, b) => a._creationTime - b._creationTime)
-						.map(async (reply) => {
-							const replyAuthor = await ctx.db.get(reply.authorId);
-							const replyLikes = await ctx.db
-								.query("likes")
-								.withIndex("by_target", (q) =>
-									q.eq("targetType", "comment").eq("targetId", reply._id),
-								)
-								.collect();
-							const replyHasLiked = currentUserId
-								? replyLikes.some((l) => l.userId === currentUserId)
-								: false;
-
-							return {
-								...reply,
-								author: replyAuthor
-									? {
-											_id: replyAuthor._id,
-											username: replyAuthor.username,
-											displayName: replyAuthor.displayName,
-											avatarUrl: replyAuthor.avatarUrl,
-										}
-									: null,
-								_count: { likes: replyLikes.length },
-								hasLiked: replyHasLiked,
-							};
-						}),
+				const enrichedReplies = await enrichReplies(
+					ctx,
+					comment._id,
+					currentUserId,
 				);
 
 				return {
@@ -223,7 +258,7 @@ export const getByTarget = query({
 								avatarUrl: author.avatarUrl,
 							}
 						: null,
-					_count: { likes: likes.length, replies: replies.length },
+					_count: { likes: likes.length, replies: enrichedReplies.length },
 					hasLiked,
 					replies: enrichedReplies,
 				};
@@ -233,6 +268,34 @@ export const getByTarget = query({
 		return { comments: enriched, nextCursor };
 	},
 });
+
+async function deleteCommentTree(
+	ctx: GenericMutationCtx<DataModel>,
+	commentId: Id<"comments">,
+) {
+	// Recursively delete children first
+	const children = await ctx.db
+		.query("comments")
+		.withIndex("by_parentId", (q) => q.eq("parentId", commentId))
+		.collect();
+	for (const child of children) {
+		await deleteCommentTree(ctx, child._id);
+	}
+
+	// Delete likes on this comment
+	const likes = await ctx.db
+		.query("likes")
+		.withIndex("by_target", (q) =>
+			q.eq("targetType", "comment").eq("targetId", commentId),
+		)
+		.collect();
+	for (const like of likes) {
+		await ctx.db.delete(like._id);
+	}
+
+	// Delete the comment itself
+	await ctx.db.delete(commentId);
+}
 
 export const deleteComment = mutation({
 	args: { commentId: v.id("comments"), clerkId: v.string() },
@@ -250,36 +313,8 @@ export const deleteComment = mutation({
 			throw new Error("Unauthorized");
 		}
 
-		// Delete likes on this comment
-		const likes = await ctx.db
-			.query("likes")
-			.withIndex("by_target", (q) =>
-				q.eq("targetType", "comment").eq("targetId", args.commentId),
-			)
-			.collect();
-		for (const like of likes) {
-			await ctx.db.delete(like._id);
-		}
-
-		// Delete replies and their likes
-		const replies = await ctx.db
-			.query("comments")
-			.withIndex("by_parentId", (q) => q.eq("parentId", args.commentId))
-			.collect();
-		for (const reply of replies) {
-			const replyLikes = await ctx.db
-				.query("likes")
-				.withIndex("by_target", (q) =>
-					q.eq("targetType", "comment").eq("targetId", reply._id),
-				)
-				.collect();
-			for (const rl of replyLikes) {
-				await ctx.db.delete(rl._id);
-			}
-			await ctx.db.delete(reply._id);
-		}
-
-		await ctx.db.delete(args.commentId);
+		// Recursively delete all descendants, then this comment
+		await deleteCommentTree(ctx, args.commentId);
 		return { success: true };
 	},
 });

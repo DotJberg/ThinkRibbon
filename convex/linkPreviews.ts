@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { action, internalMutation } from "./_generated/server";
+import { action, internalAction, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 
@@ -179,6 +179,59 @@ export const storeLinkPreview = internalMutation({
 			siteName: args.siteName,
 			domain: args.domain,
 		});
+	},
+});
+
+// Internal mutation to store a link preview on a comment
+export const storeCommentLinkPreview = internalMutation({
+	args: {
+		commentId: v.id("comments"),
+		url: v.string(),
+		title: v.optional(v.string()),
+		description: v.optional(v.string()),
+		imageUrl: v.optional(v.string()),
+		siteName: v.optional(v.string()),
+		domain: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const comment = await ctx.db.get(args.commentId);
+		if (!comment) return;
+
+		await ctx.db.patch(args.commentId, {
+			linkPreview: {
+				url: args.url,
+				title: args.title,
+				description: args.description,
+				imageUrl: args.imageUrl,
+				siteName: args.siteName,
+				domain: args.domain,
+			},
+		});
+	},
+});
+
+// Internal action to fetch and store link preview for a comment
+export const fetchAndStoreCommentLinkPreview = internalAction({
+	args: {
+		commentId: v.id("comments"),
+		url: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const metadata = await fetchOgMetadata(args.url);
+
+		if (metadata) {
+			await ctx.runMutation(internal.linkPreviews.storeCommentLinkPreview, {
+				commentId: args.commentId,
+				url: metadata.url,
+				title: metadata.title,
+				description: metadata.description,
+				imageUrl: metadata.imageUrl,
+				siteName: metadata.siteName,
+				domain: metadata.domain,
+			});
+		}
+
+		return metadata;
 	},
 });
 

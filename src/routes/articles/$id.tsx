@@ -10,12 +10,14 @@ import {
 	History,
 	MessageCircle,
 	MoreHorizontal,
+	Send,
 	Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
+import { CommentItem } from "../../components/shared/CommentItem";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { LikeButton } from "../../components/shared/LikeButton";
 import { ReportModal } from "../../components/shared/ReportModal";
@@ -38,12 +40,26 @@ function ArticleDetailPage() {
 		articleId: id as Id<"articles">,
 	});
 	const isLoading = article === undefined;
+	const commentsData = useQuery(
+		api.comments.getByTarget,
+		article
+			? {
+					targetType: "article" as const,
+					targetId: article._id,
+					clerkId: user?.id,
+				}
+			: "skip",
+	);
+	const comments = commentsData?.comments ?? [];
+	const [commentText, setCommentText] = useState("");
+	const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 	const [spoilerAccepted, setSpoilerAccepted] = useState(false);
 	const [showMenu, setShowMenu] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showHistoryModal, setShowHistoryModal] = useState(false);
 	const [showReportModal, setShowReportModal] = useState(false);
 	const toggleLike = useMutation(api.likes.toggle);
+	const createCommentMut = useMutation(api.comments.create);
 	const deleteArticleMut = useMutation(api.articles.deleteArticle);
 
 	// Only fetch history when modal is open
@@ -68,6 +84,24 @@ function ArticleDetailPage() {
 		if (!user || !article) return;
 		await deleteArticleMut({ articleId: article._id, clerkId: user.id });
 		navigate({ to: "/" });
+	};
+
+	const handleCreateComment = async () => {
+		if (!commentText.trim() || !user || !article) return;
+		setIsSubmittingComment(true);
+		try {
+			await createCommentMut({
+				content: commentText,
+				authorClerkId: user.id,
+				targetType: "article",
+				targetId: article._id,
+			});
+			setCommentText("");
+		} catch (error) {
+			console.error("Failed to create comment:", error);
+		} finally {
+			setIsSubmittingComment(false);
+		}
 	};
 
 	// Handle escape key for spoiler warning
@@ -352,6 +386,68 @@ function ArticleDetailPage() {
 							<MessageCircle size={18} />
 							{article._count.comments} comments
 						</span>
+					</div>
+
+					{/* Comments Section */}
+					<div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm mt-8">
+						<h3 className="text-xl font-bold text-white mb-6">Comments</h3>
+
+						{isSignedIn && (
+							<div className="flex gap-3 mb-8">
+								<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
+									{user?.imageUrl ? (
+										<img
+											src={user.imageUrl}
+											alt=""
+											className="w-full h-full object-cover"
+										/>
+									) : (
+										<span className="w-full h-full flex items-center justify-center text-white font-bold">
+											{(user?.fullName ||
+												user?.username ||
+												"U")[0].toUpperCase()}
+										</span>
+									)}
+								</div>
+								<div className="flex-1 flex gap-2">
+									<input
+										type="text"
+										value={commentText}
+										onChange={(e) => setCommentText(e.target.value)}
+										className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+										placeholder="Write a comment..."
+										onKeyDown={(e) =>
+											e.key === "Enter" && !e.shiftKey && handleCreateComment()
+										}
+									/>
+									<button
+										type="button"
+										onClick={handleCreateComment}
+										disabled={!commentText.trim() || isSubmittingComment}
+										className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+									>
+										<Send size={20} />
+									</button>
+								</div>
+							</div>
+						)}
+
+						<div className="space-y-6">
+							{comments.map((comment) => (
+								<CommentItem
+									key={comment._id}
+									comment={comment}
+									targetType="article"
+									targetId={article._id}
+									onReplySuccess={() => {}}
+								/>
+							))}
+							{comments.length === 0 && (
+								<div className="text-center text-gray-500 py-8">
+									No comments yet. Be the first to start the conversation!
+								</div>
+							)}
+						</div>
 					</div>
 				</article>
 			</div>

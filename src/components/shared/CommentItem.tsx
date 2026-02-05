@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Heart, Reply, Send } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { LinkPreviewCard } from "./LinkPreviewCard";
 
 interface CommentItemProps {
 	// biome-ignore lint/suspicious/noExplicitAny: Complex nested comment type
@@ -121,6 +122,18 @@ export function CommentItem({
 					<p className="text-sm text-gray-300 whitespace-pre-wrap">
 						{comment.content}
 					</p>
+					{comment.linkPreview && (
+						<div className="mt-2">
+							<LinkPreviewCard
+								url={comment.linkPreview.url}
+								title={comment.linkPreview.title}
+								description={comment.linkPreview.description}
+								imageUrl={comment.linkPreview.imageUrl}
+								siteName={comment.linkPreview.siteName}
+								domain={comment.linkPreview.domain}
+							/>
+						</div>
+					)}
 				</div>
 
 				<div className="flex items-center gap-4 mt-1 ml-1">

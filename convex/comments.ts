@@ -151,6 +151,7 @@ async function enrichReplies(
 					author: replyAuthor
 						? {
 								_id: replyAuthor._id,
+								clerkId: replyAuthor.clerkId,
 								username: replyAuthor.username,
 								displayName: replyAuthor.displayName,
 								avatarUrl: replyAuthor.avatarUrl,
@@ -273,6 +274,7 @@ export const getByTarget = query({
 					author: author
 						? {
 								_id: author._id,
+								clerkId: author.clerkId,
 								username: author.username,
 								displayName: author.displayName,
 								avatarUrl: author.avatarUrl,

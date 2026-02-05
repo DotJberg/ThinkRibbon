@@ -103,7 +103,7 @@ export function CommentItem({
 		api.users.isAdmin,
 		user?.id ? { clerkId: user.id } : "skip",
 	);
-	const isAuthor = user && comment.author?._id === user.id;
+	const isAuthor = user && comment.author?.clerkId === user.id;
 	const canDelete = isAuthor || isAdmin;
 
 	// Render deleted placeholder

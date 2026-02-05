@@ -88,6 +88,23 @@ async function getTargetPreview(
 	return {};
 }
 
+export const hasPending = query({
+	args: { clerkId: v.string() },
+	handler: async (ctx, args) => {
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		if (!user || !user.admin) return false;
+
+		const first = await ctx.db
+			.query("reports")
+			.withIndex("by_createdAt")
+			.first();
+		return first !== null;
+	},
+});
+
 export const getAll = query({
 	args: { clerkId: v.string() },
 	handler: async (ctx, args) => {

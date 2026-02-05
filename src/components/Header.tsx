@@ -38,6 +38,11 @@ export default function Header() {
 		user?.id ? { clerkId: user.id } : "skip",
 	);
 
+	const hasPendingReports = useQuery(
+		api.reports.hasPending,
+		isAdmin && user?.id ? { clerkId: user.id } : "skip",
+	);
+
 	return (
 		<>
 			<header className="p-4 flex items-center justify-between bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 text-white sticky top-0 z-40">
@@ -105,10 +110,15 @@ export default function Header() {
 							{isAdmin && (
 								<Link
 									to="/admin"
-									className="text-gray-300 hover:text-white transition-colors font-medium"
-									activeProps={{ className: "text-white font-medium" }}
+									className="text-gray-300 hover:text-white transition-colors font-medium relative"
+									activeProps={{
+										className: "text-white font-medium relative",
+									}}
 								>
 									Admin
+									{hasPendingReports && (
+										<span className="absolute -top-1 -right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full" />
+									)}
 								</Link>
 							)}
 						</>
@@ -266,7 +276,12 @@ export default function Header() {
 											"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
 									}}
 								>
-									<Shield size={20} />
+									<div className="relative">
+										<Shield size={20} />
+										{hasPendingReports && (
+											<span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
+										)}
+									</div>
 									<span className="font-medium">Admin Panel</span>
 								</Link>
 							)}

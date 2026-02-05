@@ -36,6 +36,7 @@ export function LinkPreviewCard({
 						src={imageUrl}
 						alt={title || "Link preview"}
 						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+						crossOrigin={undefined}
 						fallback={null}
 					/>
 				</div>

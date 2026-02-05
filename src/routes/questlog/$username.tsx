@@ -279,6 +279,7 @@ function QuestLogPage() {
 						setEditingEntry(null);
 						// Convex reactivity handles refresh
 					}}
+					onRemove={() => setEditingEntry(null)}
 					clerkId={currentUser.id}
 					gameId={editingEntry.gameId}
 					gameName={editingEntry.game?.name ?? "Unknown"}

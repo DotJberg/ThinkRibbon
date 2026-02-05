@@ -144,6 +144,7 @@ export function QuestLogButton({
 				isOpen={showStatusModal}
 				onClose={() => setShowStatusModal(false)}
 				onSuccess={handleStatusSuccess}
+				onRemove={handleStatusSuccess}
 				clerkId={user.id}
 				gameId={gameId}
 				gameName={gameName}

@@ -208,6 +208,7 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 					isOpen={true}
 					onClose={() => setSelectedEntry(null)}
 					onSuccess={handleStatusUpdate}
+					onRemove={() => setSelectedEntry(null)}
 					clerkId={user.id}
 					gameId={selectedEntry.gameId}
 					gameName={selectedEntry.game?.name ?? ""}

@@ -1,5 +1,13 @@
 import { useMutation } from "convex/react";
-import { Calendar, Loader2, Monitor, Share2, Star, X } from "lucide-react";
+import {
+	Calendar,
+	Loader2,
+	Monitor,
+	Share2,
+	Star,
+	Trash2,
+	X,
+} from "lucide-react";
 import { useId, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -16,6 +24,7 @@ interface StatusChangeModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onSuccess?: () => void;
+	onRemove?: () => void;
 	clerkId: string;
 	gameId: string;
 	gameName: string;
@@ -59,6 +68,7 @@ export function StatusChangeModal({
 	isOpen,
 	onClose,
 	onSuccess,
+	onRemove,
 	clerkId,
 	gameId,
 	gameName,
@@ -72,6 +82,7 @@ export function StatusChangeModal({
 }: StatusChangeModalProps) {
 	const updateQuestLogMut = useMutation(api.questlog.update);
 	const updateQuestLogStatusMut = useMutation(api.questlog.updateStatus);
+	const removeFromQuestLog = useMutation(api.questlog.remove);
 	const [newStatus, setNewStatus] = useState<QuestLogStatus>(
 		currentStatus === "Playing" ? "Beaten" : currentStatus,
 	);
@@ -81,6 +92,8 @@ export function StatusChangeModal({
 	const [quickRating, setQuickRating] = useState<number>(0);
 	const [shareAsPost, setShareAsPost] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isRemoving, setIsRemoving] = useState(false);
+	const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 	const [hoverRating, setHoverRating] = useState<number>(0);
 	const [startedAt, setStartedAt] = useState<string>(
 		formatDateForInput(currentStartedAt),
@@ -146,6 +159,21 @@ export function StatusChangeModal({
 			console.error("Failed to update status:", error);
 		} finally {
 			setIsSubmitting(false);
+		}
+	};
+
+	const handleRemove = async () => {
+		setIsRemoving(true);
+		try {
+			await removeFromQuestLog({
+				clerkId,
+				questLogId: questLogId as Id<"questLogs">,
+			});
+			onRemove?.();
+			onClose();
+		} catch (error) {
+			console.error("Failed to remove from quest log:", error);
+			setIsRemoving(false);
 		}
 	};
 
@@ -423,6 +451,47 @@ export function StatusChangeModal({
 							)}
 						</>
 					)}
+
+					{/* Remove from Quest Log */}
+					<div className="pt-2 border-t border-gray-700">
+						{showRemoveConfirm ? (
+							<div className="space-y-2">
+								<p className="text-sm text-red-400">
+									Are you sure you want to remove this game from your Quest Log?
+								</p>
+								<div className="flex gap-2">
+									<button
+										type="button"
+										onClick={handleRemove}
+										disabled={isRemoving}
+										className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+									>
+										{isRemoving ? (
+											<Loader2 size={16} className="animate-spin mx-auto" />
+										) : (
+											"Yes, Remove"
+										)}
+									</button>
+									<button
+										type="button"
+										onClick={() => setShowRemoveConfirm(false)}
+										className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors"
+									>
+										Cancel
+									</button>
+								</div>
+							</div>
+						) : (
+							<button
+								type="button"
+								onClick={() => setShowRemoveConfirm(true)}
+								className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors"
+							>
+								<Trash2 size={14} />
+								Remove from Quest Log
+							</button>
+						)}
+					</div>
 				</div>
 
 				{/* Footer */}

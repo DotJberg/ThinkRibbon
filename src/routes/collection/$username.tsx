@@ -218,7 +218,7 @@ function CollectionPage() {
 						if (!platformGroups.has(platform)) {
 							platformGroups.set(platform, []);
 						}
-						platformGroups.get(platform)!.push(item);
+						platformGroups.get(platform)?.push(item);
 					} else {
 						noPlatform.push(item);
 					}
@@ -261,7 +261,7 @@ function CollectionPage() {
 					if (!statusGroups.has(status)) {
 						statusGroups.set(status, []);
 					}
-					statusGroups.get(status)!.push(item);
+					statusGroups.get(status)?.push(item);
 				}
 
 				// Sort games within each group alphabetically
@@ -274,7 +274,7 @@ function CollectionPage() {
 					.filter((status) => statusGroups.has(status))
 					.map((status) => ({
 						name: `${collectionStatusEmojis[status]} ${collectionStatusLabels[status]}`,
-						items: statusGroups.get(status)!,
+						items: statusGroups.get(status) ?? [],
 						color: collectionStatusColors[status].split(" ")[1], // Get text color
 					}));
 

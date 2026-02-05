@@ -165,6 +165,7 @@ export default defineSchema({
 		),
 		targetId: v.string(),
 		parentId: v.optional(v.id("comments")),
+		deleted: v.optional(v.boolean()),
 		updatedAt: v.optional(v.number()),
 		linkPreview: v.optional(
 			v.object({

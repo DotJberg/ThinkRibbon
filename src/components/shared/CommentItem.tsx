@@ -1,8 +1,8 @@
 import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, Reply, Send } from "lucide-react";
+import { Heart, Reply, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { LinkPreviewCard } from "./LinkPreviewCard";
@@ -26,9 +26,11 @@ export function CommentItem({
 	const { user, isSignedIn } = useUser();
 	const toggleLike = useMutation(api.likes.toggle);
 	const createCommentMut = useMutation(api.comments.create);
+	const deleteCommentMut = useMutation(api.comments.deleteComment);
 	const [showReplyInput, setShowReplyInput] = useState(false);
 	const [replyText, setReplyText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	// Local state for optimistic updates
 	const [hasLiked, setHasLiked] = useState(
@@ -81,6 +83,61 @@ export function CommentItem({
 			setIsSubmitting(false);
 		}
 	};
+
+	const handleDelete = async () => {
+		if (!user || isDeleting) return;
+		setIsDeleting(true);
+		try {
+			await deleteCommentMut({
+				commentId,
+				clerkId: user.id,
+			});
+		} catch (error) {
+			console.error("Failed to delete comment:", error);
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
+	const isAdmin = useQuery(
+		api.users.isAdmin,
+		user?.id ? { clerkId: user.id } : "skip",
+	);
+	const isAuthor = user && comment.author?._id === user.id;
+	const canDelete = isAuthor || isAdmin;
+
+	// Render deleted placeholder
+	if (comment.deleted) {
+		return (
+			<div className={`flex gap-3 ${depth > 0 ? "ml-8 mt-4" : "mt-6"}`}>
+				<div className="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0" />
+				<div className="flex-1 min-w-0">
+					<div className="bg-gray-800/30 rounded-xl p-3 border border-gray-700/30">
+						<p className="text-sm text-gray-500 italic">
+							This comment was deleted.
+						</p>
+					</div>
+
+					{/* Nested Replies */}
+					{comment.replies && comment.replies.length > 0 && (
+						<div className="mt-2">
+							{/* biome-ignore lint/suspicious/noExplicitAny: Complex nested reply type */}
+							{comment.replies.map((reply: any) => (
+								<CommentItem
+									key={reply._id || reply.id}
+									comment={reply}
+									depth={depth + 1}
+									onReplySuccess={onReplySuccess}
+									targetType={targetType}
+									targetId={targetId}
+								/>
+							))}
+						</div>
+					)}
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className={`flex gap-3 ${depth > 0 ? "ml-8 mt-4" : "mt-6"}`}>
@@ -155,6 +212,17 @@ export function CommentItem({
 						<Reply size={12} />
 						Reply
 					</button>
+					{canDelete && (
+						<button
+							type="button"
+							onClick={handleDelete}
+							disabled={isDeleting}
+							className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-400 transition-colors"
+						>
+							<Trash2 size={12} />
+							Delete
+						</button>
+					)}
 				</div>
 
 				{/* Reply Input */}

@@ -119,6 +119,22 @@ async function enrichReplies(
 		replies
 			.sort((a, b) => a._creationTime - b._creationTime)
 			.map(async (reply) => {
+				const nestedReplies = await enrichReplies(
+					ctx,
+					reply._id,
+					currentUserId,
+				);
+
+				if (reply.deleted) {
+					return {
+						...reply,
+						author: null,
+						_count: { likes: 0, replies: nestedReplies.length },
+						hasLiked: false,
+						replies: nestedReplies,
+					};
+				}
+
 				const replyAuthor = await ctx.db.get(reply.authorId);
 				const replyLikes = await ctx.db
 					.query("likes")
@@ -129,12 +145,6 @@ async function enrichReplies(
 				const replyHasLiked = currentUserId
 					? replyLikes.some((l) => l.userId === currentUserId)
 					: false;
-
-				const nestedReplies = await enrichReplies(
-					ctx,
-					reply._id,
-					currentUserId,
-				);
 
 				return {
 					...reply,
@@ -229,6 +239,22 @@ export const getByTarget = query({
 		// Enrich each comment
 		const enriched = await Promise.all(
 			paginated.map(async (comment) => {
+				const enrichedReplies = await enrichReplies(
+					ctx,
+					comment._id,
+					currentUserId,
+				);
+
+				if (comment.deleted) {
+					return {
+						...comment,
+						author: null,
+						_count: { likes: 0, replies: enrichedReplies.length },
+						hasLiked: false,
+						replies: enrichedReplies,
+					};
+				}
+
 				const author = await ctx.db.get(comment.authorId);
 
 				const likes = await ctx.db
@@ -241,12 +267,6 @@ export const getByTarget = query({
 				const hasLiked = currentUserId
 					? likes.some((l) => l.userId === currentUserId)
 					: false;
-
-				const enrichedReplies = await enrichReplies(
-					ctx,
-					comment._id,
-					currentUserId,
-				);
 
 				return {
 					...comment,
@@ -313,8 +333,24 @@ export const deleteComment = mutation({
 			throw new Error("Unauthorized");
 		}
 
-		// Recursively delete all descendants, then this comment
-		await deleteCommentTree(ctx, args.commentId);
+		// Check if comment has children
+		const children = await ctx.db
+			.query("comments")
+			.withIndex("by_parentId", (q) => q.eq("parentId", args.commentId))
+			.collect();
+
+		if (children.length > 0) {
+			// Soft delete: clear content and mark as deleted, preserving the reply tree
+			await ctx.db.patch(args.commentId, {
+				deleted: true,
+				content: "",
+				linkPreview: undefined,
+			});
+		} else {
+			// Hard delete: no children, remove entirely
+			await deleteCommentTree(ctx, args.commentId);
+		}
+
 		return { success: true };
 	},
 });

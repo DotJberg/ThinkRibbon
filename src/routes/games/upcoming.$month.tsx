@@ -111,7 +111,7 @@ function UpcomingMonthPage() {
 			slug: g.slug,
 			coverUrl: g.coverUrl ?? null,
 			genres: g.genres,
-			releaseDate: new Date(g.releaseDate!),
+			releaseDate: new Date(g.releaseDate ?? 0),
 			categoryLabel: g.categoryLabel,
 		}));
 

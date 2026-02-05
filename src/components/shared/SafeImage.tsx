@@ -9,7 +9,7 @@ export const SafeImage = memo(function SafeImage({
 	alt,
 	className,
 	fallback,
-	crossOrigin = "anonymous",
+	crossOrigin,
 	loading = "lazy",
 	onError,
 	...props

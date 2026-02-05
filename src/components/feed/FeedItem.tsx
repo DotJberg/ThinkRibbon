@@ -25,6 +25,7 @@ import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
 import { ReportModal } from "../shared/ReportModal";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
+import { TagDisplay } from "../shared/TagDisplay";
 
 // FeedItem type (previously from lib/server/feed)
 interface FeedItem {
@@ -58,6 +59,8 @@ interface FeedItem {
 	};
 	containsSpoilers?: boolean;
 	rating?: number;
+	tags?: string[];
+	genres?: string[];
 	game?: {
 		_id: string;
 		name: string;
@@ -529,6 +532,13 @@ export const FeedItemCard = memo(function FeedItemCard({
 				</Link>
 			)}
 
+			{/* Tags (for reviews) */}
+			{item.type === "review" && (item.tags?.length || item.genres?.length) && (
+				<div className="mb-3">
+					<TagDisplay tags={item.tags} genres={item.genres} />
+				</div>
+			)}
+
 			{/* Games (for articles) */}
 			{item.type === "article" && item.games && item.games.length > 0 && (
 				<div className="flex flex-wrap gap-1 mb-3">
@@ -555,6 +565,14 @@ export const FeedItemCard = memo(function FeedItemCard({
 					)}
 				</div>
 			)}
+
+			{/* Tags (for articles) */}
+			{item.type === "article" &&
+				(item.tags?.length || item.genres?.length) && (
+					<div className="mb-3">
+						<TagDisplay tags={item.tags} genres={item.genres} />
+					</div>
+				)}
 
 			{/* Content */}
 			{item.type === "post" && (

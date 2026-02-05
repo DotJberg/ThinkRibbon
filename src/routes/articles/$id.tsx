@@ -23,6 +23,7 @@ import {
 	SpoilerBadge,
 	SpoilerWarning,
 } from "../../components/shared/SpoilerWarning";
+import { TagDisplay } from "../../components/shared/TagDisplay";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
 
 export const Route = createFileRoute("/articles/$id")({
@@ -300,6 +301,22 @@ function ArticleDetailPage() {
 									))}
 							</div>
 						)}
+
+						{/* Tags */}
+						{(() => {
+							const combinedGenres = [
+								...new Set(
+									article.games
+										.filter((g) => g !== null)
+										.flatMap((g) => (g as { genres?: string[] }).genres || []),
+								),
+							];
+							return article.tags?.length || combinedGenres.length > 0 ? (
+								<div className="mt-3">
+									<TagDisplay tags={article.tags} genres={combinedGenres} />
+								</div>
+							) : null;
+						})()}
 					</header>
 
 					{/* Content */}

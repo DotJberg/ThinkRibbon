@@ -18,6 +18,7 @@ import { NavigationWarning } from "../../components/editor/NavigationWarning";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
+import { TagSelector } from "../../components/shared/TagSelector";
 
 export const Route = createFileRoute("/reviews/new")({
 	component: NewReviewPage,
@@ -70,6 +71,7 @@ function NewReviewPage() {
 	const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
+	const [tags, setTags] = useState<string[]>([]);
 
 	// Draft state
 	const [draftId, setDraftId] = useState<string | undefined>(initialDraftId);
@@ -160,6 +162,7 @@ function NewReviewPage() {
 				setCoverImageUrl(draft.coverImageUrl ?? null);
 				setCoverFileKey(draft.coverFileKey ?? null);
 				setContainsSpoilers(draft.containsSpoilers ?? false);
+				setTags(draft.tags ?? []);
 				setDraftId(draft._id);
 				toast.success("Draft loaded");
 			}
@@ -180,6 +183,7 @@ function NewReviewPage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags: tags.length > 0 ? tags : undefined,
 				gameId: selectedGame?.id,
 				authorClerkId: user.id,
 			});
@@ -199,6 +203,7 @@ function NewReviewPage() {
 		coverImageUrl,
 		coverFileKey,
 		containsSpoilers,
+		tags,
 		selectedGame,
 		saveReviewDraftMut,
 	]);
@@ -284,6 +289,7 @@ function NewReviewPage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags: tags.length > 0 ? tags : undefined,
 				published: true,
 				authorClerkId: user.id,
 			});
@@ -613,6 +619,9 @@ function NewReviewPage() {
 							onChange={setRating}
 						/>
 					</div>
+
+					{/* Tags */}
+					<TagSelector selectedTags={tags} onChange={setTags} />
 
 					{/* Title */}
 					<div>

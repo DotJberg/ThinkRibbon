@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
+import { TagDisplay } from "../shared/TagDisplay";
 
 interface ArticleCardProps {
 	article: {
@@ -13,6 +14,8 @@ interface ArticleCardProps {
 		content: string;
 		coverImageUrl: string | null;
 		containsSpoilers?: boolean;
+		tags?: string[];
+		genres?: string[];
 		createdAt: Date | string;
 		author: {
 			id: string;
@@ -118,6 +121,13 @@ export function ArticleCard({
 								+{article.games.length - 3} more
 							</span>
 						)}
+					</div>
+				)}
+
+				{/* Tags */}
+				{(article.tags?.length || article.genres?.length) && (
+					<div className="mb-3">
+						<TagDisplay tags={article.tags} genres={article.genres} />
 					</div>
 				)}
 

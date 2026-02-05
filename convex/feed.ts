@@ -23,6 +23,8 @@ interface FeedItem {
 	coverImageUrl?: string;
 	containsSpoilers?: boolean;
 	rating?: number;
+	tags?: string[];
+	genres?: string[];
 	game?: {
 		_id: Id<"games">;
 		name: string;
@@ -287,6 +289,10 @@ async function enrichItems(
 			usersById,
 		);
 
+		const articleGenres = [
+			...new Set(games.flatMap((g) => g.genres || [])),
+		];
+
 		items.push({
 			type: "article",
 			id: article._id,
@@ -303,6 +309,8 @@ async function enrichItems(
 			content: article.content,
 			title: article.title,
 			excerpt: article.excerpt || undefined,
+			tags: article.tags || undefined,
+			genres: articleGenres.length > 0 ? articleGenres : undefined,
 			games: games.map((g) => ({
 				_id: g._id,
 				name: g.name,
@@ -354,6 +362,8 @@ async function enrichItems(
 			coverImageUrl: review.coverImageUrl,
 			containsSpoilers: review.containsSpoilers,
 			rating: review.rating,
+			tags: review.tags || undefined,
+			genres: game?.genres && game.genres.length > 0 ? game.genres : undefined,
 			game: game
 				? {
 						_id: game._id,

@@ -25,6 +25,7 @@ import {
 	SpoilerWarning,
 } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
+import { TagDisplay } from "../../components/shared/TagDisplay";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
 
 export const Route = createFileRoute("/reviews/$id")({
@@ -263,6 +264,14 @@ function ReviewDetailPage() {
 								)}
 							</div>
 							<StarRating rating={review.rating} size="lg" />
+
+							{/* Tags */}
+							{(review.tags?.length ||
+								(review.game?.genres && review.game.genres.length > 0)) && (
+								<div className="mt-3">
+									<TagDisplay tags={review.tags} genres={review.game?.genres} />
+								</div>
+							)}
 
 							{/* Author */}
 							<div className="flex items-center gap-3 mt-4">

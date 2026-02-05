@@ -10,6 +10,7 @@ import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
+import { TagSelector } from "../../components/shared/TagSelector";
 
 export const Route = createFileRoute("/reviews/edit/$id")({
 	component: EditReviewPage,
@@ -36,6 +37,7 @@ function EditReviewPage() {
 	const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
+	const [tags, setTags] = useState<string[]>([]);
 
 	// Loading state
 	const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
@@ -64,6 +66,7 @@ function EditReviewPage() {
 			setRating(review.rating);
 			setCoverImageUrl(review.coverImageUrl ?? null);
 			setContainsSpoilers(review.containsSpoilers || false);
+			setTags(review.tags ?? []);
 			if (review.game) {
 				setGame({
 					id: review.game._id,
@@ -94,6 +97,7 @@ function EditReviewPage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags,
 				clerkId: user.id,
 			});
 			setLastSaved(new Date());
@@ -111,6 +115,7 @@ function EditReviewPage() {
 		coverImageUrl,
 		coverFileKey,
 		containsSpoilers,
+		tags,
 		updateReviewMut,
 	]);
 
@@ -158,6 +163,7 @@ function EditReviewPage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags,
 				published: true,
 				saveHistory: true,
 				clerkId: user.id,
@@ -280,6 +286,9 @@ function EditReviewPage() {
 							onChange={setRating}
 						/>
 					</div>
+
+					{/* Tags */}
+					<TagSelector selectedTags={tags} onChange={setTags} />
 
 					{/* Title */}
 					<div>

@@ -9,6 +9,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
+import { TagSelector } from "../../components/shared/TagSelector";
 
 export const Route = createFileRoute("/articles/edit/$id")({
 	component: EditArticlePage,
@@ -27,6 +28,7 @@ function EditArticlePage() {
 	const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
+	const [tags, setTags] = useState<string[]>([]);
 	const [selectedGames, setSelectedGames] = useState<
 		Array<{ id: string; name: string; coverUrl: string | null }>
 	>([]);
@@ -73,6 +75,7 @@ function EditArticlePage() {
 			setExcerpt(article.excerpt || "");
 			setCoverImageUrl(article.coverImageUrl ?? null);
 			setContainsSpoilers(article.containsSpoilers || false);
+			setTags(article.tags ?? []);
 			if (article.games) {
 				setSelectedGames(
 					article.games
@@ -105,6 +108,7 @@ function EditArticlePage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags,
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				clerkId: user.id,
 			});
@@ -123,6 +127,7 @@ function EditArticlePage() {
 		coverImageUrl,
 		coverFileKey,
 		containsSpoilers,
+		tags,
 		selectedGames,
 		updateArticleMut,
 	]);
@@ -212,6 +217,7 @@ function EditArticlePage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags,
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				published: true,
 				saveHistory: true,
@@ -423,6 +429,9 @@ function EditArticlePage() {
 							</div>
 						)}
 					</div>
+
+					{/* Tags */}
+					<TagSelector selectedTags={tags} onChange={setTags} />
 
 					{/* Spoiler Toggle */}
 					<SpoilerToggle

@@ -18,6 +18,7 @@ import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { NavigationWarning } from "../../components/editor/NavigationWarning";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
+import { TagSelector } from "../../components/shared/TagSelector";
 
 export const Route = createFileRoute("/articles/new")({
 	component: NewArticlePage,
@@ -39,6 +40,7 @@ function NewArticlePage() {
 	const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
+	const [tags, setTags] = useState<string[]>([]);
 	const [selectedGames, setSelectedGames] = useState<
 		Array<{ id: string; name: string; coverUrl: string | null }>
 	>([]);
@@ -115,6 +117,7 @@ function NewArticlePage() {
 				setCoverImageUrl(draft.coverImageUrl ?? null);
 				setCoverFileKey(draft.coverFileKey ?? null);
 				setContainsSpoilers(draft.containsSpoilers ?? false);
+				setTags(draft.tags ?? []);
 				setDraftId(draft._id);
 				toast.success("Draft loaded");
 			}
@@ -135,6 +138,7 @@ function NewArticlePage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags: tags.length > 0 ? tags : undefined,
 				gameIds: selectedGames.map((g) => g.id),
 				authorClerkId: user.id,
 			});
@@ -154,6 +158,7 @@ function NewArticlePage() {
 		coverImageUrl,
 		coverFileKey,
 		containsSpoilers,
+		tags,
 		selectedGames,
 		saveArticleDraftMut,
 	]);
@@ -247,6 +252,7 @@ function NewArticlePage() {
 				coverImageUrl: coverImageUrl || undefined,
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
+				tags: tags.length > 0 ? tags : undefined,
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				published: true,
 				authorClerkId: user.id,
@@ -550,6 +556,9 @@ function NewArticlePage() {
 							</div>
 						)}
 					</div>
+
+					{/* Tags */}
+					<TagSelector selectedTags={tags} onChange={setTags} />
 
 					{/* Spoiler Toggle */}
 					<SpoilerToggle

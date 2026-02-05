@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
 import { StarRating } from "../shared/StarRating";
+import { TagDisplay } from "../shared/TagDisplay";
 
 interface ReviewCardProps {
 	review: {
@@ -13,6 +14,8 @@ interface ReviewCardProps {
 		rating: number;
 		coverImageUrl?: string | null;
 		containsSpoilers?: boolean;
+		tags?: string[];
+		genres?: string[];
 		createdAt: Date | string;
 		author: {
 			id: string;
@@ -112,6 +115,13 @@ export function ReviewCard({
 						</div>
 						<StarRating rating={review.rating} size="sm" />
 					</div>
+
+					{/* Tags */}
+					{(review.tags?.length || review.genres?.length) && (
+						<div className="mb-2">
+							<TagDisplay tags={review.tags} genres={review.genres} />
+						</div>
+					)}
 
 					{/* Footer */}
 					<div className="flex items-center justify-between mt-auto">

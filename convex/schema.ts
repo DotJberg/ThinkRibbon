@@ -269,6 +269,7 @@ export default defineSchema({
 		),
 		platform: v.optional(v.string()), // Platform owned on
 		difficulty: v.optional(v.string()), // Difficulty setting planned/used
+		hoursPlayed: v.optional(v.number()),
 		acquiredAt: v.optional(v.number()),
 		notes: v.optional(v.string()), // Deprecated - kept for backwards compatibility
 		updatedAt: v.optional(v.number()),

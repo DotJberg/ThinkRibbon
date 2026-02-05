@@ -36,6 +36,7 @@ export const add = mutation({
 		status: v.optional(collectionStatus),
 		platform: v.optional(v.string()),
 		difficulty: v.optional(v.string()),
+		hoursPlayed: v.optional(v.number()),
 		acquiredAt: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
@@ -74,6 +75,7 @@ export const add = mutation({
 			status: args.status,
 			platform: args.platform,
 			difficulty: args.difficulty,
+			hoursPlayed: args.hoursPlayed,
 			acquiredAt: args.acquiredAt,
 			updatedAt: Date.now(),
 		});
@@ -90,6 +92,7 @@ export const update = mutation({
 		status: v.optional(collectionStatus),
 		platform: v.optional(v.string()),
 		difficulty: v.optional(v.string()),
+		hoursPlayed: v.optional(v.number()),
 		acquiredAt: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
@@ -110,6 +113,8 @@ export const update = mutation({
 		if (args.status !== undefined) updateData.status = args.status;
 		if (args.platform !== undefined) updateData.platform = args.platform;
 		if (args.difficulty !== undefined) updateData.difficulty = args.difficulty;
+		if (args.hoursPlayed !== undefined)
+			updateData.hoursPlayed = args.hoursPlayed;
 		if (args.acquiredAt !== undefined) updateData.acquiredAt = args.acquiredAt;
 
 		await ctx.db.patch(args.collectionId, updateData);
@@ -259,6 +264,7 @@ export const getUserCollection = query({
 					status: entry.status || null,
 					platform: entry.platform,
 					difficulty: entry.difficulty,
+					hoursPlayed: entry.hoursPlayed,
 					acquiredAt: entry.acquiredAt,
 					updatedAt: entry.updatedAt || entry._creationTime,
 				},

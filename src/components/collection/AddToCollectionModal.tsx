@@ -1,6 +1,7 @@
 import { useMutation } from "convex/react";
 import {
 	Calendar,
+	Clock,
 	Gamepad2,
 	Loader2,
 	Monitor,
@@ -115,6 +116,7 @@ export function AddToCollectionModal({
 	const [status, setStatus] = useState<CollectionStatus>("Unplayed");
 	const [platform, setPlatform] = useState<string>("");
 	const [difficulty, setDifficulty] = useState<string>("");
+	const [hoursPlayed, setHoursPlayed] = useState<string>("");
 	const [acquiredAt, setAcquiredAt] = useState<string>(
 		new Date().toISOString().split("T")[0],
 	);
@@ -125,6 +127,7 @@ export function AddToCollectionModal({
 	const platformId = useId();
 	const difficultyId = useId();
 	const difficultyListId = useId();
+	const hoursPlayedId = useId();
 	const acquiredId = useId();
 
 	if (!isOpen) return null;
@@ -140,6 +143,7 @@ export function AddToCollectionModal({
 				status,
 				platform: platform || undefined,
 				difficulty: difficulty || undefined,
+				hoursPlayed: hoursPlayed ? Number(hoursPlayed) : undefined,
 				acquiredAt: acquiredAt ? new Date(acquiredAt).getTime() : undefined,
 			});
 
@@ -419,6 +423,27 @@ export function AddToCollectionModal({
 								</button>
 							))}
 						</div>
+					</div>
+
+					{/* Hours Played */}
+					<div className="space-y-2">
+						<label
+							htmlFor={hoursPlayedId}
+							className="text-sm font-medium text-gray-400 flex items-center gap-2"
+						>
+							<Clock size={14} />
+							Hours Played (Optional)
+						</label>
+						<input
+							id={hoursPlayedId}
+							type="number"
+							min="0"
+							step="1"
+							value={hoursPlayed}
+							onChange={(e) => setHoursPlayed(e.target.value)}
+							placeholder="e.g., 50"
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+						/>
 					</div>
 
 					{/* Acquired Date */}

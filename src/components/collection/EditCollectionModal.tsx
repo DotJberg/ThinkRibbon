@@ -1,6 +1,7 @@
 import { useMutation } from "convex/react";
 import {
 	Calendar,
+	Clock,
 	Gamepad2,
 	Loader2,
 	Monitor,
@@ -35,6 +36,7 @@ interface EditCollectionModalProps {
 	currentStatus?: CollectionStatus | null;
 	currentPlatform?: string;
 	currentDifficulty?: string;
+	currentHoursPlayed?: number;
 	currentAcquiredAt?: number;
 }
 
@@ -83,6 +85,7 @@ export function EditCollectionModal({
 	currentStatus,
 	currentPlatform,
 	currentDifficulty,
+	currentHoursPlayed,
 	currentAcquiredAt,
 }: EditCollectionModalProps) {
 	const updateCollection = useMutation(api.collections.update);
@@ -94,6 +97,9 @@ export function EditCollectionModal({
 	);
 	const [platform, setPlatform] = useState<string>(currentPlatform ?? "");
 	const [difficulty, setDifficulty] = useState<string>(currentDifficulty ?? "");
+	const [hoursPlayed, setHoursPlayed] = useState<string>(
+		currentHoursPlayed ? String(currentHoursPlayed) : "",
+	);
 	const [acquiredAt, setAcquiredAt] = useState<string>(
 		currentAcquiredAt
 			? new Date(currentAcquiredAt).toISOString().split("T")[0]
@@ -106,6 +112,7 @@ export function EditCollectionModal({
 	const platformId = useId();
 	const difficultyId = useId();
 	const difficultyListId = useId();
+	const hoursPlayedId = useId();
 	const acquiredId = useId();
 
 	if (!isOpen) return null;
@@ -121,6 +128,7 @@ export function EditCollectionModal({
 				status,
 				platform: platform || undefined,
 				difficulty: difficulty || undefined,
+				hoursPlayed: hoursPlayed ? Number(hoursPlayed) : undefined,
 				acquiredAt: acquiredAt ? new Date(acquiredAt).getTime() : undefined,
 			});
 
@@ -302,6 +310,27 @@ export function EditCollectionModal({
 								</button>
 							))}
 						</div>
+					</div>
+
+					{/* Hours Played */}
+					<div className="space-y-2">
+						<label
+							htmlFor={hoursPlayedId}
+							className="text-sm font-medium text-gray-400 flex items-center gap-2"
+						>
+							<Clock size={14} />
+							Hours Played (Optional)
+						</label>
+						<input
+							id={hoursPlayedId}
+							type="number"
+							min="0"
+							step="1"
+							value={hoursPlayed}
+							onChange={(e) => setHoursPlayed(e.target.value)}
+							placeholder="e.g., 50"
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+						/>
 					</div>
 
 					{/* Acquired Date */}

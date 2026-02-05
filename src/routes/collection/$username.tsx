@@ -7,7 +7,6 @@ import {
 	Calendar,
 	ChevronDown,
 	ChevronUp,
-	Clock,
 	Disc,
 	Download,
 	Gamepad2,
@@ -20,6 +19,7 @@ import { useMemo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { CollectionGameSearchModal } from "../../components/collection/CollectionGameSearchModal";
 import { EditCollectionModal } from "../../components/collection/EditCollectionModal";
+import { HoursPlayedBadge } from "../../components/collection/HoursPlayedBadge";
 
 type CollectionStatus =
 	| "Unplayed"
@@ -129,6 +129,7 @@ type CollectionItem = {
 		status: CollectionStatus | null;
 		platform?: string;
 		difficulty?: string;
+		hoursPlayed?: number;
 		acquiredAt?: number;
 		updatedAt: number;
 	};
@@ -179,10 +180,6 @@ function OwnershipBadge({ type }: { type: OwnershipType }) {
 			Digital
 		</span>
 	);
-}
-
-function getTotalHoursPlayed(playthroughs: PlaythroughItem[]): number {
-	return playthroughs.reduce((sum, p) => sum + (p.hoursPlayed || 0), 0);
 }
 
 function CollectionPage() {
@@ -336,7 +333,7 @@ function CollectionPage() {
 	const renderGameCard = (item: CollectionItem) => {
 		const isExpanded = expandedGames.has(item.game._id);
 		const displayRating = item.review?.rating || item.latestRating;
-		const totalHours = getTotalHoursPlayed(item.playthroughs);
+		const hours = item.collection.hoursPlayed ?? 0;
 		const releaseYear = item.game.releaseDate
 			? new Date(item.game.releaseDate).getFullYear()
 			: null;
@@ -445,12 +442,7 @@ function CollectionPage() {
 							{item.collection.difficulty && (
 								<span>Difficulty: {item.collection.difficulty}</span>
 							)}
-							{totalHours > 0 && (
-								<span className="flex items-center gap-1">
-									<Clock size={12} />
-									{totalHours}h played
-								</span>
-							)}
+							{hours > 0 && <HoursPlayedBadge hours={hours} size="sm" />}
 							{item.collection.acquiredAt && (
 								<span className="flex items-center gap-1">
 									<Calendar size={12} />
@@ -788,6 +780,7 @@ function CollectionPage() {
 					currentStatus={editingItem.collection.status}
 					currentPlatform={editingItem.collection.platform}
 					currentDifficulty={editingItem.collection.difficulty}
+					currentHoursPlayed={editingItem.collection.hoursPlayed}
 					currentAcquiredAt={editingItem.collection.acquiredAt}
 				/>
 			)}

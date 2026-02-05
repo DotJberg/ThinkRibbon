@@ -5,6 +5,7 @@ import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { AddToCollectionModal } from "./AddToCollectionModal";
+import { HoursPlayedBadge } from "./HoursPlayedBadge";
 
 type OwnershipType = "Physical" | "Digital";
 
@@ -110,15 +111,20 @@ export function CollectionButton({
 					Add to Collection
 				</button>
 			) : (
-				/* In collection - show owned status */
-				<button
-					type="button"
-					onClick={() => setShowAddModal(true)}
-					className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${ownershipColors[entry.ownershipType]} text-white font-medium rounded-lg shadow-lg hover:opacity-90 transition-all`}
-				>
-					<Check size={18} />
-					{ownershipLabels[entry.ownershipType]}
-				</button>
+				/* In collection - show owned status + hours badge */
+				<div className="flex items-center gap-2">
+					<button
+						type="button"
+						onClick={() => setShowAddModal(true)}
+						className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${ownershipColors[entry.ownershipType]} text-white font-medium rounded-lg shadow-lg hover:opacity-90 transition-all`}
+					>
+						<Check size={18} />
+						{ownershipLabels[entry.ownershipType]}
+					</button>
+					{entry.hoursPlayed && entry.hoursPlayed > 0 && (
+						<HoursPlayedBadge hours={entry.hoursPlayed} size="md" />
+					)}
+				</div>
 			)}
 
 			{/* Modal always mounted, visibility controlled by showAddModal */}

@@ -13,6 +13,7 @@ import {
 	type LinkPreviewData,
 } from "../../lib/link-preview";
 import { useUploadThing } from "../../lib/uploadthing";
+import { EmojiPickerButton } from "../shared/EmojiPickerButton";
 
 interface PostComposerProps {
 	onSubmit: (
@@ -290,6 +291,9 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 							>
 								<ImagePlus size={20} />
 							</button>
+							<EmojiPickerButton
+								onEmojiSelect={(emoji) => setContent((prev) => prev + emoji)}
+							/>
 							<input
 								ref={fileInputRef}
 								type="file"

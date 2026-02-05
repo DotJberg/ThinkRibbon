@@ -21,6 +21,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { EditPostModal } from "../posts/EditPostModal";
 import { PostImageGrid } from "../posts/PostImageGrid";
 import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
+import { EmojiPickerButton } from "../shared/EmojiPickerButton";
 import { LinkPreviewCard } from "../shared/LinkPreviewCard";
 import { ReportModal } from "../shared/ReportModal";
 import { SafeImage } from "../shared/SafeImage";
@@ -772,6 +773,10 @@ export const FeedItemCard = memo(function FeedItemCard({
 									handleSubmitComment();
 								}
 							}}
+						/>
+						<EmojiPickerButton
+							size={14}
+							onEmojiSelect={(emoji) => setCommentText((prev) => prev + emoji)}
 						/>
 						<button
 							type="button"

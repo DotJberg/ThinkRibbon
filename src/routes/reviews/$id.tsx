@@ -19,6 +19,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
 import { CommentItem } from "../../components/shared/CommentItem";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
+import { EmojiPickerButton } from "../../components/shared/EmojiPickerButton";
 import { LikeButton } from "../../components/shared/LikeButton";
 import { ReportModal } from "../../components/shared/ReportModal";
 import { SafeImage } from "../../components/shared/SafeImage";
@@ -414,6 +415,11 @@ function ReviewDetailPage() {
 										placeholder="Write a comment..."
 										onKeyDown={(e) =>
 											e.key === "Enter" && !e.shiftKey && handleCreateComment()
+										}
+									/>
+									<EmojiPickerButton
+										onEmojiSelect={(emoji) =>
+											setCommentText((prev) => prev + emoji)
 										}
 									/>
 									<button

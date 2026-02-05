@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Heart, Reply, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { EmojiPickerButton } from "./EmojiPickerButton";
 import { LinkPreviewCard } from "./LinkPreviewCard";
 
 interface CommentItemProps {
@@ -234,6 +235,10 @@ export function CommentItem({
 							onChange={(e) => setReplyText(e.target.value)}
 							className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500"
 							placeholder="Write a reply..."
+						/>
+						<EmojiPickerButton
+							size={14}
+							onEmojiSelect={(emoji) => setReplyText((prev) => prev + emoji)}
 						/>
 						<button
 							type="button"

@@ -19,6 +19,7 @@ import { EditPostModal } from "../../components/posts/EditPostModal";
 import { PostImageGrid } from "../../components/posts/PostImageGrid";
 import { CommentItem } from "../../components/shared/CommentItem";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
+import { EmojiPickerButton } from "../../components/shared/EmojiPickerButton";
 import { LikeButton } from "../../components/shared/LikeButton";
 import { ReportModal } from "../../components/shared/ReportModal";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
@@ -308,6 +309,11 @@ function PostDetailPage() {
 									placeholder="Write a comment..."
 									onKeyDown={(e) =>
 										e.key === "Enter" && !e.shiftKey && handleCreateComment()
+									}
+								/>
+								<EmojiPickerButton
+									onEmojiSelect={(emoji) =>
+										setCommentText((prev) => prev + emoji)
 									}
 								/>
 								<button

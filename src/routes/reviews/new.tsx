@@ -16,9 +16,11 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { NavigationWarning } from "../../components/editor/NavigationWarning";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { GenreSelector } from "../../components/shared/GenreSelector";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
 import { TagSelector } from "../../components/shared/TagSelector";
+import { normalizeIgdbGenres } from "../../lib/genres";
 
 export const Route = createFileRoute("/reviews/new")({
 	component: NewReviewPage,
@@ -72,6 +74,8 @@ function NewReviewPage() {
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
 	const [tags, setTags] = useState<string[]>([]);
+	const [genres, setGenres] = useState<string[]>([]);
+	const [igdbGenres, setIgdbGenres] = useState<string[]>([]);
 
 	// Draft state
 	const [draftId, setDraftId] = useState<string | undefined>(initialDraftId);
@@ -143,6 +147,11 @@ function NewReviewPage() {
 				name: preselectedGameData.name,
 				coverUrl: preselectedGameData.coverUrl ?? null,
 			});
+			if (preselectedGameData.genres) {
+				const normalized = normalizeIgdbGenres(preselectedGameData.genres);
+				setIgdbGenres(normalized);
+				setGenres(normalized);
+			}
 		}
 	}, [preselectedGameData, selectedGame]);
 
@@ -163,6 +172,7 @@ function NewReviewPage() {
 				setCoverFileKey(draft.coverFileKey ?? null);
 				setContainsSpoilers(draft.containsSpoilers ?? false);
 				setTags(draft.tags ?? []);
+				setGenres(draft.genres ?? []);
 				setDraftId(draft._id);
 				toast.success("Draft loaded");
 			}
@@ -184,6 +194,7 @@ function NewReviewPage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags: tags.length > 0 ? tags : undefined,
+				genres: genres.length > 0 ? genres : undefined,
 				gameId: selectedGame?.id,
 				authorClerkId: user.id,
 			});
@@ -204,6 +215,7 @@ function NewReviewPage() {
 		coverFileKey,
 		containsSpoilers,
 		tags,
+		genres,
 		selectedGame,
 		saveReviewDraftMut,
 	]);
@@ -290,6 +302,7 @@ function NewReviewPage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags: tags.length > 0 ? tags : undefined,
+				genres: genres.length > 0 ? genres : undefined,
 				published: true,
 				authorClerkId: user.id,
 			});
@@ -535,11 +548,14 @@ function NewReviewPage() {
 											key={game._id}
 											type="button"
 											onClick={() => {
+												const normalized = normalizeIgdbGenres(game.genres);
 												setSelectedGame({
 													id: game._id,
 													name: game.name,
 													coverUrl: game.coverUrl ?? null,
 												});
+												setIgdbGenres(normalized);
+												setGenres(normalized);
 												setSearchQuery("");
 												setSearchResults([]);
 											}}
@@ -622,6 +638,13 @@ function NewReviewPage() {
 
 					{/* Tags */}
 					<TagSelector selectedTags={tags} onChange={setTags} />
+
+					{/* Genres */}
+					<GenreSelector
+						selectedGenres={genres}
+						onChange={setGenres}
+						igdbGenres={igdbGenres}
+					/>
 
 					{/* Title */}
 					<div>

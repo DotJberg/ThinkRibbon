@@ -347,18 +347,23 @@ function ArticleDetailPage() {
 							</div>
 						)}
 
-						{/* Tags */}
+						{/* Tags & Genres */}
 						{(() => {
-							const combinedGenres = [
-								...new Set(
-									article.games
-										.filter((g) => g !== null)
-										.flatMap((g) => (g as { genres?: string[] }).genres || []),
-								),
-							];
-							return article.tags?.length || combinedGenres.length > 0 ? (
+							const displayGenres =
+								article.genres && article.genres.length > 0
+									? article.genres
+									: [
+											...new Set(
+												article.games
+													.filter((g) => g !== null)
+													.flatMap(
+														(g) => (g as { genres?: string[] }).genres || [],
+													),
+											),
+										];
+							return article.tags?.length || displayGenres.length > 0 ? (
 								<div className="mt-3">
-									<TagDisplay tags={article.tags} genres={combinedGenres} />
+									<TagDisplay tags={article.tags} genres={displayGenres} />
 								</div>
 							) : null;
 						})()}

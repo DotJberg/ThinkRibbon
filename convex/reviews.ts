@@ -13,6 +13,7 @@ export const create = mutation({
 		coverFileKey: v.optional(v.string()),
 		containsSpoilers: v.optional(v.boolean()),
 		tags: v.optional(v.array(v.string())),
+		genres: v.optional(v.array(v.string())),
 		published: v.optional(v.boolean()),
 		authorClerkId: v.string(),
 	},
@@ -51,6 +52,7 @@ export const create = mutation({
 			coverFileKey: args.coverFileKey,
 			containsSpoilers: args.containsSpoilers ?? false,
 			tags: args.tags,
+			genres: args.genres,
 			published: args.published ?? false,
 			authorId: user._id,
 			updatedAt: Date.now(),
@@ -69,6 +71,7 @@ export const update = mutation({
 		coverFileKey: v.optional(v.string()),
 		containsSpoilers: v.optional(v.boolean()),
 		tags: v.optional(v.array(v.string())),
+		genres: v.optional(v.array(v.string())),
 		published: v.optional(v.boolean()),
 		saveHistory: v.optional(v.boolean()),
 		clerkId: v.string(),
@@ -118,6 +121,7 @@ export const update = mutation({
 		if (args.containsSpoilers !== undefined)
 			updateData.containsSpoilers = args.containsSpoilers;
 		if (args.tags !== undefined) updateData.tags = args.tags;
+		if (args.genres !== undefined) updateData.genres = args.genres;
 		if (args.published !== undefined) updateData.published = args.published;
 		if (args.saveHistory) {
 			updateData.editCount = (review.editCount ?? 0) + 1;

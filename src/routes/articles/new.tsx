@@ -17,8 +17,10 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { NavigationWarning } from "../../components/editor/NavigationWarning";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { GenreSelector } from "../../components/shared/GenreSelector";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { TagSelector } from "../../components/shared/TagSelector";
+import { normalizeIgdbGenres } from "../../lib/genres";
 
 export const Route = createFileRoute("/articles/new")({
 	component: NewArticlePage,
@@ -41,8 +43,14 @@ function NewArticlePage() {
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
 	const [tags, setTags] = useState<string[]>([]);
+	const [genres, setGenres] = useState<string[]>([]);
 	const [selectedGames, setSelectedGames] = useState<
-		Array<{ id: string; name: string; coverUrl: string | null }>
+		Array<{
+			id: string;
+			name: string;
+			coverUrl: string | null;
+			genres: string[];
+		}>
 	>([]);
 
 	// Search state
@@ -118,6 +126,7 @@ function NewArticlePage() {
 				setCoverFileKey(draft.coverFileKey ?? null);
 				setContainsSpoilers(draft.containsSpoilers ?? false);
 				setTags(draft.tags ?? []);
+				setGenres(draft.genres ?? []);
 				setDraftId(draft._id);
 				toast.success("Draft loaded");
 			}
@@ -139,6 +148,7 @@ function NewArticlePage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags: tags.length > 0 ? tags : undefined,
+				genres: genres.length > 0 ? genres : undefined,
 				gameIds: selectedGames.map((g) => g.id),
 				authorClerkId: user.id,
 			});
@@ -159,6 +169,7 @@ function NewArticlePage() {
 		coverFileKey,
 		containsSpoilers,
 		tags,
+		genres,
 		selectedGames,
 		saveArticleDraftMut,
 	]);
@@ -214,8 +225,11 @@ function NewArticlePage() {
 		id: string;
 		name: string;
 		coverUrl: string | null;
+		genres: string[];
 	}) => {
 		setSelectedGames((prev) => [...prev, game]);
+		const normalized = normalizeIgdbGenres(game.genres);
+		setGenres((prev) => [...new Set([...prev, ...normalized])]);
 		setSearchQuery("");
 		setSearchResults([]);
 	};
@@ -253,6 +267,7 @@ function NewArticlePage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags: tags.length > 0 ? tags : undefined,
+				genres: genres.length > 0 ? genres : undefined,
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				published: true,
 				authorClerkId: user.id,
@@ -532,6 +547,7 @@ function NewArticlePage() {
 												id: game._id,
 												name: game.name,
 												coverUrl: game.coverUrl ?? null,
+												genres: game.genres,
 											})
 										}
 										className="w-full flex items-center gap-2 p-2 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors text-left text-sm"
@@ -559,6 +575,15 @@ function NewArticlePage() {
 
 					{/* Tags */}
 					<TagSelector selectedTags={tags} onChange={setTags} />
+
+					{/* Genres */}
+					<GenreSelector
+						selectedGenres={genres}
+						onChange={setGenres}
+						igdbGenres={normalizeIgdbGenres(
+							selectedGames.flatMap((g) => g.genres),
+						)}
+					/>
 
 					{/* Spoiler Toggle */}
 					<SpoilerToggle

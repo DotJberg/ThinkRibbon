@@ -86,6 +86,7 @@ export default defineSchema({
 		published: v.boolean(),
 		authorId: v.id("users"),
 		tags: v.optional(v.array(v.string())),
+		genres: v.optional(v.array(v.string())),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
 			})
@@ -129,6 +130,7 @@ export default defineSchema({
 		authorId: v.id("users"),
 		gameId: v.id("games"),
 		tags: v.optional(v.array(v.string())),
+		genres: v.optional(v.array(v.string())),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
 			})
@@ -205,6 +207,7 @@ export default defineSchema({
 		containsSpoilers: v.boolean(),
 		gameIds: v.array(v.string()),
 		tags: v.optional(v.array(v.string())),
+		genres: v.optional(v.array(v.string())),
 		authorId: v.id("users"),
 		updatedAt: v.optional(v.number()),
 			}).index("by_authorId", ["authorId"]),
@@ -225,6 +228,7 @@ export default defineSchema({
 		containsSpoilers: v.boolean(),
 		gameId: v.optional(v.string()),
 		tags: v.optional(v.array(v.string())),
+		genres: v.optional(v.array(v.string())),
 		authorId: v.id("users"),
 		updatedAt: v.optional(v.number()),
 			}).index("by_authorId", ["authorId"]),

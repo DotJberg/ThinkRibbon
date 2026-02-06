@@ -8,9 +8,11 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { GenreSelector } from "../../components/shared/GenreSelector";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
 import { TagSelector } from "../../components/shared/TagSelector";
+import { normalizeIgdbGenres } from "../../lib/genres";
 
 export const Route = createFileRoute("/reviews/edit/$id")({
 	component: EditReviewPage,
@@ -38,6 +40,8 @@ function EditReviewPage() {
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
 	const [tags, setTags] = useState<string[]>([]);
+	const [genres, setGenres] = useState<string[]>([]);
+	const [igdbGenres, setIgdbGenres] = useState<string[]>([]);
 
 	// Loading state
 	const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
@@ -74,6 +78,17 @@ function EditReviewPage() {
 					slug: review.game.slug,
 					coverUrl: review.game.coverUrl ?? null,
 				});
+				if (review.game.genres) {
+					const normalized = normalizeIgdbGenres(review.game.genres);
+					setIgdbGenres(normalized);
+					setGenres(
+						review.genres && review.genres.length > 0
+							? review.genres
+							: normalized,
+					);
+				}
+			} else {
+				setGenres(review.genres ?? []);
 			}
 			// Mark initial load complete after a short delay
 			setTimeout(() => {
@@ -98,6 +113,7 @@ function EditReviewPage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags,
+				genres,
 				clerkId: user.id,
 			});
 			setLastSaved(new Date());
@@ -116,6 +132,7 @@ function EditReviewPage() {
 		coverFileKey,
 		containsSpoilers,
 		tags,
+		genres,
 		updateReviewMut,
 	]);
 
@@ -164,6 +181,7 @@ function EditReviewPage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags,
+				genres,
 				published: true,
 				saveHistory: true,
 				clerkId: user.id,
@@ -289,6 +307,13 @@ function EditReviewPage() {
 
 					{/* Tags */}
 					<TagSelector selectedTags={tags} onChange={setTags} />
+
+					{/* Genres */}
+					<GenreSelector
+						selectedGenres={genres}
+						onChange={setGenres}
+						igdbGenres={igdbGenres}
+					/>
 
 					{/* Title */}
 					<div>

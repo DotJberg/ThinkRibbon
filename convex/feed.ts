@@ -289,9 +289,13 @@ async function enrichItems(
 			usersById,
 		);
 
-		const articleGenres = [
+		const igdbArticleGenres = [
 			...new Set(games.flatMap((g) => g.genres || [])),
 		];
+		const articleGenres =
+			article.genres && article.genres.length > 0
+				? article.genres
+				: igdbArticleGenres;
 
 		items.push({
 			type: "article",
@@ -363,7 +367,12 @@ async function enrichItems(
 			containsSpoilers: review.containsSpoilers,
 			rating: review.rating,
 			tags: review.tags || undefined,
-			genres: game?.genres && game.genres.length > 0 ? game.genres : undefined,
+			genres:
+				review.genres && review.genres.length > 0
+					? review.genres
+					: game?.genres && game.genres.length > 0
+						? game.genres
+						: undefined,
 			game: game
 				? {
 						_id: game._id,

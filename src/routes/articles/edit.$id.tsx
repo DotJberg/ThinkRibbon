@@ -8,8 +8,10 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { GenreSelector } from "../../components/shared/GenreSelector";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { TagSelector } from "../../components/shared/TagSelector";
+import { normalizeIgdbGenres } from "../../lib/genres";
 
 export const Route = createFileRoute("/articles/edit/$id")({
 	component: EditArticlePage,
@@ -29,8 +31,14 @@ function EditArticlePage() {
 	const [coverFileKey, setCoverFileKey] = useState<string | null>(null);
 	const [containsSpoilers, setContainsSpoilers] = useState(false);
 	const [tags, setTags] = useState<string[]>([]);
+	const [genres, setGenres] = useState<string[]>([]);
 	const [selectedGames, setSelectedGames] = useState<
-		Array<{ id: string; name: string; coverUrl: string | null }>
+		Array<{
+			id: string;
+			name: string;
+			coverUrl: string | null;
+			genres: string[];
+		}>
 	>([]);
 
 	// Search state
@@ -77,15 +85,24 @@ function EditArticlePage() {
 			setContainsSpoilers(article.containsSpoilers || false);
 			setTags(article.tags ?? []);
 			if (article.games) {
-				setSelectedGames(
-					article.games
-						.filter((g) => g !== null)
-						.map((g) => ({
-							id: g._id,
-							name: g.name,
-							coverUrl: g.coverUrl ?? null,
-						})),
-				);
+				const gamesWithGenres = article.games
+					.filter((g) => g !== null)
+					.map((g) => ({
+						id: g._id,
+						name: g.name,
+						coverUrl: g.coverUrl ?? null,
+						genres: (g as { genres?: string[] }).genres ?? [],
+					}));
+				setSelectedGames(gamesWithGenres);
+				if (article.genres && article.genres.length > 0) {
+					setGenres(article.genres);
+				} else {
+					setGenres(
+						normalizeIgdbGenres(gamesWithGenres.flatMap((g) => g.genres)),
+					);
+				}
+			} else {
+				setGenres(article.genres ?? []);
 			}
 			// Mark initial load complete after a short delay
 			setTimeout(() => {
@@ -109,6 +126,7 @@ function EditArticlePage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags,
+				genres,
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				clerkId: user.id,
 			});
@@ -128,6 +146,7 @@ function EditArticlePage() {
 		coverFileKey,
 		containsSpoilers,
 		tags,
+		genres,
 		selectedGames,
 		updateArticleMut,
 	]);
@@ -183,8 +202,11 @@ function EditArticlePage() {
 		id: string;
 		name: string;
 		coverUrl: string | null;
+		genres: string[];
 	}) => {
 		setSelectedGames((prev) => [...prev, game]);
+		const normalized = normalizeIgdbGenres(game.genres);
+		setGenres((prev) => [...new Set([...prev, ...normalized])]);
 		setSearchQuery("");
 		setSearchResults([]);
 	};
@@ -218,6 +240,7 @@ function EditArticlePage() {
 				coverFileKey: coverFileKey || undefined,
 				containsSpoilers,
 				tags,
+				genres,
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				published: true,
 				saveHistory: true,
@@ -405,6 +428,7 @@ function EditArticlePage() {
 												id: game._id,
 												name: game.name,
 												coverUrl: game.coverUrl ?? null,
+												genres: game.genres,
 											})
 										}
 										className="w-full flex items-center gap-2 p-2 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors text-left text-sm"
@@ -432,6 +456,15 @@ function EditArticlePage() {
 
 					{/* Tags */}
 					<TagSelector selectedTags={tags} onChange={setTags} />
+
+					{/* Genres */}
+					<GenreSelector
+						selectedGenres={genres}
+						onChange={setGenres}
+						igdbGenres={normalizeIgdbGenres(
+							selectedGames.flatMap((g) => g.genres),
+						)}
+					/>
 
 					{/* Spoiler Toggle */}
 					<SpoilerToggle

@@ -310,13 +310,19 @@ function ReviewDetailPage() {
 							</div>
 							<StarRating rating={review.rating} size="lg" />
 
-							{/* Tags */}
-							{(review.tags?.length ||
-								(review.game?.genres && review.game.genres.length > 0)) && (
-								<div className="mt-3">
-									<TagDisplay tags={review.tags} genres={review.game?.genres} />
-								</div>
-							)}
+							{/* Tags & Genres */}
+							{(() => {
+								const displayGenres =
+									review.genres && review.genres.length > 0
+										? review.genres
+										: review.game?.genres;
+								return review.tags?.length ||
+									(displayGenres && displayGenres.length > 0) ? (
+									<div className="mt-3">
+										<TagDisplay tags={review.tags} genres={displayGenres} />
+									</div>
+								) : null;
+							})()}
 
 							{/* Author */}
 							<div className="flex items-center gap-3 mt-4">

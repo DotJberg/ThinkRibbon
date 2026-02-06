@@ -110,7 +110,7 @@ export function CommentItem({
 	// Render deleted placeholder
 	if (comment.deleted) {
 		return (
-			<div className={`flex gap-3 ${depth > 0 ? "ml-8 mt-4" : "mt-6"}`}>
+			<div className={`flex gap-3 ${depth > 0 ? "ml-4 sm:ml-8 mt-4" : "mt-6"}`}>
 				<div className="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0" />
 				<div className="flex-1 min-w-0">
 					<div className="bg-gray-800/30 rounded-xl p-3 border border-gray-700/30">
@@ -141,7 +141,7 @@ export function CommentItem({
 	}
 
 	return (
-		<div className={`flex gap-3 ${depth > 0 ? "ml-8 mt-4" : "mt-6"}`}>
+		<div className={`flex gap-3 ${depth > 0 ? "ml-4 sm:ml-8 mt-4" : "mt-6"}`}>
 			<Link
 				to="/profile/$username"
 				params={{ username: comment.author.username }}
@@ -177,7 +177,7 @@ export function CommentItem({
 							{formatDistanceToNow(new Date(comment._creationTime))} ago
 						</span>
 					</div>
-					<p className="text-sm text-gray-300 whitespace-pre-wrap">
+					<p className="text-sm text-gray-300 whitespace-pre-wrap break-words">
 						{comment.content}
 					</p>
 					{comment.linkPreview && (
@@ -228,12 +228,12 @@ export function CommentItem({
 
 				{/* Reply Input */}
 				{showReplyInput && (
-					<div className="mt-2 flex gap-2">
+					<div className="mt-2 flex gap-2 min-w-0">
 						<input
 							type="text"
 							value={replyText}
 							onChange={(e) => setReplyText(e.target.value)}
-							className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500"
+							className="flex-1 min-w-0 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500"
 							placeholder="Write a reply..."
 						/>
 						<EmojiPickerButton

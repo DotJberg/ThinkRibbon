@@ -134,7 +134,7 @@ function PostDetailPage() {
 					Back
 				</Link>
 
-				<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm mb-6">
+				<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 sm:p-6 backdrop-blur-sm mb-6">
 					<div className="flex items-start gap-4 mb-4">
 						<Link
 							to="/profile/$username"
@@ -157,8 +157,8 @@ function PostDetailPage() {
 								)}
 							</div>
 						</Link>
-						<div className="flex-1">
-							<div className="flex items-center gap-2">
+						<div className="flex-1 min-w-0">
+							<div className="flex items-center gap-2 flex-wrap">
 								<Link
 									to="/profile/$username"
 									params={{ username: post.author.username }}
@@ -256,7 +256,7 @@ function PostDetailPage() {
 						)}
 					</div>
 
-					<p className="text-white whitespace-pre-wrap text-lg mb-6">
+					<p className="text-white whitespace-pre-wrap break-words text-lg mb-6">
 						{post.linkPreview ? stripFirstUrl(post.content) : post.content}
 					</p>
 
@@ -303,7 +303,7 @@ function PostDetailPage() {
 				</div>
 
 				{/* Comments Section */}
-				<div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm">
+				<div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
 					<h3 className="text-xl font-bold text-white mb-6">Comments</h3>
 
 					{/* Comment Input */}
@@ -322,7 +322,7 @@ function PostDetailPage() {
 									</span>
 								)}
 							</div>
-							<div className="flex-1 flex gap-2">
+							<div className="flex-1 flex gap-2 min-w-0">
 								<input
 									type="text"
 									value={commentText}

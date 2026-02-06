@@ -362,7 +362,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 						>
 							{item.author.displayName || item.author.username}
 						</Link>
-						<div className="flex items-center gap-2 text-sm text-gray-500">
+						<div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
 							<span>@{item.author.username}</span>
 							<span>·</span>
 							<span>{formatDistanceToNow(new Date(item.createdAt))}</span>
@@ -592,7 +592,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 			{/* Content */}
 			{item.type === "post" && (
 				<div className="text-gray-300 mb-3">
-					<p className="whitespace-pre-wrap">
+					<p className="whitespace-pre-wrap break-words">
 						{item.linkPreview ? stripFirstUrl(item.content) : item.content}
 					</p>
 					{item.images && item.images.length > 0 && (
@@ -802,7 +802,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 								}
 							/>
 						</div>
-						<div className="flex-1 flex items-center gap-2 bg-gray-700/50 rounded-full pl-4 pr-2 py-2">
+						<div className="flex-1 flex items-center gap-2 bg-gray-700/50 rounded-full pl-4 pr-2 py-2 min-w-0">
 							<input
 								type="text"
 								value={commentText}

@@ -1,5 +1,10 @@
 import { useUser } from "@clerk/clerk-react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	useNavigate,
+	useRouter,
+} from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import {
 	ArrowLeft,
@@ -13,7 +18,7 @@ import {
 	Send,
 	Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { RichTextContent } from "../../components/editor/RichTextEditor";
@@ -38,7 +43,16 @@ export const Route = createFileRoute("/reviews/$id")({
 function ReviewDetailPage() {
 	const { id } = Route.useParams();
 	const navigate = useNavigate();
+	const router = useRouter();
 	const { user, isSignedIn } = useUser();
+
+	const handleBack = useCallback(() => {
+		if (window.history.length > 1) {
+			router.history.back();
+		} else {
+			router.navigate({ to: "/" });
+		}
+	}, [router]);
 	const review = useQuery(api.reviews.getById, {
 		reviewId: id as Id<"reviews">,
 	});
@@ -121,12 +135,12 @@ function ReviewDetailPage() {
 	useEffect(() => {
 		const handleEscape = (e: KeyboardEvent) => {
 			if (e.key === "Escape" && review?.containsSpoilers && !spoilerAccepted) {
-				navigate({ to: "/" });
+				handleBack();
 			}
 		};
 		window.addEventListener("keydown", handleEscape);
 		return () => window.removeEventListener("keydown", handleEscape);
-	}, [review, spoilerAccepted, navigate]);
+	}, [review, spoilerAccepted, handleBack]);
 
 	if (isLoading) {
 		return (
@@ -157,7 +171,7 @@ function ReviewDetailPage() {
 			<SpoilerWarning
 				title={review.title}
 				contentType="review"
-				onGoBack={() => navigate({ to: "/" })}
+				onGoBack={handleBack}
 				onContinue={() => setSpoilerAccepted(true)}
 			/>
 		);
@@ -176,13 +190,14 @@ function ReviewDetailPage() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
 			<div className="container mx-auto px-4 py-8 max-w-4xl">
-				<Link
-					to="/"
+				<button
+					type="button"
+					onClick={handleBack}
 					className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
 				>
 					<ArrowLeft size={20} />
 					Back
-				</Link>
+				</button>
 
 				<article>
 					{/* Cover Image (if uploaded) */}

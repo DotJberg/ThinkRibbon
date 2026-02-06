@@ -1,5 +1,10 @@
 import { useUser } from "@clerk/clerk-react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	useNavigate,
+	useRouter,
+} from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -12,7 +17,7 @@ import {
 	Send,
 	Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { EditPostModal } from "../../components/posts/EditPostModal";
@@ -33,7 +38,16 @@ export const Route = createFileRoute("/posts/$id")({
 function PostDetailPage() {
 	const { id } = Route.useParams();
 	const navigate = useNavigate();
+	const router = useRouter();
 	const { user, isSignedIn } = useUser();
+
+	const handleBack = useCallback(() => {
+		if (window.history.length > 1) {
+			router.history.back();
+		} else {
+			router.navigate({ to: "/" });
+		}
+	}, [router]);
 	const post = useQuery(api.posts.getById, { id: id as Id<"posts"> });
 	const hasLiked = useQuery(
 		api.likes.hasLiked,
@@ -126,13 +140,14 @@ function PostDetailPage() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
 			<div className="container mx-auto px-4 py-8 max-w-2xl">
-				<Link
-					to="/"
+				<button
+					type="button"
+					onClick={handleBack}
 					className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
 				>
 					<ArrowLeft size={20} />
 					Back
-				</Link>
+				</button>
 
 				<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 sm:p-6 backdrop-blur-sm mb-6">
 					<div className="flex items-start gap-4 mb-4">

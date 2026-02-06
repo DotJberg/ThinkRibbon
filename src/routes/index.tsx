@@ -1,8 +1,8 @@
 import { useUser } from "@clerk/clerk-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { Compass, Gamepad2, TrendingUp, Users } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { api } from "../../convex/_generated/api";
 import type { FeedItem } from "../components/feed/FeedItem";
 import { FeedItemCard } from "../components/feed/FeedItem";
@@ -13,24 +13,33 @@ import {
 import { PostComposer } from "../components/posts/PostComposer";
 import type { LinkPreviewData } from "../lib/link-preview";
 
+// Cache feed data across navigations so scroll restoration works on back nav
+const feedCache = new Map<string, FeedItem[]>();
+
+interface HomeSearchParams {
+	view?: "following" | "discover";
+	sub?: DiscoverFeedType;
+}
+
 export const Route = createFileRoute("/")({
 	component: HomePage,
+	validateSearch: (search: Record<string, unknown>): HomeSearchParams => ({
+		view: ["following", "discover"].includes(search.view as string)
+			? (search.view as "following" | "discover")
+			: undefined,
+		sub: ["discover", "popular"].includes(search.sub as string)
+			? (search.sub as DiscoverFeedType)
+			: undefined,
+	}),
 });
 
 function HomePage() {
 	const { user, isSignedIn, isLoaded } = useUser();
-	const [activeTab, setActiveTab] = useState<"following" | "discover">(
-		"discover",
-	);
-	const [discoverFeedType, setDiscoverFeedType] =
-		useState<DiscoverFeedType>("discover");
+	const navigate = useNavigate();
+	const { view, sub } = Route.useSearch();
 
-	// Set default tab based on auth state
-	useEffect(() => {
-		if (isLoaded) {
-			setActiveTab(isSignedIn ? "following" : "discover");
-		}
-	}, [isLoaded, isSignedIn]);
+	const activeTab = view ?? "discover";
+	const discoverFeedType = sub ?? "discover";
 
 	// Feed queries - use "skip" for inactive tabs
 	const followingData = useQuery(
@@ -56,23 +65,27 @@ function HomePage() {
 
 	const createPostMut = useMutation(api.posts.create);
 
-	// Determine active feed data
+	// Determine active feed data, using cache to prevent loading skeleton on back nav
+	const feedKey =
+		activeTab === "following" ? "following" : `discover-${discoverFeedType}`;
+	const rawData =
+		activeTab === "following"
+			? followingData
+			: discoverFeedType === "popular"
+				? popularData
+				: discoverData;
+
 	let feedItems: FeedItem[] = [];
 	let isLoading = false;
 
-	if (activeTab === "following") {
-		isLoading = followingData === undefined;
-		feedItems = followingData?.items ?? [];
-	} else if (discoverFeedType === "popular") {
-		isLoading = popularData === undefined;
-		feedItems = popularData?.items ?? [];
-	} else {
-		isLoading = discoverData === undefined;
-		feedItems = discoverData?.items ?? [];
-	}
-
-	// Don't show loading before Clerk is loaded
 	if (!isLoaded) {
+		isLoading = true;
+	} else if (rawData !== undefined) {
+		feedItems = rawData.items ?? [];
+		feedCache.set(feedKey, feedItems);
+	} else if (feedCache.get(feedKey)) {
+		feedItems = feedCache.get(feedKey) ?? [];
+	} else {
 		isLoading = true;
 	}
 
@@ -125,10 +138,30 @@ function HomePage() {
 				<div className="max-w-2xl mx-auto">
 					{/* Tabs */}
 					<div className="flex gap-2 mb-6">
+						<FeedSelector
+							selectedFeed={discoverFeedType}
+							onFeedChange={(feed) => {
+								navigate({
+									to: "/",
+									search: {
+										view: "discover",
+										sub: feed === "discover" ? undefined : feed,
+									},
+									replace: true,
+								});
+							}}
+							isActive={activeTab === "discover"}
+						/>
 						{isSignedIn && (
 							<button
 								type="button"
-								onClick={() => setActiveTab("following")}
+								onClick={() =>
+									navigate({
+										to: "/",
+										search: { view: "following" },
+										replace: true,
+									})
+								}
 								className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
 									activeTab === "following"
 										? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
@@ -139,14 +172,6 @@ function HomePage() {
 								Following
 							</button>
 						)}
-						<FeedSelector
-							selectedFeed={discoverFeedType}
-							onFeedChange={(feed) => {
-								setDiscoverFeedType(feed);
-								setActiveTab("discover");
-							}}
-							isActive={activeTab === "discover"}
-						/>
 					</div>
 
 					{/* Post Composer (signed in only) */}

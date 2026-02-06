@@ -1,5 +1,7 @@
 export const GENRES: string[] = [
+	"4X",
 	"Action",
+	"Action RPG",
 	"Adventure",
 	"Arcade",
 	"Battle Royale",
@@ -26,7 +28,7 @@ export const GENRES: string[] = [
 	"Quiz/Trivia",
 	"Racing",
 	"Real Time Strategy (RTS)",
-	"Roguelike",
+	"RogueX",
 	"Role-playing (RPG)",
 	"Sandbox",
 	"Shoot 'em Up",

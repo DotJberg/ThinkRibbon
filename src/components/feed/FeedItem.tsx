@@ -18,6 +18,7 @@ import {
 import { memo, useCallback, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { stripFirstUrl } from "../../lib/link-preview";
 import { EditPostModal } from "../posts/EditPostModal";
 import { PostImageGrid } from "../posts/PostImageGrid";
 import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
@@ -591,7 +592,9 @@ export const FeedItemCard = memo(function FeedItemCard({
 			{/* Content */}
 			{item.type === "post" && (
 				<div className="text-gray-300 mb-3">
-					<p className="whitespace-pre-wrap">{item.content}</p>
+					<p className="whitespace-pre-wrap">
+						{item.linkPreview ? stripFirstUrl(item.content) : item.content}
+					</p>
 					{item.images && item.images.length > 0 && (
 						<PostImageGrid images={item.images} />
 					)}
@@ -850,6 +853,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 					onClose={() => setShowEditModal(false)}
 					postId={item.id as Id<"posts">}
 					currentContent={item.content}
+					hasLinkPreview={!!item.linkPreview}
 				/>
 			)}
 

@@ -11,6 +11,7 @@ import {
 	extractFirstUrl,
 	fetchLinkPreview,
 	type LinkPreviewData,
+	stripFirstUrl,
 } from "../../lib/link-preview";
 import { useUploadThing } from "../../lib/uploadthing";
 import { EmojiPickerButton } from "../shared/EmojiPickerButton";
@@ -87,7 +88,10 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 
 	const displayAvatarUrl = dbUser?.avatarUrl || user?.imageUrl;
 
-	const remaining = maxLength - content.length;
+	const effectiveLength = linkPreview
+		? stripFirstUrl(content).length
+		: content.length;
+	const remaining = maxLength - effectiveLength;
 	const isOverLimit = remaining < 0;
 	const isEmpty = content.trim().length === 0 && selectedFiles.length === 0;
 

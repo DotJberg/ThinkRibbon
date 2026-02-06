@@ -21,8 +21,10 @@ import { CommentItem } from "../../components/shared/CommentItem";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { EmojiPickerButton } from "../../components/shared/EmojiPickerButton";
 import { LikeButton } from "../../components/shared/LikeButton";
+import { LinkPreviewCard } from "../../components/shared/LinkPreviewCard";
 import { ReportModal } from "../../components/shared/ReportModal";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
+import { stripFirstUrl } from "../../lib/link-preview";
 
 export const Route = createFileRoute("/posts/$id")({
 	component: PostDetailPage,
@@ -255,12 +257,25 @@ function PostDetailPage() {
 					</div>
 
 					<p className="text-white whitespace-pre-wrap text-lg mb-6">
-						{post.content}
+						{post.linkPreview ? stripFirstUrl(post.content) : post.content}
 					</p>
 
 					{post.images && post.images.length > 0 && (
 						<div className="mb-6">
 							<PostImageGrid images={post.images} />
+						</div>
+					)}
+
+					{(!post.images || post.images.length === 0) && post.linkPreview && (
+						<div className="mb-6">
+							<LinkPreviewCard
+								url={post.linkPreview.url}
+								title={post.linkPreview.title}
+								description={post.linkPreview.description}
+								imageUrl={post.linkPreview.imageUrl}
+								siteName={post.linkPreview.siteName}
+								domain={post.linkPreview.domain}
+							/>
 						</div>
 					)}
 
@@ -361,6 +376,7 @@ function PostDetailPage() {
 				onClose={() => setShowEditModal(false)}
 				postId={post._id}
 				currentContent={post.content}
+				hasLinkPreview={!!post.linkPreview}
 			/>
 
 			<DeleteConfirmationModal

@@ -4,12 +4,14 @@ import { Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { stripFirstUrl } from "../../lib/link-preview";
 
 interface EditPostModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	postId: string;
 	currentContent: string;
+	hasLinkPreview?: boolean;
 }
 
 export function EditPostModal({
@@ -17,6 +19,7 @@ export function EditPostModal({
 	onClose,
 	postId,
 	currentContent,
+	hasLinkPreview,
 }: EditPostModalProps) {
 	const { user } = useUser();
 	const [content, setContent] = useState(currentContent);
@@ -24,7 +27,10 @@ export function EditPostModal({
 	const updatePost = useMutation(api.posts.updatePost);
 
 	const maxLength = 280;
-	const remaining = maxLength - content.length;
+	const effectiveLength = hasLinkPreview
+		? stripFirstUrl(content).length
+		: content.length;
+	const remaining = maxLength - effectiveLength;
 	const isOverLimit = remaining < 0;
 
 	useEffect(() => {

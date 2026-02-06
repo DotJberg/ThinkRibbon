@@ -33,8 +33,13 @@ export const create = mutation({
 			.unique();
 		if (!user) throw new Error("User not found");
 
+		// When a link preview is present, the URL doesn't count towards the limit
+		const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/;
+		const urlMatch = args.linkPreview ? urlRegex.exec(args.content) : null;
+		const sliceLimit = urlMatch ? 280 + urlMatch[0].length + 1 : 280;
+
 		const postId = await ctx.db.insert("posts", {
-			content: args.content.slice(0, 280),
+			content: args.content.slice(0, sliceLimit),
 			authorId: user._id,
 			updatedAt: Date.now(),
 		});
@@ -95,6 +100,11 @@ export const getById = query({
 			.withIndex("by_postId", (q) => q.eq("postId", post._id))
 			.collect();
 
+		const linkPreview = await ctx.db
+			.query("postLinkPreviews")
+			.withIndex("by_postId", (q) => q.eq("postId", post._id))
+			.first();
+
 		return {
 			...post,
 			author: author
@@ -110,6 +120,16 @@ export const getById = query({
 				url: img.url,
 				caption: img.caption,
 			})),
+			linkPreview: linkPreview
+				? {
+						url: linkPreview.url,
+						title: linkPreview.title,
+						description: linkPreview.description,
+						imageUrl: linkPreview.imageUrl,
+						siteName: linkPreview.siteName,
+						domain: linkPreview.domain,
+					}
+				: undefined,
 			_count: { likes: likes.length, comments: comments.length },
 		};
 	},
@@ -237,8 +257,17 @@ export const updatePost = mutation({
 			editedAt: Date.now(),
 		});
 
+		// When a link preview exists, the URL doesn't count towards the limit
+		const linkPreview = await ctx.db
+			.query("postLinkPreviews")
+			.withIndex("by_postId", (q) => q.eq("postId", args.postId))
+			.first();
+		const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/;
+		const urlMatch = linkPreview ? urlRegex.exec(args.content) : null;
+		const sliceLimit = urlMatch ? 280 + urlMatch[0].length + 1 : 280;
+
 		await ctx.db.patch(args.postId, {
-			content: args.content.slice(0, 280),
+			content: args.content.slice(0, sliceLimit),
 			updatedAt: Date.now(),
 			editCount: (post.editCount ?? 0) + 1,
 		});

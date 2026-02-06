@@ -24,6 +24,16 @@ export function extractFirstUrl(content: string): string | null {
 	return match ? match[0] : null;
 }
 
+// Strip the first URL from content and clean up leftover whitespace
+export function stripFirstUrl(content: string): string {
+	const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/g;
+	const match = urlRegex.exec(content);
+	if (!match) return content;
+	const before = content.slice(0, match.index);
+	const after = content.slice(match.index + match[0].length);
+	return (before + after).replace(/\n{3,}/g, "\n\n").trim();
+}
+
 // Extract domain from URL
 function getDomain(url: string): string {
 	try {

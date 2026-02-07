@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { ExternalLink, ImagePlus, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { isNativePlatform, pickImageNative } from "../../lib/capacitor";
 import { cleanEmbedPaste, getEmbedInfo } from "../../lib/embed-utils";
 import {
 	POST_IMAGE_CONSTRAINTS,
@@ -141,9 +142,10 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 	);
 
 	const handleAddFiles = useCallback(
-		(files: FileList | null) => {
+		(files: FileList | File[] | null) => {
 			if (!files) return;
-			const newFiles = Array.from(files).slice(
+			const fileArr = Array.from(files);
+			const newFiles = fileArr.slice(
 				0,
 				POST_IMAGE_CONSTRAINTS.maxCount - selectedFiles.length,
 			);
@@ -165,6 +167,11 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 		},
 		[selectedFiles],
 	);
+
+	const handleNativeImagePick = useCallback(async () => {
+		const picked = await pickImageNative();
+		if (picked) handleAddFiles([picked]);
+	}, [handleAddFiles]);
 
 	const handleRemoveFile = (index: number) => {
 		URL.revokeObjectURL(previews[index]);
@@ -330,7 +337,11 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 						<div className="flex items-center gap-3">
 							<button
 								type="button"
-								onClick={() => fileInputRef.current?.click()}
+								onClick={
+									isNativePlatform()
+										? handleNativeImagePick
+										: () => fileInputRef.current?.click()
+								}
 								disabled={
 									selectedFiles.length >= POST_IMAGE_CONSTRAINTS.maxCount ||
 									busy

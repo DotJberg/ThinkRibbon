@@ -3,6 +3,7 @@ import { useMutation } from "convex/react";
 import { AlertCircle, Loader2, Save, Upload, X } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { isNativePlatform, pickImageNative } from "../../lib/capacitor";
 import { useUploadThing } from "../../lib/uploadthing";
 import { ImageCropModal } from "./ImageCropModal";
 
@@ -81,11 +82,8 @@ export function EditProfileModal({
 		},
 	});
 
-	const handleFileSelect = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "banner") => {
-			const file = e.target.files?.[0];
-			if (!file) return;
-
+	const openCropForFile = useCallback(
+		(file: File, type: "avatar" | "banner") => {
 			if (!file.type.startsWith("image/")) {
 				setError("Please select an image file");
 				return;
@@ -98,11 +96,27 @@ export function EditProfileModal({
 				setCropModalOpen(true);
 			};
 			reader.readAsDataURL(file);
+		},
+		[],
+	);
 
+	const handleFileSelect = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "banner") => {
+			const file = e.target.files?.[0];
+			if (!file) return;
+			openCropForFile(file, type);
 			// Reset input so same file can be selected again
 			e.target.value = "";
 		},
-		[],
+		[openCropForFile],
+	);
+
+	const handleNativeFilePick = useCallback(
+		async (type: "avatar" | "banner") => {
+			const picked = await pickImageNative();
+			if (picked) openCropForFile(picked, type);
+		},
+		[openCropForFile],
 	);
 
 	const handleCropComplete = useCallback(
@@ -190,7 +204,11 @@ export function EditProfileModal({
 						</span>
 						<button
 							type="button"
-							onClick={() => bannerInputRef.current?.click()}
+							onClick={
+								isNativePlatform()
+									? () => handleNativeFilePick("banner")
+									: () => bannerInputRef.current?.click()
+							}
 							disabled={isUploading}
 							className="relative w-full rounded-xl overflow-hidden bg-gray-800 border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							style={{ aspectRatio: "3/1" }}
@@ -227,7 +245,11 @@ export function EditProfileModal({
 					<div className="flex items-center gap-6">
 						<button
 							type="button"
-							onClick={() => avatarInputRef.current?.click()}
+							onClick={
+								isNativePlatform()
+									? () => handleNativeFilePick("avatar")
+									: () => avatarInputRef.current?.click()
+							}
 							disabled={isUploading}
 							className="relative w-24 h-24 disabled:opacity-50 disabled:cursor-not-allowed"
 						>

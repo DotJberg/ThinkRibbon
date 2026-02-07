@@ -36,3 +36,6 @@ jobs:
 
       - name: Build
         run: bun run build
+
+      - name: Build Mobile
+        run: bun run build:mobile

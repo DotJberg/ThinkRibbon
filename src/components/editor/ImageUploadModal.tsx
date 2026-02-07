@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import { useImageResize } from "@/hooks/useImageResize";
+import { isNativePlatform, pickImageNative } from "@/lib/capacitor";
 import { IMAGE_CONSTRAINTS } from "@/lib/image-utils";
 import { useUploadThing } from "@/lib/uploadthing";
 
@@ -72,21 +73,16 @@ export function ImageUploadModal({
 		onClose();
 	}, [onClose, resetState]);
 
-	const handleFileSelect = useCallback(
-		async (e: React.ChangeEvent<HTMLInputElement>) => {
-			const selectedFile = e.target.files?.[0];
-			if (!selectedFile) return;
-
+	const loadFilePreview = useCallback(
+		async (selectedFile: File) => {
 			const processedFile = await processFile(selectedFile);
 			if (!processedFile) return;
 
-			// Create preview
 			const reader = new FileReader();
 			reader.onload = (event) => {
 				const dataUrl = event.target?.result as string;
 				setPreview(dataUrl);
 
-				// Get dimensions for display
 				const img = new window.Image();
 				img.onload = () => {
 					setDimensions({ width: img.width, height: img.height });
@@ -99,6 +95,20 @@ export function ImageUploadModal({
 		},
 		[processFile],
 	);
+
+	const handleFileSelect = useCallback(
+		async (e: React.ChangeEvent<HTMLInputElement>) => {
+			const selectedFile = e.target.files?.[0];
+			if (!selectedFile) return;
+			await loadFilePreview(selectedFile);
+		},
+		[loadFilePreview],
+	);
+
+	const handleNativePick = useCallback(async () => {
+		const picked = await pickImageNative();
+		if (picked) await loadFilePreview(picked);
+	}, [loadFilePreview]);
 
 	const handleUpload = useCallback(async () => {
 		if (!file) return;
@@ -141,7 +151,11 @@ export function ImageUploadModal({
 						<>
 							<button
 								type="button"
-								onClick={() => fileInputRef.current?.click()}
+								onClick={
+									isNativePlatform()
+										? handleNativePick
+										: () => fileInputRef.current?.click()
+								}
 								className="w-full border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 transition-colors"
 							>
 								<Upload className="mx-auto mb-3 text-gray-400" size={40} />

@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { ExternalLink, ImagePlus, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { getEmbedInfo } from "../../lib/embed-utils";
 import {
 	POST_IMAGE_CONSTRAINTS,
 	resizeImageIfNeeded,
@@ -88,9 +89,10 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 
 	const displayAvatarUrl = dbUser?.avatarUrl || user?.imageUrl;
 
-	const effectiveLength = linkPreview
-		? stripFirstUrl(content).length
-		: content.length;
+	const firstUrl = extractFirstUrl(content);
+	const isEmbed = firstUrl ? !!getEmbedInfo(firstUrl) : false;
+	const effectiveLength =
+		linkPreview || isEmbed ? stripFirstUrl(content).length : content.length;
 	const remaining = maxLength - effectiveLength;
 	const isOverLimit = remaining < 0;
 	const isEmpty = content.trim().length === 0 && selectedFiles.length === 0;

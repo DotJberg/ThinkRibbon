@@ -116,7 +116,7 @@ function QuestLogPage() {
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
-				<div className="flex items-center justify-between mb-8">
+				<div className="flex items-center justify-between mb-8 flex-wrap gap-4">
 					<div className="flex items-center gap-4">
 						<Link
 							to="/profile/$username"
@@ -126,7 +126,7 @@ function QuestLogPage() {
 							<ArrowLeft size={20} />
 						</Link>
 						<div>
-							<h1 className="text-2xl font-bold text-white flex items-center gap-2">
+							<h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
 								<Gamepad2 className="text-purple-400" />
 								{profile?.displayName || profile?.username}'s Quest Log
 							</h1>

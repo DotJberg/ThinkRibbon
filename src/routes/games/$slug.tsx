@@ -128,7 +128,7 @@ function GameDetailPage() {
 
 						{/* Info */}
 						<div className="flex-1">
-							<h1 className="text-4xl font-bold text-white mb-2">
+							<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
 								{game.name}
 							</h1>
 
@@ -182,7 +182,7 @@ function GameDetailPage() {
 									<Link
 										to="/reviews/new"
 										search={{ gameId: game._id, draftId: undefined }}
-										className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all border border-gray-700"
+										className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all border border-gray-700"
 									>
 										<Star size={20} />
 										Write a Review

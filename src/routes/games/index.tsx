@@ -204,7 +204,9 @@ function GamesPage() {
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="text-center mb-8">
-					<h1 className="text-4xl font-bold text-white mb-4">Browse Games</h1>
+					<h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+						Browse Games
+					</h1>
 					<p className="text-gray-400">Discover games to review and discuss</p>
 				</div>
 

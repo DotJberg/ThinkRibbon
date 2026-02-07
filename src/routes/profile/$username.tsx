@@ -172,7 +172,9 @@ function ProfilePage() {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
 				<div className="text-center">
-					<h1 className="text-2xl font-bold text-white mb-2">User Not Found</h1>
+					<h1 className="text-xl sm:text-2xl font-bold text-white mb-2">
+						User Not Found
+					</h1>
 					<Link to="/" className="text-purple-400 hover:underline">
 						Back to Home
 					</Link>
@@ -225,7 +227,7 @@ function ProfilePage() {
 						<div className="flex-1">
 							<div className="flex items-center gap-4 flex-wrap">
 								<h1
-									className="text-2xl font-bold text-white"
+									className="text-xl sm:text-2xl font-bold text-white"
 									style={{ textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}
 								>
 									{profile.displayName || profile.username}
@@ -284,7 +286,7 @@ function ProfilePage() {
 
 							{/* Stats */}
 							<div
-								className="flex items-center gap-4 mt-2 text-sm"
+								className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-sm"
 								style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
 							>
 								<button
@@ -345,10 +347,10 @@ function ProfilePage() {
 						</div>
 
 						{/* Stats Grid */}
-						<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3">
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
 							{/* Total Owned */}
 							<div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
-								<div className="text-2xl font-bold text-purple-400">
+								<div className="text-xl sm:text-2xl font-bold text-purple-400">
 									{collectionStats.totalOwned}
 								</div>
 								<div className="text-xs text-gray-400">Owned</div>
@@ -357,7 +359,7 @@ function ProfilePage() {
 							{/* Playing */}
 							{collectionStats.playing > 0 && (
 								<div className="text-center p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-									<div className="text-2xl font-bold text-green-400">
+									<div className="text-xl sm:text-2xl font-bold text-green-400">
 										{collectionStats.playing}
 									</div>
 									<div className="text-xs text-gray-400">Playing</div>
@@ -367,7 +369,7 @@ function ProfilePage() {
 							{/* Beaten */}
 							{collectionStats.beaten > 0 && (
 								<div className="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-									<div className="text-2xl font-bold text-blue-400">
+									<div className="text-xl sm:text-2xl font-bold text-blue-400">
 										{collectionStats.beaten}
 									</div>
 									<div className="text-xs text-gray-400">Beaten</div>
@@ -377,7 +379,7 @@ function ProfilePage() {
 							{/* Completed */}
 							{collectionStats.completed > 0 && (
 								<div className="text-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-									<div className="text-2xl font-bold text-amber-400">
+									<div className="text-xl sm:text-2xl font-bold text-amber-400">
 										{collectionStats.completed}
 									</div>
 									<div className="text-xs text-gray-400">Completed</div>
@@ -387,7 +389,7 @@ function ProfilePage() {
 							{/* Backlog */}
 							{collectionStats.backlog > 0 && (
 								<div className="text-center p-3 bg-gray-500/10 rounded-lg border border-gray-500/20">
-									<div className="text-2xl font-bold text-gray-400">
+									<div className="text-xl sm:text-2xl font-bold text-gray-400">
 										{collectionStats.backlog}
 									</div>
 									<div className="text-xs text-gray-400">Backlog</div>
@@ -397,7 +399,7 @@ function ProfilePage() {
 							{/* On Hold */}
 							{collectionStats.onHold > 0 && (
 								<div className="text-center p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-									<div className="text-2xl font-bold text-yellow-400">
+									<div className="text-xl sm:text-2xl font-bold text-yellow-400">
 										{collectionStats.onHold}
 									</div>
 									<div className="text-xs text-gray-400">On Hold</div>
@@ -407,7 +409,7 @@ function ProfilePage() {
 							{/* Dropped */}
 							{collectionStats.dropped > 0 && (
 								<div className="text-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-									<div className="text-2xl font-bold text-red-400">
+									<div className="text-xl sm:text-2xl font-bold text-red-400">
 										{collectionStats.dropped}
 									</div>
 									<div className="text-xs text-gray-400">Dropped</div>
@@ -417,7 +419,7 @@ function ProfilePage() {
 							{/* Unplayed */}
 							{collectionStats.unplayed > 0 && (
 								<div className="text-center p-3 bg-slate-500/10 rounded-lg border border-slate-500/20">
-									<div className="text-2xl font-bold text-slate-400">
+									<div className="text-xl sm:text-2xl font-bold text-slate-400">
 										{collectionStats.unplayed}
 									</div>
 									<div className="text-xs text-gray-400">Unplayed</div>

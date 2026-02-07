@@ -34,7 +34,7 @@ export function FeedSelector({
 	return (
 		<div className="space-y-2">
 			{/* Primary tabs */}
-			<div className="flex gap-2">
+			<div className="flex gap-2 flex-wrap">
 				{primaryTabs
 					.filter((t) => !t.authOnly || isSignedIn)
 					.map((tab) => {
@@ -45,7 +45,7 @@ export function FeedSelector({
 								key={tab.id}
 								type="button"
 								onClick={() => onTabChange(tab.id)}
-								className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+								className={`flex items-center gap-1.5 px-3 py-1.5 sm:gap-2 sm:px-4 sm:py-2 text-sm sm:text-base rounded-full font-medium transition-all ${
 									isActive
 										? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/20"
 										: "bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700"

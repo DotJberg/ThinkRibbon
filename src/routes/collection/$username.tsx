@@ -606,7 +606,7 @@ function CollectionPage() {
 							<ArrowLeft size={20} />
 						</Link>
 						<div>
-							<h1 className="text-2xl font-bold text-white flex items-center gap-2">
+							<h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
 								<Library className="text-purple-400" />
 								{profile?.displayName || profile?.username}'s Collection
 							</h1>
@@ -645,45 +645,49 @@ function CollectionPage() {
 				{stats && stats.totalOwned > 0 && (
 					<div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
 						<div className="bg-purple-500/10 rounded-lg p-3 text-center border border-purple-500/20">
-							<p className="text-2xl font-bold text-purple-400">
+							<p className="text-xl sm:text-2xl font-bold text-purple-400">
 								{stats.totalOwned}
 							</p>
 							<p className="text-xs text-gray-400">Owned</p>
 						</div>
 						<div className="bg-green-500/10 rounded-lg p-3 text-center border border-green-500/20">
-							<p className="text-2xl font-bold text-green-400">
+							<p className="text-xl sm:text-2xl font-bold text-green-400">
 								{stats.playing}
 							</p>
 							<p className="text-xs text-gray-400">Playing</p>
 						</div>
 						<div className="bg-blue-500/10 rounded-lg p-3 text-center border border-blue-500/20">
-							<p className="text-2xl font-bold text-blue-400">{stats.beaten}</p>
+							<p className="text-xl sm:text-2xl font-bold text-blue-400">
+								{stats.beaten}
+							</p>
 							<p className="text-xs text-gray-400">Beaten</p>
 						</div>
 						<div className="bg-amber-500/10 rounded-lg p-3 text-center border border-amber-500/20">
-							<p className="text-2xl font-bold text-amber-400">
+							<p className="text-xl sm:text-2xl font-bold text-amber-400">
 								{stats.completed}
 							</p>
 							<p className="text-xs text-gray-400">Completed</p>
 						</div>
 						<div className="bg-gray-500/10 rounded-lg p-3 text-center border border-gray-500/20">
-							<p className="text-2xl font-bold text-gray-400">
+							<p className="text-xl sm:text-2xl font-bold text-gray-400">
 								{stats.backlog}
 							</p>
 							<p className="text-xs text-gray-400">Backlog</p>
 						</div>
 						<div className="bg-yellow-500/10 rounded-lg p-3 text-center border border-yellow-500/20">
-							<p className="text-2xl font-bold text-yellow-400">
+							<p className="text-xl sm:text-2xl font-bold text-yellow-400">
 								{stats.onHold}
 							</p>
 							<p className="text-xs text-gray-400">On Hold</p>
 						</div>
 						<div className="bg-red-500/10 rounded-lg p-3 text-center border border-red-500/20">
-							<p className="text-2xl font-bold text-red-400">{stats.dropped}</p>
+							<p className="text-xl sm:text-2xl font-bold text-red-400">
+								{stats.dropped}
+							</p>
 							<p className="text-xs text-gray-400">Dropped</p>
 						</div>
 						<div className="bg-slate-500/10 rounded-lg p-3 text-center border border-slate-500/20">
-							<p className="text-2xl font-bold text-slate-400">
+							<p className="text-xl sm:text-2xl font-bold text-slate-400">
 								{stats.unplayed}
 							</p>
 							<p className="text-xs text-gray-400">Unplayed</p>

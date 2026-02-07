@@ -594,3 +594,105 @@ export const getDiscover = query({
 		return { items: paginated, nextCursor };
 	},
 });
+
+export const getReviews = query({
+	args: {
+		cursor: v.optional(v.string()),
+		limit: v.optional(v.number()),
+		clerkId: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const limit = args.limit || 20;
+
+		let currentUserId: Id<"users"> | null = null;
+		if (args.clerkId) {
+			const user = await ctx.db
+				.query("users")
+				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId!))
+				.unique();
+			currentUserId = user?._id ?? null;
+		}
+
+		const reviews = await ctx.db
+			.query("reviews")
+			.withIndex("by_published", (q) => q.eq("published", true))
+			.order("desc")
+			.take(limit * 2);
+
+		const items = await enrichItems(ctx, [], [], reviews, currentUserId);
+
+		items.sort((a, b) => b.createdAt - a.createdAt);
+
+		let startIndex = 0;
+		if (args.cursor) {
+			const idx = items.findIndex(
+				(item) => `${item.type}-${item.id}` === args.cursor,
+			);
+			if (idx !== -1) startIndex = idx + 1;
+		}
+
+		const paginated = items.slice(startIndex, startIndex + limit + 1);
+		let nextCursor: string | undefined;
+		if (paginated.length > limit) {
+			const last = paginated.pop()!;
+			nextCursor = `${last.type}-${last.id}`;
+		}
+
+		return { items: paginated, nextCursor };
+	},
+});
+
+export const getPopularReviews = query({
+	args: {
+		cursor: v.optional(v.string()),
+		limit: v.optional(v.number()),
+		clerkId: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const limit = args.limit || 20;
+		const last7Days = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+		let currentUserId: Id<"users"> | null = null;
+		if (args.clerkId) {
+			const user = await ctx.db
+				.query("users")
+				.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId!))
+				.unique();
+			currentUserId = user?._id ?? null;
+		}
+
+		const allReviews = await ctx.db
+			.query("reviews")
+			.withIndex("by_published", (q) => q.eq("published", true))
+			.order("desc")
+			.take(limit * 3);
+		const reviews = allReviews.filter(
+			(r) => r._creationTime >= last7Days,
+		);
+
+		const items = await enrichItems(ctx, [], [], reviews, currentUserId);
+
+		// Sort by likes desc, then creation time desc
+		items.sort((a, b) => {
+			if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
+			return b.createdAt - a.createdAt;
+		});
+
+		let startIndex = 0;
+		if (args.cursor) {
+			const idx = items.findIndex(
+				(item) => `${item.type}-${item.id}` === args.cursor,
+			);
+			if (idx !== -1) startIndex = idx + 1;
+		}
+
+		const paginated = items.slice(startIndex, startIndex + limit + 1);
+		let nextCursor: string | undefined;
+		if (paginated.length > limit) {
+			const last = paginated.pop()!;
+			nextCursor = `${last.type}-${last.id}`;
+		}
+
+		return { items: paginated, nextCursor };
+	},
+});

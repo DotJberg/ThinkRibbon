@@ -1,14 +1,15 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
-import { Compass, Gamepad2, TrendingUp, Users } from "lucide-react";
+import { Compass, Gamepad2, Star, TrendingUp, Users } from "lucide-react";
 import { useCallback } from "react";
 import { api } from "../../convex/_generated/api";
 import type { FeedItem } from "../components/feed/FeedItem";
 import { FeedItemCard } from "../components/feed/FeedItem";
 import {
-	type DiscoverFeedType,
 	FeedSelector,
+	type PrimaryTab,
+	type SubFilter,
 } from "../components/feed/FeedSelector";
 import { PostComposer } from "../components/posts/PostComposer";
 import type { LinkPreviewData } from "../lib/link-preview";
@@ -17,18 +18,18 @@ import type { LinkPreviewData } from "../lib/link-preview";
 const feedCache = new Map<string, FeedItem[]>();
 
 interface HomeSearchParams {
-	view?: "following" | "discover";
-	sub?: DiscoverFeedType;
+	tab?: PrimaryTab;
+	sub?: SubFilter;
 }
 
 export const Route = createFileRoute("/")({
 	component: HomePage,
 	validateSearch: (search: Record<string, unknown>): HomeSearchParams => ({
-		view: ["following", "discover"].includes(search.view as string)
-			? (search.view as "following" | "discover")
+		tab: ["discover", "reviews", "following"].includes(search.tab as string)
+			? (search.tab as PrimaryTab)
 			: undefined,
-		sub: ["discover", "popular"].includes(search.sub as string)
-			? (search.sub as DiscoverFeedType)
+		sub: ["latest", "popular"].includes(search.sub as string)
+			? (search.sub as SubFilter)
 			: undefined,
 	}),
 });
@@ -36,10 +37,10 @@ export const Route = createFileRoute("/")({
 function HomePage() {
 	const { user, isSignedIn, isLoaded } = useUser();
 	const navigate = useNavigate();
-	const { view, sub } = Route.useSearch();
+	const { tab, sub } = Route.useSearch();
 
-	const activeTab = view ?? "discover";
-	const discoverFeedType = sub ?? "discover";
+	const activeTab: PrimaryTab = tab ?? "discover";
+	const subFilter: SubFilter = sub ?? "latest";
 
 	// Feed queries - use "skip" for inactive tabs
 	const followingData = useQuery(
@@ -49,16 +50,30 @@ function HomePage() {
 			: "skip",
 	);
 
-	const popularData = useQuery(
-		api.feed.getPopular,
-		activeTab === "discover" && discoverFeedType === "popular"
+	const discoverData = useQuery(
+		api.feed.getDiscover,
+		activeTab === "discover" && subFilter === "latest"
 			? { clerkId: user?.id, limit: 20 }
 			: "skip",
 	);
 
-	const discoverData = useQuery(
-		api.feed.getDiscover,
-		activeTab === "discover" && discoverFeedType === "discover"
+	const popularData = useQuery(
+		api.feed.getPopular,
+		activeTab === "discover" && subFilter === "popular"
+			? { clerkId: user?.id, limit: 20 }
+			: "skip",
+	);
+
+	const reviewsData = useQuery(
+		api.feed.getReviews,
+		activeTab === "reviews" && subFilter === "latest"
+			? { clerkId: user?.id, limit: 20 }
+			: "skip",
+	);
+
+	const popularReviewsData = useQuery(
+		api.feed.getPopularReviews,
+		activeTab === "reviews" && subFilter === "popular"
 			? { clerkId: user?.id, limit: 20 }
 			: "skip",
 	);
@@ -66,14 +81,17 @@ function HomePage() {
 	const createPostMut = useMutation(api.posts.create);
 
 	// Determine active feed data, using cache to prevent loading skeleton on back nav
-	const feedKey =
-		activeTab === "following" ? "following" : `discover-${discoverFeedType}`;
+	const feedKey = `${activeTab}-${subFilter}`;
 	const rawData =
 		activeTab === "following"
 			? followingData
-			: discoverFeedType === "popular"
-				? popularData
-				: discoverData;
+			: activeTab === "reviews"
+				? subFilter === "popular"
+					? popularReviewsData
+					: reviewsData
+				: subFilter === "popular"
+					? popularData
+					: discoverData;
 
 	let feedItems: FeedItem[] = [];
 	let isLoading = false;
@@ -122,6 +140,36 @@ function HomePage() {
 		[user, createPostMut],
 	);
 
+	const handleTabChange = useCallback(
+		(newTab: PrimaryTab) => {
+			navigate({
+				to: "/",
+				search:
+					newTab === "discover"
+						? {}
+						: newTab === "following"
+							? { tab: "following" }
+							: { tab: newTab },
+				replace: true,
+			});
+		},
+		[navigate],
+	);
+
+	const handleSubFilterChange = useCallback(
+		(filter: SubFilter) => {
+			navigate({
+				to: "/",
+				search: {
+					tab: activeTab === "discover" ? undefined : activeTab,
+					sub: filter === "latest" ? undefined : filter,
+				},
+				replace: true,
+			});
+		},
+		[navigate, activeTab],
+	);
+
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
 			<div className="container mx-auto px-4 py-8">
@@ -137,41 +185,14 @@ function HomePage() {
 
 				<div className="max-w-2xl mx-auto">
 					{/* Tabs */}
-					<div className="flex gap-2 mb-6">
+					<div className="mb-6">
 						<FeedSelector
-							selectedFeed={discoverFeedType}
-							onFeedChange={(feed) => {
-								navigate({
-									to: "/",
-									search: {
-										view: "discover",
-										sub: feed === "discover" ? undefined : feed,
-									},
-									replace: true,
-								});
-							}}
-							isActive={activeTab === "discover"}
+							activeTab={activeTab}
+							subFilter={subFilter}
+							onTabChange={handleTabChange}
+							onSubFilterChange={handleSubFilterChange}
+							isSignedIn={!!isSignedIn}
 						/>
-						{isSignedIn && (
-							<button
-								type="button"
-								onClick={() =>
-									navigate({
-										to: "/",
-										search: { view: "following" },
-										replace: true,
-									})
-								}
-								className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-									activeTab === "following"
-										? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-										: "bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700"
-								}`}
-							>
-								<Users size={18} />
-								Following
-							</button>
-						)}
 					</div>
 
 					{/* Post Composer (signed in only) */}
@@ -209,7 +230,9 @@ function HomePage() {
 								<div className="w-16 h-16 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
 									{activeTab === "following" ? (
 										<Users className="text-gray-600" size={32} />
-									) : discoverFeedType === "popular" ? (
+									) : activeTab === "reviews" ? (
+										<Star className="text-gray-600" size={32} />
+									) : subFilter === "popular" ? (
 										<TrendingUp className="text-gray-600" size={32} />
 									) : (
 										<Compass className="text-gray-600" size={32} />
@@ -218,14 +241,20 @@ function HomePage() {
 								<h3 className="text-lg font-medium text-gray-300 mb-2">
 									{activeTab === "following"
 										? "Your timeline is empty"
-										: discoverFeedType === "popular"
-											? "No trending content yet"
-											: "Nothing to discover yet"}
+										: activeTab === "reviews" && subFilter === "popular"
+											? "No trending reviews yet"
+											: activeTab === "reviews"
+												? "No reviews yet"
+												: subFilter === "popular"
+													? "No trending content yet"
+													: "Nothing to discover yet"}
 								</h3>
 								<p className="text-gray-500 mb-4">
 									{activeTab === "following"
 										? "Follow some users to see their posts, reviews, and articles here!"
-										: "Be the first to share something!"}
+										: activeTab === "reviews"
+											? "Be the first to write a review!"
+											: "Be the first to share something!"}
 								</p>
 								{activeTab === "following" && (
 									<Link

@@ -1,107 +1,78 @@
-import { ChevronDown, Compass, TrendingUp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Compass, Star, Users } from "lucide-react";
 
-export type DiscoverFeedType = "discover" | "popular";
-
-interface FeedOption {
-	type: DiscoverFeedType;
-	label: string;
-	icon: React.ReactNode;
-	description: string;
-}
-
-const feedOptions: FeedOption[] = [
-	{
-		type: "discover",
-		label: "Discover",
-		icon: <Compass size={18} />,
-		description: "Latest posts from everyone",
-	},
-	{
-		type: "popular",
-		label: "Popular",
-		icon: <TrendingUp size={18} />,
-		description: "Trending in the last 24h",
-	},
-];
+export type PrimaryTab = "discover" | "reviews" | "following";
+export type SubFilter = "latest" | "popular";
 
 interface FeedSelectorProps {
-	selectedFeed: DiscoverFeedType;
-	onFeedChange: (feed: DiscoverFeedType) => void;
-	isActive: boolean;
+	activeTab: PrimaryTab;
+	subFilter: SubFilter;
+	onTabChange: (tab: PrimaryTab) => void;
+	onSubFilterChange: (filter: SubFilter) => void;
+	isSignedIn: boolean;
 }
 
+const primaryTabs: {
+	id: PrimaryTab;
+	label: string;
+	icon: typeof Compass;
+	authOnly?: boolean;
+}[] = [
+	{ id: "discover", label: "Discover", icon: Compass },
+	{ id: "reviews", label: "Reviews", icon: Star },
+	{ id: "following", label: "Following", icon: Users, authOnly: true },
+];
+
 export function FeedSelector({
-	selectedFeed,
-	onFeedChange,
-	isActive,
+	activeTab,
+	subFilter,
+	onTabChange,
+	onSubFilterChange,
+	isSignedIn,
 }: FeedSelectorProps) {
-	const [isOpen, setIsOpen] = useState(false);
-	const dropdownRef = useRef<HTMLDivElement>(null);
-
-	const selectedOption = feedOptions.find((f) => f.type === selectedFeed);
-
-	// Close dropdown when clicking outside
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				dropdownRef.current &&
-				!dropdownRef.current.contains(event.target as Node)
-			) {
-				setIsOpen(false);
-			}
-		};
-
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, []);
+	const showSubFilter = activeTab === "discover" || activeTab === "reviews";
 
 	return (
-		<div ref={dropdownRef} className="relative">
-			<button
-				type="button"
-				onClick={() => setIsOpen(!isOpen)}
-				className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-					isActive
-						? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-						: "bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700"
-				}`}
-			>
-				{selectedOption?.icon}
-				{selectedOption?.label}
-				<ChevronDown
-					size={16}
-					className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
-				/>
-			</button>
+		<div className="space-y-2">
+			{/* Primary tabs */}
+			<div className="flex gap-2">
+				{primaryTabs
+					.filter((t) => !t.authOnly || isSignedIn)
+					.map((tab) => {
+						const Icon = tab.icon;
+						const isActive = activeTab === tab.id;
+						return (
+							<button
+								key={tab.id}
+								type="button"
+								onClick={() => onTabChange(tab.id)}
+								className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+									isActive
+										? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/20"
+										: "bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700"
+								}`}
+							>
+								<Icon size={18} />
+								{tab.label}
+							</button>
+						);
+					})}
+			</div>
 
-			{isOpen && (
-				<div className="absolute top-full left-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
-					{feedOptions.map((option) => (
+			{/* Sub-filter row */}
+			{showSubFilter && (
+				<div className="flex gap-1 ml-1">
+					{(["latest", "popular"] as const).map((filter) => (
 						<button
-							key={option.type}
+							key={filter}
 							type="button"
-							onClick={() => {
-								onFeedChange(option.type);
-								setIsOpen(false);
-							}}
-							className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
-								selectedFeed === option.type
-									? "bg-purple-600/20 text-white"
-									: "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+							onClick={() => onSubFilterChange(filter)}
+							className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+								subFilter === filter
+									? "bg-gray-700 text-white"
+									: "text-gray-500 hover:text-gray-300"
 							}`}
 						>
-							<span
-								className={`mt-0.5 ${selectedFeed === option.type ? "text-purple-400" : "text-gray-500"}`}
-							>
-								{option.icon}
-							</span>
-							<div>
-								<div className="font-medium">{option.label}</div>
-								<div className="text-xs text-gray-500">
-									{option.description}
-								</div>
-							</div>
+							{filter === "latest" ? "Latest" : "Popular"}
 						</button>
 					))}
 				</div>

@@ -20,8 +20,10 @@ import {
 	Undo,
 	Unlink,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { transformContentForPreview } from "../../lib/tiptap-link-preview";
 import { ImageUploadModal } from "./ImageUploadModal";
+import { LinkPreviewExtension } from "./LinkPreviewNode";
 
 interface RichTextEditorProps {
 	content?: string; // JSON string
@@ -312,6 +314,11 @@ export function RichTextContent({
 	content: string;
 	className?: string;
 }) {
+	const transformedContent = useMemo(
+		() => transformContentForPreview(JSON.parse(content)),
+		[content],
+	);
+
 	const editor = useEditor({
 		extensions: [
 			StarterKit.configure({
@@ -330,8 +337,9 @@ export function RichTextContent({
 					class: "text-purple-400 underline hover:text-purple-300",
 				},
 			}),
+			LinkPreviewExtension,
 		],
-		content: JSON.parse(content),
+		content: transformedContent,
 		editable: false,
 		editorProps: {
 			attributes: {

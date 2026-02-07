@@ -11,7 +11,7 @@
     "lint": "biome lint",
     "typecheck": "tsc --noEmit",
     "check": "biome check",
-    "build:mobile": "vite build --config vite.config.mobile.ts",
+    "build:mobile": "vite build --config vite.config.mobile.ts && mv dist/mobile.html dist/index.html",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android"

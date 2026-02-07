@@ -1,5 +1,8 @@
 import { ExternalLink } from "lucide-react";
+import { useMemo } from "react";
+import { getEmbedInfo } from "../../lib/embed-utils";
 import { SafeImage } from "../shared/SafeImage";
+import { EmbedRenderer } from "./EmbedRenderer";
 
 interface LinkPreviewCardProps {
 	url: string;
@@ -18,6 +21,12 @@ export function LinkPreviewCard({
 	siteName,
 	domain,
 }: LinkPreviewCardProps) {
+	const embedInfo = useMemo(() => getEmbedInfo(url), [url]);
+
+	if (embedInfo) {
+		return <EmbedRenderer embed={embedInfo} />;
+	}
+
 	// Don't render if we have no useful metadata
 	if (!title && !description && !imageUrl) {
 		return null;

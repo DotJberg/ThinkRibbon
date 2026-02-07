@@ -154,6 +154,96 @@ function parseInstagram(url: URL): EmbedInfo | null {
 	};
 }
 
+/**
+ * Detects pasted HTML embed codes (e.g. Twitter/X blockquote, Instagram embed)
+ * and extracts just the clean embed URL, preserving any surrounding user text.
+ * Returns the original text unchanged if no embed HTML is detected.
+ */
+export function cleanEmbedPaste(text: string): string {
+	// Quick check — no HTML tags means nothing to clean
+	if (!/<[a-z]/i.test(text)) return text;
+
+	// Find the boundaries of the HTML block
+	const htmlStart = text.search(/<(?:blockquote|iframe)\b/i);
+	if (htmlStart < 0) return text;
+
+	// Find the end: last </script>, </blockquote>, or </iframe>
+	const ends = [
+		text.lastIndexOf("</script>"),
+		text.lastIndexOf("</blockquote>"),
+		text.lastIndexOf("</iframe>"),
+	]
+		.filter((i) => i >= htmlStart)
+		.map((i) => {
+			if (text.indexOf("</script>", i) === i) return i + 9;
+			if (text.indexOf("</blockquote>", i) === i) return i + 14;
+			return i + 9;
+		});
+	const htmlEnd = ends.length > 0 ? Math.max(...ends) : -1;
+	if (htmlEnd < 0) return text;
+
+	// Search for an embed URL inside the HTML block
+	const htmlBlock = text.slice(htmlStart, htmlEnd);
+	const urls = htmlBlock.match(/https?:\/\/[^\s<>"]+/g);
+	const embedUrl = urls?.find((u) => getEmbedInfo(u));
+	if (!embedUrl) return text;
+
+	// Keep user text before/after the HTML, replace the HTML block with the URL
+	const before = text.slice(0, htmlStart).trim();
+	const after = text.slice(htmlEnd).trim();
+	return [before, embedUrl, after].filter(Boolean).join(" ");
+}
+
+/**
+ * Transforms pasted HTML: replaces embed code blocks (blockquote, iframe)
+ * with a simple `<p><a>` link that TipTap will store as a link mark.
+ */
+export function cleanEmbedHtml(html: string): string {
+	if (!/<(?:blockquote|iframe)\b/i.test(html)) return html;
+
+	let result = html;
+
+	// Replace <blockquote>...(optional <script>...) with a link
+	result = result.replace(
+		/<blockquote[\s\S]*?<\/blockquote>(\s*<script[\s\S]*?<\/script>)?/gi,
+		(match) => {
+			const urls = match.match(/https?:\/\/[^\s<>"]+/g);
+			const embedUrl = urls?.find((u) => getEmbedInfo(u));
+			if (embedUrl) {
+				return `<p><a href="${embedUrl}">${embedUrl}</a></p>`;
+			}
+			return match;
+		},
+	);
+
+	// Replace <iframe> embeds with a link
+	result = result.replace(/<iframe[\s\S]*?<\/iframe>/gi, (match) => {
+		const srcMatch = match.match(/src=["']([^"']+)["']/);
+		if (srcMatch) {
+			const embedUrl = srcMatch[1];
+			if (getEmbedInfo(embedUrl)) {
+				return `<p><a href="${embedUrl}">${embedUrl}</a></p>`;
+			}
+		}
+		return match;
+	});
+
+	return result;
+}
+
+/**
+ * Extracts all URLs from an HTML string and returns the first one
+ * recognized as an embeddable URL by getEmbedInfo().
+ */
+export function extractEmbedUrlFromHtml(html: string): string | null {
+	const urls = html.match(/https?:\/\/[^\s<>"]+/g);
+	if (!urls) return null;
+	for (const url of urls) {
+		if (getEmbedInfo(url)) return url;
+	}
+	return null;
+}
+
 export function getEmbedInfo(rawUrl: string): EmbedInfo | null {
 	let url: URL;
 	try {

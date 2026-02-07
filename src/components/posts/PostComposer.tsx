@@ -3,7 +3,7 @@ import { useQuery } from "convex/react";
 import { ExternalLink, ImagePlus, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import { getEmbedInfo } from "../../lib/embed-utils";
+import { cleanEmbedPaste, getEmbedInfo } from "../../lib/embed-utils";
 import {
 	POST_IMAGE_CONSTRAINTS,
 	resizeImageIfNeeded,
@@ -89,13 +89,56 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 
 	const displayAvatarUrl = dbUser?.avatarUrl || user?.imageUrl;
 
-	const firstUrl = extractFirstUrl(content);
-	const isEmbed = firstUrl ? !!getEmbedInfo(firstUrl) : false;
-	const effectiveLength =
-		linkPreview || isEmbed ? stripFirstUrl(content).length : content.length;
+	// Count only non-URL text toward the limit when content has an embed link
+	const getTextLength = useCallback(
+		(text: string) => {
+			const url = extractFirstUrl(text);
+			if (linkPreview || (url && getEmbedInfo(url))) {
+				return stripFirstUrl(text).length;
+			}
+			return text.length;
+		},
+		[linkPreview],
+	);
+
+	const effectiveLength = getTextLength(content);
 	const remaining = maxLength - effectiveLength;
 	const isOverLimit = remaining < 0;
 	const isEmpty = content.trim().length === 0 && selectedFiles.length === 0;
+
+	// Clean HTML embed pastes, then cap non-URL text at maxLength
+	const handleContentChange = useCallback(
+		(value: string) => {
+			// Clean HTML embed code (e.g. Twitter blockquote) → extract just the URL
+			const cleaned = cleanEmbedPaste(value);
+
+			if (cleaned.length <= content.length) {
+				setContent(cleaned);
+				return;
+			}
+			const textLen = getTextLength(cleaned);
+			if (textLen <= maxLength) {
+				setContent(cleaned);
+			} else {
+				// Over limit — trim only the non-URL text portion
+				const url = extractFirstUrl(cleaned);
+				if (url && getEmbedInfo(url)) {
+					const urlIdx = cleaned.indexOf(url);
+					const before = cleaned.slice(0, urlIdx);
+					const after = cleaned.slice(urlIdx + url.length);
+					const textOnly = before + after;
+					const trimmed = textOnly.slice(0, maxLength);
+					const clampedIdx = Math.min(urlIdx, trimmed.length);
+					setContent(
+						trimmed.slice(0, clampedIdx) + url + trimmed.slice(clampedIdx),
+					);
+				} else {
+					setContent(cleaned.slice(0, maxLength));
+				}
+			}
+		},
+		[content.length, getTextLength, maxLength],
+	);
 
 	const handleAddFiles = useCallback(
 		(files: FileList | null) => {
@@ -205,7 +248,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 				<div className="flex-1">
 					<textarea
 						value={content}
-						onChange={(e) => setContent(e.target.value)}
+						onChange={(e) => handleContentChange(e.target.value)}
 						placeholder="What's on your mind?"
 						rows={3}
 						className="w-full bg-transparent text-white placeholder:text-gray-500 resize-none focus:outline-none text-lg"
@@ -298,7 +341,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 								<ImagePlus size={20} />
 							</button>
 							<EmojiPickerButton
-								onEmojiSelect={(emoji) => setContent((prev) => prev + emoji)}
+								onEmojiSelect={(emoji) => handleContentChange(content + emoji)}
 							/>
 							<input
 								ref={fileInputRef}

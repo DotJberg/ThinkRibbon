@@ -21,6 +21,11 @@ import {
 	Unlink,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+	cleanEmbedHtml,
+	extractEmbedUrlFromHtml,
+	getEmbedInfo,
+} from "../../lib/embed-utils";
 import { transformContentForPreview } from "../../lib/tiptap-link-preview";
 import { ImageUploadModal } from "./ImageUploadModal";
 import { LinkPreviewExtension } from "./LinkPreviewNode";
@@ -61,6 +66,8 @@ export function RichTextEditor({
 			}),
 			Link.configure({
 				openOnClick: false,
+				autolink: true,
+				linkOnPaste: true,
 				HTMLAttributes: {
 					class: "text-purple-400 underline hover:text-purple-300",
 				},
@@ -80,6 +87,37 @@ export function RichTextEditor({
 			attributes: {
 				class:
 					"prose prose-invert prose-lg max-w-none focus:outline-none min-h-[300px] px-4 py-3",
+			},
+			handlePaste(view, event) {
+				const clipboardData = event.clipboardData;
+				if (!clipboardData) return false;
+
+				const plainText = clipboardData.getData("text/plain").trim();
+				const html = clipboardData.getData("text/html");
+
+				// Find an embed URL from: direct URL, HTML embed code in
+				// plain text (e.g. YouTube iframe), or HTML clipboard data
+				// (e.g. Twitter blockquote)
+				const embedUrl =
+					(plainText && getEmbedInfo(plainText) && plainText) ||
+					(plainText && extractEmbedUrlFromHtml(plainText)) ||
+					(html && extractEmbedUrlFromHtml(html));
+
+				if (embedUrl) {
+					const { schema } = view.state;
+					const linkNode = schema.text(embedUrl, [
+						schema.marks.link.create({ href: embedUrl }),
+					]);
+					const paragraph = schema.nodes.paragraph.create(null, linkNode);
+					const tr = view.state.tr.replaceSelectionWith(paragraph);
+					view.dispatch(tr);
+					return true;
+				}
+
+				return false;
+			},
+			transformPastedHTML(html) {
+				return cleanEmbedHtml(html);
 			},
 		},
 	});
@@ -341,12 +379,20 @@ export function RichTextContent({
 		],
 		content: transformedContent,
 		editable: false,
+		immediatelyRender: false,
 		editorProps: {
 			attributes: {
 				class: "prose prose-invert prose-lg max-w-none",
 			},
 		},
 	});
+
+	// Ensure transformed content (with linkPreview nodes) is applied after editor creation
+	useEffect(() => {
+		if (editor && transformedContent) {
+			editor.commands.setContent(transformedContent);
+		}
+	}, [editor, transformedContent]);
 
 	if (!editor) {
 		return (

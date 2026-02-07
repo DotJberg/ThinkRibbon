@@ -3,9 +3,10 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
 
 export const Route = createFileRoute("/api/cron/cleanup")({
+	// @ts-expect-error TanStack Start server handlers not in base router types
 	server: {
 		handlers: {
-			GET: async ({ request }) => {
+			GET: async ({ request }: { request: Request }) => {
 				// Verify the request is from Vercel Cron
 				const authHeader = request.headers.get("Authorization");
 				const cronSecret = process.env.CRON_SECRET;

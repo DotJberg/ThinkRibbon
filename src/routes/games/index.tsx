@@ -52,7 +52,7 @@ function GamesPage() {
 			if (inputValue !== searchQuery) {
 				navigate({
 					to: "/games",
-					search: (prev) => ({
+					search: (prev: GamesSearchParams) => ({
 						...prev,
 						q: inputValue || undefined,
 					}),
@@ -66,7 +66,7 @@ function GamesPage() {
 	const setSelectedFeed = (feed: GamesFeedType) => {
 		navigate({
 			to: "/games",
-			search: (prev) => ({
+			search: (prev: GamesSearchParams) => ({
 				...prev,
 				feed: feed === "latest-reviewed" ? undefined : feed,
 			}),

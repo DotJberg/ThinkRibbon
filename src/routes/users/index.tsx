@@ -156,7 +156,7 @@ function UsersPage() {
 	}, [inputValue, searchQuery, navigate]);
 
 	// Queries
-	const discoverUsers = useQuery(api.users.getDiscoverUsers, { limit: 20 });
+	const discoverUsers = useQuery(api.users.getDiscoverUsers, { limit: 15 });
 	const searchResults = useQuery(
 		api.users.searchUsers,
 		searchQuery.trim() ? { query: searchQuery, limit: 20 } : "skip",

@@ -1,4 +1,4 @@
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
 	Calendar,
 	Clock,
@@ -112,6 +112,10 @@ export function AddToCollectionModal({
 	gamePlatforms = [],
 }: AddToCollectionModalProps) {
 	const addToCollection = useMutation(api.collections.add);
+	const existingQuestLogEntry = useQuery(
+		api.questlog.getEntry,
+		gameId ? { clerkId, gameId } : "skip",
+	);
 	const [ownershipType, setOwnershipType] = useState<OwnershipType>("Digital");
 	const [status, setStatus] = useState<CollectionStatus>("Unplayed");
 	const [platform, setPlatform] = useState<string>("");
@@ -148,7 +152,7 @@ export function AddToCollectionModal({
 			});
 
 			// If status is Playing, prompt to add to Quest Log before calling onSuccess
-			if (status === "Playing") {
+			if (status === "Playing" && !existingQuestLogEntry) {
 				setShowQuestLogPrompt(true);
 			} else {
 				onSuccess?.();

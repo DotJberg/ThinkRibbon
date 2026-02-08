@@ -89,6 +89,16 @@ export const run = internalAction({
 			return;
 		}
 
+		// UPLOADTHING_TOKEN is a base64-encoded JSON containing the apiKey
+		let apiKey: string;
+		try {
+			const decoded = JSON.parse(atob(token));
+			apiKey = decoded.apiKey;
+		} catch {
+			// Fallback: token might already be a raw API key
+			apiKey = token;
+		}
+
 		try {
 			// List all files from UploadThing with pagination
 			const allFiles: Array<{ key: string }> = [];
@@ -102,7 +112,7 @@ export const run = internalAction({
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
-							"X-Uploadthing-Api-Key": token,
+							"X-Uploadthing-Api-Key": apiKey,
 						},
 						body: JSON.stringify({ limit, offset }),
 					},
@@ -147,7 +157,7 @@ export const run = internalAction({
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
-							"X-Uploadthing-Api-Key": token,
+							"X-Uploadthing-Api-Key": apiKey,
 						},
 						body: JSON.stringify({ fileKeys: batch }),
 					},

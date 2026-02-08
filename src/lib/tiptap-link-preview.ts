@@ -41,6 +41,11 @@ function isStandaloneUrl(text: string): string | null {
 	return null;
 }
 
+/** Returns true when the visible text of a linked node is itself a URL (pasted link). */
+function isLinkDisplayingUrl(node: TipTapNode): boolean {
+	return !!isStandaloneUrl(node.text || "");
+}
+
 function isEmptyParagraph(node: TipTapNode): boolean {
 	if (!node.content || node.content.length === 0) return true;
 	return node.content.every(
@@ -61,6 +66,7 @@ function splitParagraphAtLinks(paragraph: TipTapNode): TipTapNode[] {
 		const url = isStandaloneUrl(allText);
 		if (
 			url &&
+			getEmbedInfo(url) &&
 			paragraph.content.every(
 				(c) => c.type === "text" && (!c.marks || c.marks.length === 0),
 			)
@@ -75,7 +81,7 @@ function splitParagraphAtLinks(paragraph: TipTapNode): TipTapNode[] {
 	const linkChildren = paragraph.content.filter((c) => hasLinkMark(c));
 	if (linkChildren.length === 1) {
 		const href = hasLinkMark(linkChildren[0]);
-		if (href && getEmbedInfo(href)) {
+		if (href && getEmbedInfo(href) && isLinkDisplayingUrl(linkChildren[0])) {
 			const nonLinkText = paragraph.content
 				.filter((c) => !hasLinkMark(c))
 				.map((c) => c.text || "")
@@ -93,7 +99,7 @@ function splitParagraphAtLinks(paragraph: TipTapNode): TipTapNode[] {
 	for (const child of paragraph.content) {
 		const href = hasLinkMark(child);
 
-		if (!href) {
+		if (!href || !getEmbedInfo(href) || !isLinkDisplayingUrl(child)) {
 			currentChildren.push(child);
 			continue;
 		}

@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+// Triggers module augmentation that adds `server` to route options
+import type {} from "@tanstack/react-start";
 import { createRouteHandler } from "uploadthing/server";
 import { uploadRouter } from "@/lib/server/uploadthing";
 

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, query } from "./_generated/server";
 
 export const upsertFromIgdb = internalMutation({
 	args: {
@@ -323,7 +323,7 @@ export const getUpcomingByMonth = query({
 
 // Cleanup orphaned games that aren't referenced by any other table
 // and were cached more than `maxAgeDays` days ago
-export const cleanupOrphanedGames = mutation({
+export const cleanupOrphanedGames = internalMutation({
 	args: {
 		maxAgeDays: v.optional(v.number()),
 		dryRun: v.optional(v.boolean()),

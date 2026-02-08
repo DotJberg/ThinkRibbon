@@ -1,4 +1,4 @@
-import { action, internalQuery } from "./_generated/server";
+import { internalAction, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 // Collect all file keys referenced in the database
@@ -73,7 +73,7 @@ function extractFileKey(url: string): string | null {
 }
 
 // Run cleanup - compare UploadThing files against database references
-export const run = action({
+export const run = internalAction({
 	args: {},
 	handler: async (ctx) => {
 		const dbUrls = await ctx.runQuery(internal.cleanup.collectAllFileKeys);

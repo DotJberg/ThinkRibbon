@@ -425,6 +425,68 @@ export const getCombinedRating = query({
 	},
 });
 
+export const quickRate = mutation({
+	args: {
+		clerkId: v.string(),
+		gameId: v.id("games"),
+		quickRating: v.number(),
+	},
+	handler: async (ctx, args) => {
+		if (args.quickRating < 1 || args.quickRating > 5) {
+			throw new Error("Rating must be between 1 and 5");
+		}
+
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		if (!user) throw new Error("User not found");
+
+		const game = await ctx.db.get(args.gameId);
+		if (!game) throw new Error("Game not found");
+
+		if (game.categoryLabel && DLC_CATEGORIES.includes(game.categoryLabel)) {
+			throw new Error(
+				`Cannot rate ${game.categoryLabel}. Only main games can be rated.`,
+			);
+		}
+
+		const existing = await ctx.db
+			.query("questLogs")
+			.withIndex("by_userId_gameId", (q) =>
+				q.eq("userId", user._id).eq("gameId", args.gameId),
+			)
+			.first();
+
+		if (existing) {
+			await ctx.db.patch(existing._id, {
+				quickRating: args.quickRating,
+				updatedAt: Date.now(),
+			});
+			return existing._id;
+		}
+
+		const displayed = await ctx.db
+			.query("questLogs")
+			.withIndex("by_userId_display", (q) =>
+				q.eq("userId", user._id).eq("displayOnProfile", true),
+			)
+			.collect();
+
+		const id = await ctx.db.insert("questLogs", {
+			userId: user._id,
+			gameId: args.gameId,
+			status: "Backlog",
+			quickRating: args.quickRating,
+			displayOnProfile: true,
+			displayOrder: Math.min(displayed.length, 4),
+			updatedAt: Date.now(),
+		});
+
+		return id;
+	},
+});
+
 function getStatusText(status: string): string {
 	switch (status) {
 		case "Beaten":

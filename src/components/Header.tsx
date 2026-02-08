@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import {
 	BookOpen,
+	ChevronDown,
 	FileText,
 	Gamepad2,
 	Home,
@@ -12,12 +13,14 @@ import {
 	User,
 	Users,
 	X,
+	Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import guidelinesMd from "../../user_guideline.md?raw";
 import ClerkHeader from "../integrations/clerk/header-user.tsx";
 import NotificationBell from "./NotificationBell.tsx";
+import { QuickReviewModal } from "./shared/QuickReviewModal";
 
 const firstLine = guidelinesMd.split("\n")[0];
 const dateStr = firstLine?.split(" - ")[1]?.trim();
@@ -32,6 +35,9 @@ const isNew = dateStr === currentMonthYear;
 export default function Header() {
 	const { user, isSignedIn } = useUser();
 	const [isOpen, setIsOpen] = useState(false);
+	const [reviewDropdownOpen, setReviewDropdownOpen] = useState(false);
+	const [quickReviewModalOpen, setQuickReviewModalOpen] = useState(false);
+	const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const isAdmin = useQuery(
 		api.users.isAdmin,
@@ -91,21 +97,73 @@ export default function Header() {
 
 					{isSignedIn && (
 						<>
-							<Link
-								to="/reviews/new"
-								search={{ gameId: undefined, draftId: undefined }}
-								className="text-gray-300 hover:text-white transition-colors font-medium"
-								activeProps={{ className: "text-white font-medium" }}
+							{/* biome-ignore lint/a11y/noStaticElementInteractions: hover dropdown trigger */}
+							<div
+								className="relative"
+								onMouseEnter={() => {
+									if (dropdownTimeoutRef.current) {
+										clearTimeout(dropdownTimeoutRef.current);
+									}
+									setReviewDropdownOpen(true);
+								}}
+								onMouseLeave={() => {
+									dropdownTimeoutRef.current = setTimeout(() => {
+										setReviewDropdownOpen(false);
+									}, 150);
+								}}
 							>
-								Write Review
-							</Link>
+								<span className="text-gray-300 hover:text-white transition-colors font-medium cursor-default flex items-center gap-1">
+									New Review
+									<ChevronDown
+										size={14}
+										className={`transition-transform ${reviewDropdownOpen ? "rotate-180" : ""}`}
+									/>
+								</span>
+								{reviewDropdownOpen && (
+									<div className="absolute top-full left-0 pt-2">
+										<div className="bg-gray-800 border border-gray-700 rounded-xl shadow-xl py-1 min-w-[180px]">
+											<Link
+												to="/drafts"
+												onClick={() => setReviewDropdownOpen(false)}
+												className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+											>
+												<FileText size={16} />
+												Open a Draft
+											</Link>
+											<Link
+												to="/reviews/new"
+												search={{
+													gameId: undefined,
+													draftId: undefined,
+												}}
+												onClick={() => setReviewDropdownOpen(false)}
+												className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+											>
+												<Star size={16} />
+												Full Review
+											</Link>
+											<button
+												type="button"
+												onClick={() => {
+													setReviewDropdownOpen(false);
+													setQuickReviewModalOpen(true);
+												}}
+												className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+											>
+												<Zap size={16} />
+												Quick Review
+											</button>
+										</div>
+									</div>
+								)}
+							</div>
 							<Link
 								to="/articles/new"
 								search={{ draftId: undefined }}
 								className="text-gray-300 hover:text-white transition-colors font-medium"
 								activeProps={{ className: "text-white font-medium" }}
 							>
-								Write Article
+								New Article
 							</Link>
 							{isAdmin && (
 								<Link
@@ -227,18 +285,39 @@ export default function Header() {
 							</p>
 
 							<Link
+								to="/drafts"
+								onClick={() => setIsOpen(false)}
+								className="flex items-center gap-3 p-3 pl-6 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+							>
+								<FileText size={20} />
+								<span className="font-medium">Open a Draft</span>
+							</Link>
+
+							<Link
 								to="/reviews/new"
 								search={{ gameId: undefined, draftId: undefined }}
 								onClick={() => setIsOpen(false)}
-								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+								className="flex items-center gap-3 p-3 pl-6 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 								activeProps={{
 									className:
-										"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+										"flex items-center gap-3 p-3 pl-6 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
 								}}
 							>
 								<Star size={20} />
-								<span className="font-medium">Write Review</span>
+								<span className="font-medium">Full Review</span>
 							</Link>
+
+							<button
+								type="button"
+								onClick={() => {
+									setIsOpen(false);
+									setQuickReviewModalOpen(true);
+								}}
+								className="w-full flex items-center gap-3 p-3 pl-6 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+							>
+								<Zap size={20} />
+								<span className="font-medium">Quick Review</span>
+							</button>
 
 							<Link
 								to="/articles/new"
@@ -251,7 +330,7 @@ export default function Header() {
 								}}
 							>
 								<FileText size={20} />
-								<span className="font-medium">Write Article</span>
+								<span className="font-medium">New Article</span>
 							</Link>
 
 							<div className="border-t border-gray-800 my-4" />
@@ -313,6 +392,11 @@ export default function Header() {
 					<ClerkHeader />
 				</div>
 			</aside>
+
+			<QuickReviewModal
+				isOpen={quickReviewModalOpen}
+				onClose={() => setQuickReviewModalOpen(false)}
+			/>
 		</>
 	);
 }

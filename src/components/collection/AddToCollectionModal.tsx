@@ -114,7 +114,7 @@ export function AddToCollectionModal({
 	const addToCollection = useMutation(api.collections.add);
 	const existingQuestLogEntry = useQuery(
 		api.questlog.getEntry,
-		gameId ? { clerkId, gameId } : "skip",
+		gameId ? { clerkId, gameId: gameId as Id<"games"> } : "skip",
 	);
 	const [ownershipType, setOwnershipType] = useState<OwnershipType>("Digital");
 	const [status, setStatus] = useState<CollectionStatus>("Unplayed");

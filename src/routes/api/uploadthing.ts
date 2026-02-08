@@ -15,7 +15,6 @@ const handler = createRouteHandler({
 });
 
 export const Route = createFileRoute("/api/uploadthing")({
-	// @ts-expect-error TanStack Start server handlers not in base router types
 	server: {
 		handlers: {
 			GET: async ({ request }: { request: Request }) => handler(request),

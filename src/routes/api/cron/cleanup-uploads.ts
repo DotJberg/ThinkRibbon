@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
 
-export const Route = createFileRoute("/api/cron/cleanup")({
+export const Route = createFileRoute("/api/cron/cleanup-uploads")({
 	server: {
 		handlers: {
 			GET: async ({ request }: { request: Request }) => {
@@ -26,29 +26,15 @@ export const Route = createFileRoute("/api/cron/cleanup")({
 				}
 
 				const client = new ConvexHttpClient(convexUrl);
-				const results: Record<string, unknown> = {};
 
 				try {
-					// Cleanup orphaned games (cached >14 days, not referenced anywhere)
-					const gameCleanup = await client.mutation(
-						api.games.cleanupOrphanedGames,
-						{
-							maxAgeDays: 14,
-							dryRun: false,
-						},
-					);
-					results.games = gameCleanup;
-					console.log("Game cleanup completed:", gameCleanup);
-
-					// Add other cleanup tasks here in the future
-					// e.g., orphaned images, expired drafts, etc.
-
-					return new Response(JSON.stringify(results), {
+					await client.action(api.cleanup.run, {});
+					return new Response(JSON.stringify({ success: true }), {
 						status: 200,
 						headers: { "Content-Type": "application/json" },
 					});
 				} catch (error) {
-					console.error("Cleanup error:", error);
+					console.error("UploadThing cleanup error:", error);
 					return new Response(
 						`Cleanup error: ${error instanceof Error ? error.message : "Unknown error"}`,
 						{ status: 500 },

@@ -30,6 +30,7 @@ import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as ReviewsEditIdRouteImport } from './routes/reviews/edit.$id'
 import { Route as GamesUpcomingMonthRouteImport } from './routes/games/upcoming.$month'
 import { Route as ArticlesEditIdRouteImport } from './routes/articles/edit.$id'
+import { Route as ApiCronCleanupUploadsRouteImport } from './routes/api/cron/cleanup-uploads'
 import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
 
 const SignUpRoute = SignUpRouteImport.update({
@@ -137,6 +138,11 @@ const ArticlesEditIdRoute = ArticlesEditIdRouteImport.update({
   path: '/articles/edit/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronCleanupUploadsRoute = ApiCronCleanupUploadsRouteImport.update({
+  id: '/api/cron/cleanup-uploads',
+  path: '/api/cron/cleanup-uploads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
   id: '/api/cron/cleanup',
   path: '/api/cron/cleanup',
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/games/': typeof GamesIndexRoute
   '/users/': typeof UsersIndexRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/cleanup-uploads': typeof ApiCronCleanupUploadsRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
   '/reviews/edit/$id': typeof ReviewsEditIdRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/games': typeof GamesIndexRoute
   '/users': typeof UsersIndexRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/cleanup-uploads': typeof ApiCronCleanupUploadsRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
   '/reviews/edit/$id': typeof ReviewsEditIdRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/games/': typeof GamesIndexRoute
   '/users/': typeof UsersIndexRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/cleanup-uploads': typeof ApiCronCleanupUploadsRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
   '/reviews/edit/$id': typeof ReviewsEditIdRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/games/'
     | '/users/'
     | '/api/cron/cleanup'
+    | '/api/cron/cleanup-uploads'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
     | '/reviews/edit/$id'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/users'
     | '/api/cron/cleanup'
+    | '/api/cron/cleanup-uploads'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
     | '/reviews/edit/$id'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/games/'
     | '/users/'
     | '/api/cron/cleanup'
+    | '/api/cron/cleanup-uploads'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
     | '/reviews/edit/$id'
@@ -311,6 +323,7 @@ export interface RootRouteChildren {
   GamesIndexRoute: typeof GamesIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
   ApiCronCleanupRoute: typeof ApiCronCleanupRoute
+  ApiCronCleanupUploadsRoute: typeof ApiCronCleanupUploadsRoute
   ArticlesEditIdRoute: typeof ArticlesEditIdRoute
   GamesUpcomingMonthRoute: typeof GamesUpcomingMonthRoute
   ReviewsEditIdRoute: typeof ReviewsEditIdRoute
@@ -465,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArticlesEditIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/cleanup-uploads': {
+      id: '/api/cron/cleanup-uploads'
+      path: '/api/cron/cleanup-uploads'
+      fullPath: '/api/cron/cleanup-uploads'
+      preLoaderRoute: typeof ApiCronCleanupUploadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cron/cleanup': {
       id: '/api/cron/cleanup'
       path: '/api/cron/cleanup'
@@ -495,6 +515,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesIndexRoute: GamesIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
   ApiCronCleanupRoute: ApiCronCleanupRoute,
+  ApiCronCleanupUploadsRoute: ApiCronCleanupUploadsRoute,
   ArticlesEditIdRoute: ArticlesEditIdRoute,
   GamesUpcomingMonthRoute: GamesUpcomingMonthRoute,
   ReviewsEditIdRoute: ReviewsEditIdRoute,

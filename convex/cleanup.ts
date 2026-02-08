@@ -1,4 +1,4 @@
-import { internalAction, internalQuery } from "./_generated/server";
+import { action, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 // Collect all file keys referenced in the database
@@ -73,7 +73,7 @@ function extractFileKey(url: string): string | null {
 }
 
 // Run cleanup - compare UploadThing files against database references
-export const run = internalAction({
+export const run = action({
 	args: {},
 	handler: async (ctx) => {
 		const dbUrls = await ctx.runQuery(internal.cleanup.collectAllFileKeys);
@@ -90,26 +90,41 @@ export const run = internalAction({
 		}
 
 		try {
-			// List files from UploadThing
-			const response = await fetch(
-				"https://api.uploadthing.com/v6/listFiles",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-Uploadthing-Api-Key": token,
-					},
-					body: JSON.stringify({ limit: 500 }),
-				},
-			);
+			// List all files from UploadThing with pagination
+			const allFiles: Array<{ key: string }> = [];
+			let offset = 0;
+			const limit = 500;
 
-			if (!response.ok) {
-				console.error("Failed to list UploadThing files:", response.statusText);
-				return;
+			while (true) {
+				const response = await fetch(
+					"https://api.uploadthing.com/v6/listFiles",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"X-Uploadthing-Api-Key": token,
+						},
+						body: JSON.stringify({ limit, offset }),
+					},
+				);
+
+				if (!response.ok) {
+					console.error(
+						"Failed to list UploadThing files:",
+						response.statusText,
+					);
+					return;
+				}
+
+				const data = await response.json();
+				const files: Array<{ key: string }> = data.files || [];
+				allFiles.push(...files);
+
+				if (files.length < limit) break;
+				offset += limit;
 			}
 
-			const data = await response.json();
-			const allFiles: Array<{ key: string }> = data.files || [];
+			console.log(`Found ${allFiles.length} total files on UploadThing`);
 
 			// Find orphaned files
 			const orphanedKeys = allFiles
@@ -123,27 +138,30 @@ export const run = internalAction({
 
 			console.log(`Found ${orphanedKeys.length} orphaned files, deleting...`);
 
-			// Delete orphaned files
-			const deleteResponse = await fetch(
-				"https://api.uploadthing.com/v6/deleteFiles",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-Uploadthing-Api-Key": token,
+			// Delete orphaned files in batches of 10
+			for (let i = 0; i < orphanedKeys.length; i += 10) {
+				const batch = orphanedKeys.slice(i, i + 10);
+				const deleteResponse = await fetch(
+					"https://api.uploadthing.com/v6/deleteFiles",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"X-Uploadthing-Api-Key": token,
+						},
+						body: JSON.stringify({ fileKeys: batch }),
 					},
-					body: JSON.stringify({ fileKeys: orphanedKeys }),
-				},
-			);
-
-			if (!deleteResponse.ok) {
-				console.error(
-					"Failed to delete orphaned files:",
-					deleteResponse.statusText,
 				);
-			} else {
-				console.log(`Deleted ${orphanedKeys.length} orphaned files`);
+
+				if (!deleteResponse.ok) {
+					console.error(
+						"Failed to delete orphaned files:",
+						deleteResponse.statusText,
+					);
+				}
 			}
+
+			console.log(`Deleted ${orphanedKeys.length} orphaned files`);
 		} catch (err) {
 			console.error("Cleanup failed:", err);
 		}

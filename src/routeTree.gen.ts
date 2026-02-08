@@ -30,8 +30,6 @@ import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as ReviewsEditIdRouteImport } from './routes/reviews/edit.$id'
 import { Route as GamesUpcomingMonthRouteImport } from './routes/games/upcoming.$month'
 import { Route as ArticlesEditIdRouteImport } from './routes/articles/edit.$id'
-import { Route as ApiCronCleanupUploadsRouteImport } from './routes/api/cron/cleanup-uploads'
-import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -138,16 +136,6 @@ const ArticlesEditIdRoute = ArticlesEditIdRouteImport.update({
   path: '/articles/edit/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCronCleanupUploadsRoute = ApiCronCleanupUploadsRouteImport.update({
-  id: '/api/cron/cleanup-uploads',
-  path: '/api/cron/cleanup-uploads',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
-  id: '/api/cron/cleanup',
-  path: '/api/cron/cleanup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -168,8 +156,6 @@ export interface FileRoutesByFullPath {
   '/drafts/': typeof DraftsIndexRoute
   '/games/': typeof GamesIndexRoute
   '/users/': typeof UsersIndexRoute
-  '/api/cron/cleanup': typeof ApiCronCleanupRoute
-  '/api/cron/cleanup-uploads': typeof ApiCronCleanupUploadsRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
   '/reviews/edit/$id': typeof ReviewsEditIdRoute
@@ -193,8 +179,6 @@ export interface FileRoutesByTo {
   '/drafts': typeof DraftsIndexRoute
   '/games': typeof GamesIndexRoute
   '/users': typeof UsersIndexRoute
-  '/api/cron/cleanup': typeof ApiCronCleanupRoute
-  '/api/cron/cleanup-uploads': typeof ApiCronCleanupUploadsRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
   '/reviews/edit/$id': typeof ReviewsEditIdRoute
@@ -219,8 +203,6 @@ export interface FileRoutesById {
   '/drafts/': typeof DraftsIndexRoute
   '/games/': typeof GamesIndexRoute
   '/users/': typeof UsersIndexRoute
-  '/api/cron/cleanup': typeof ApiCronCleanupRoute
-  '/api/cron/cleanup-uploads': typeof ApiCronCleanupUploadsRoute
   '/articles/edit/$id': typeof ArticlesEditIdRoute
   '/games/upcoming/$month': typeof GamesUpcomingMonthRoute
   '/reviews/edit/$id': typeof ReviewsEditIdRoute
@@ -246,8 +228,6 @@ export interface FileRouteTypes {
     | '/drafts/'
     | '/games/'
     | '/users/'
-    | '/api/cron/cleanup'
-    | '/api/cron/cleanup-uploads'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
     | '/reviews/edit/$id'
@@ -271,8 +251,6 @@ export interface FileRouteTypes {
     | '/drafts'
     | '/games'
     | '/users'
-    | '/api/cron/cleanup'
-    | '/api/cron/cleanup-uploads'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
     | '/reviews/edit/$id'
@@ -296,8 +274,6 @@ export interface FileRouteTypes {
     | '/drafts/'
     | '/games/'
     | '/users/'
-    | '/api/cron/cleanup'
-    | '/api/cron/cleanup-uploads'
     | '/articles/edit/$id'
     | '/games/upcoming/$month'
     | '/reviews/edit/$id'
@@ -322,8 +298,6 @@ export interface RootRouteChildren {
   DraftsIndexRoute: typeof DraftsIndexRoute
   GamesIndexRoute: typeof GamesIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
-  ApiCronCleanupRoute: typeof ApiCronCleanupRoute
-  ApiCronCleanupUploadsRoute: typeof ApiCronCleanupUploadsRoute
   ArticlesEditIdRoute: typeof ArticlesEditIdRoute
   GamesUpcomingMonthRoute: typeof GamesUpcomingMonthRoute
   ReviewsEditIdRoute: typeof ReviewsEditIdRoute
@@ -478,20 +452,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArticlesEditIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/cron/cleanup-uploads': {
-      id: '/api/cron/cleanup-uploads'
-      path: '/api/cron/cleanup-uploads'
-      fullPath: '/api/cron/cleanup-uploads'
-      preLoaderRoute: typeof ApiCronCleanupUploadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/cron/cleanup': {
-      id: '/api/cron/cleanup'
-      path: '/api/cron/cleanup'
-      fullPath: '/api/cron/cleanup'
-      preLoaderRoute: typeof ApiCronCleanupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -514,8 +474,6 @@ const rootRouteChildren: RootRouteChildren = {
   DraftsIndexRoute: DraftsIndexRoute,
   GamesIndexRoute: GamesIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
-  ApiCronCleanupRoute: ApiCronCleanupRoute,
-  ApiCronCleanupUploadsRoute: ApiCronCleanupUploadsRoute,
   ArticlesEditIdRoute: ArticlesEditIdRoute,
   GamesUpcomingMonthRoute: GamesUpcomingMonthRoute,
   ReviewsEditIdRoute: ReviewsEditIdRoute,
@@ -523,12 +481,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

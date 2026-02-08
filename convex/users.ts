@@ -24,7 +24,6 @@ export const syncUser = mutation({
 
 			await ctx.db.patch(existingByClerkId._id, {
 				email: args.email,
-				displayName: args.displayName,
 				...(shouldUpdateAvatar && args.avatarUrl
 					? { avatarUrl: args.avatarUrl }
 					: {}),
@@ -47,7 +46,6 @@ export const syncUser = mutation({
 
 			await ctx.db.patch(existingByEmail._id, {
 				clerkId: args.clerkId,
-				displayName: args.displayName,
 				...(shouldUpdateAvatar && args.avatarUrl
 					? { avatarUrl: args.avatarUrl }
 					: {}),
@@ -61,7 +59,7 @@ export const syncUser = mutation({
 			clerkId: args.clerkId,
 			email: args.email,
 			username: args.username,
-			displayName: args.displayName,
+			displayName: args.username,
 			avatarUrl: args.avatarUrl,
 			updatedAt: Date.now(),
 		});

@@ -24,7 +24,7 @@ function UserSync() {
 				clerkId: user.id,
 				email: user.primaryEmailAddress?.emailAddress || "",
 				username: user.username || user.id,
-				displayName: user.fullName || undefined,
+				displayName: undefined,
 				avatarUrl: user.imageUrl || undefined,
 			}).catch(console.error);
 		}

@@ -31,15 +31,15 @@ export function EmojiPickerButton({
 						className="fixed inset-0 z-40"
 						onClick={() => setShowPicker(false)}
 					/>
-					<div className="absolute bottom-full mb-2 right-0 z-50">
+					<div className="fixed sm:absolute bottom-0 left-0 right-0 sm:bottom-full sm:mb-2 sm:left-auto sm:right-0 z-50">
 						<EmojiPicker
 							theme={Theme.DARK}
 							onEmojiClick={(emojiData) => {
 								onEmojiSelect(emojiData.emoji);
 								setShowPicker(false);
 							}}
-							width={320}
-							height={400}
+							width="100%"
+							height={350}
 						/>
 					</div>
 				</>

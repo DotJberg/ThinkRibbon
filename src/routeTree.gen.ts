@@ -27,6 +27,7 @@ import { Route as CollectionUsernameRouteImport } from './routes/collection/$use
 import { Route as ArticlesNewRouteImport } from './routes/articles/new'
 import { Route as ArticlesIdRouteImport } from './routes/articles/$id'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as ApiSitemapRouteImport } from './routes/api/sitemap'
 import { Route as ReviewsEditIdRouteImport } from './routes/reviews/edit.$id'
 import { Route as GamesUpcomingMonthRouteImport } from './routes/games/upcoming.$month'
 import { Route as ArticlesEditIdRouteImport } from './routes/articles/edit.$id'
@@ -121,6 +122,11 @@ const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   path: '/api/uploadthing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSitemapRoute = ApiSitemapRouteImport.update({
+  id: '/api/sitemap',
+  path: '/api/sitemap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReviewsEditIdRoute = ReviewsEditIdRouteImport.update({
   id: '/reviews/edit/$id',
   path: '/reviews/edit/$id',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/guidelines': typeof GuidelinesRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/api/sitemap': typeof ApiSitemapRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/guidelines': typeof GuidelinesRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/api/sitemap': typeof ApiSitemapRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/guidelines': typeof GuidelinesRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/api/sitemap': typeof ApiSitemapRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/articles/$id': typeof ArticlesIdRoute
   '/articles/new': typeof ArticlesNewRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
     | '/guidelines'
     | '/sign-in'
     | '/sign-up'
+    | '/api/sitemap'
     | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/guidelines'
     | '/sign-in'
     | '/sign-up'
+    | '/api/sitemap'
     | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/guidelines'
     | '/sign-in'
     | '/sign-up'
+    | '/api/sitemap'
     | '/api/uploadthing'
     | '/articles/$id'
     | '/articles/new'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   GuidelinesRoute: typeof GuidelinesRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  ApiSitemapRoute: typeof ApiSitemapRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ArticlesIdRoute: typeof ArticlesIdRoute
   ArticlesNewRoute: typeof ArticlesNewRoute
@@ -431,6 +444,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadthingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sitemap': {
+      id: '/api/sitemap'
+      path: '/api/sitemap'
+      fullPath: '/api/sitemap'
+      preLoaderRoute: typeof ApiSitemapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reviews/edit/$id': {
       id: '/reviews/edit/$id'
       path: '/reviews/edit/$id'
@@ -460,6 +480,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidelinesRoute: GuidelinesRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  ApiSitemapRoute: ApiSitemapRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
   ArticlesIdRoute: ArticlesIdRoute,
   ArticlesNewRoute: ArticlesNewRoute,

@@ -26,6 +26,7 @@ import type * as posts from "../posts.js";
 import type * as questlog from "../questlog.js";
 import type * as reports from "../reports.js";
 import type * as reviews from "../reviews.js";
+import type * as sitemap from "../sitemap.js";
 import type * as users from "../users.js";
 
 import type {
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   questlog: typeof questlog;
   reports: typeof reports;
   reviews: typeof reviews;
+  sitemap: typeof sitemap;
   users: typeof users;
 }>;
 

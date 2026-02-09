@@ -1,3 +1,10 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Disallow: /drafts
+Disallow: /admin
+Disallow: /articles/new
+Disallow: /articles/edit/
+Disallow: /reviews/new
+Disallow: /reviews/edit/
+
+Sitemap: https://www.thinkribbon.com/api/sitemap

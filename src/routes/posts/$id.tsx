@@ -29,9 +29,38 @@ import { LikeButton } from "../../components/shared/LikeButton";
 import { LinkPreviewCard } from "../../components/shared/LinkPreviewCard";
 import { ReportModal } from "../../components/shared/ReportModal";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
+import { getConvexClient } from "../../lib/convex-server";
 import { stripFirstUrl } from "../../lib/link-preview";
+import { buildMeta, seoTitle, seoUrl, truncate } from "../../lib/seo";
 
 export const Route = createFileRoute("/posts/$id")({
+	loader: async ({ params }) => {
+		try {
+			const client = getConvexClient();
+			const post = await client.query(api.posts.getById, {
+				id: params.id as Id<"posts">,
+			});
+			return { post };
+		} catch {
+			return { post: null };
+		}
+	},
+	head: ({ loaderData }) => {
+		const post = loaderData?.post;
+		if (!post) return {};
+		const authorName =
+			post.author?.displayName || post.author?.username || "Someone";
+		const description = truncate(post.content);
+		const image = post.images?.[0]?.url;
+		return {
+			meta: buildMeta({
+				title: seoTitle(`${authorName} on Think Ribbon`),
+				description,
+				url: seoUrl(`/posts/${post._id}`),
+				image,
+			}),
+		};
+	},
 	component: PostDetailPage,
 });
 

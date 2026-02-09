@@ -51,6 +51,18 @@ export const Route = createRootRoute({
 				content:
 					"A video game social platform for reviews, articles, and community.",
 			},
+			{
+				property: "og:site_name",
+				content: "Think Ribbon",
+			},
+			{
+				property: "og:type",
+				content: "website",
+			},
+			{
+				name: "twitter:card",
+				content: "summary",
+			},
 		],
 		links: [
 			{

@@ -19,8 +19,38 @@ import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import { FollowListModal } from "../../components/profile/FollowListModal";
 import { NowPlaying } from "../../components/profile/NowPlaying";
 import { SafeImage } from "../../components/shared/SafeImage";
+import { getConvexClient } from "../../lib/convex-server";
+import { buildMeta, seoTitle, seoUrl, truncate } from "../../lib/seo";
 
 export const Route = createFileRoute("/profile/$username")({
+	loader: async ({ params }) => {
+		try {
+			const client = getConvexClient();
+			const profile = await client.query(api.users.getByUsername, {
+				username: params.username,
+			});
+			return { profile };
+		} catch {
+			return { profile: null };
+		}
+	},
+	head: ({ loaderData }) => {
+		const profile = loaderData?.profile;
+		if (!profile) return {};
+		const displayName = profile.displayName || profile.username;
+		const description = profile.bio
+			? truncate(profile.bio)
+			: `Check out ${displayName}'s profile on Think Ribbon`;
+		return {
+			meta: buildMeta({
+				title: seoTitle(`${displayName} (@${profile.username})`),
+				description,
+				url: seoUrl(`/profile/${profile.username}`),
+				image: profile.avatarUrl,
+				type: "profile",
+			}),
+		};
+	},
 	component: ProfilePage,
 });
 

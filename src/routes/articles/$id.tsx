@@ -33,8 +33,53 @@ import {
 } from "../../components/shared/SpoilerWarning";
 import { TagDisplay } from "../../components/shared/TagDisplay";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
+import { getConvexClient } from "../../lib/convex-server";
+import {
+	buildMeta,
+	extractTextFromContent,
+	seoTitle,
+	seoUrl,
+	truncate,
+} from "../../lib/seo";
 
 export const Route = createFileRoute("/articles/$id")({
+	loader: async ({ params }) => {
+		try {
+			const client = getConvexClient();
+			const article = await client.query(api.articles.getById, {
+				articleId: params.id as Id<"articles">,
+			});
+			return { article };
+		} catch {
+			return { article: null };
+		}
+	},
+	head: ({ loaderData }) => {
+		const article = loaderData?.article;
+		if (!article) return {};
+		const description = article.excerpt
+			? truncate(article.excerpt)
+			: truncate(extractTextFromContent(article.content));
+		return {
+			meta: buildMeta({
+				title: seoTitle(article.title),
+				description,
+				url: seoUrl(`/articles/${article._id}`),
+				image: article.coverImageUrl,
+				extra: [
+					{
+						property: "article:author",
+						content:
+							article.author?.displayName || article.author?.username || "",
+					},
+					{
+						property: "article:published_time",
+						content: new Date(article._creationTime).toISOString(),
+					},
+				],
+			}),
+		};
+	},
 	component: ArticleDetailPage,
 });
 

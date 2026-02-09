@@ -8,10 +8,45 @@ import { CollectionButton } from "../../components/collection/CollectionButton";
 import { QuestLogButton } from "../../components/questlog/QuestLogButton";
 import { ReviewCard } from "../../components/reviews/ReviewCard";
 import { StarRatingDisplay } from "../../components/shared/StarRating";
+import { getConvexClient } from "../../lib/convex-server";
+import { buildMeta, seoTitle, seoUrl, truncate } from "../../lib/seo";
 
 const STALE_THRESHOLD_DAYS = 30;
 
 export const Route = createFileRoute("/games/$slug")({
+	loader: async ({ params }) => {
+		try {
+			const client = getConvexClient();
+			const game = await client.query(api.games.getBySlug, {
+				slug: params.slug,
+			});
+			return { game };
+		} catch {
+			return { game: null };
+		}
+	},
+	head: ({ loaderData }) => {
+		const game = loaderData?.game;
+		if (!game) return {};
+		const year = game.releaseDate
+			? new Date(game.releaseDate).getFullYear()
+			: null;
+		const title = year
+			? seoTitle(`${game.name} (${year})`)
+			: seoTitle(game.name);
+		const description = game.summary
+			? truncate(game.summary)
+			: `Explore ${game.name} on Think Ribbon — reviews, articles, and community discussion.`;
+		return {
+			meta: buildMeta({
+				title,
+				description,
+				url: seoUrl(`/games/${game.slug}`),
+				image: game.coverUrl,
+				type: "website",
+			}),
+		};
+	},
 	component: GameDetailPage,
 });
 

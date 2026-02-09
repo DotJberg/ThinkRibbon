@@ -35,8 +35,39 @@ import {
 import { StarRating } from "../../components/shared/StarRating";
 import { TagDisplay } from "../../components/shared/TagDisplay";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
+import { getConvexClient } from "../../lib/convex-server";
+import { buildMeta, seoTitle, seoUrl, truncate } from "../../lib/seo";
 
 export const Route = createFileRoute("/reviews/$id")({
+	loader: async ({ params }) => {
+		try {
+			const client = getConvexClient();
+			const review = await client.query(api.reviews.getById, {
+				reviewId: params.id as Id<"reviews">,
+			});
+			return { review };
+		} catch {
+			return { review: null };
+		}
+	},
+	head: ({ loaderData }) => {
+		const review = loaderData?.review;
+		if (!review) return {};
+		const authorName =
+			review.author?.displayName || review.author?.username || "";
+		const gameName = review.game?.name || "a game";
+		const description = truncate(
+			`A ${review.rating}/5 review of ${gameName} by ${authorName}`,
+		);
+		return {
+			meta: buildMeta({
+				title: seoTitle(`${review.title} - ${gameName} Review`),
+				description,
+				url: seoUrl(`/reviews/${review._id}`),
+				image: review.coverImageUrl || review.game?.coverUrl,
+			}),
+		};
+	},
 	component: ReviewDetailPage,
 });
 

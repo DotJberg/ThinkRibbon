@@ -23,6 +23,26 @@ interface HomeSearchParams {
 }
 
 export const Route = createFileRoute("/")({
+	head: () => ({
+		meta: [
+			{ title: "Think Ribbon - Video Game Social Platform" },
+			{
+				name: "description",
+				content:
+					"Discover reviews, articles, and posts from the gaming community.",
+			},
+			{
+				property: "og:title",
+				content: "Think Ribbon - Video Game Social Platform",
+			},
+			{
+				property: "og:description",
+				content:
+					"Discover reviews, articles, and posts from the gaming community.",
+			},
+			{ property: "og:url", content: "https://www.thinkribbon.com" },
+		],
+	}),
 	component: HomePage,
 	validateSearch: (search: Record<string, unknown>): HomeSearchParams => ({
 		tab: ["discover", "reviews", "following"].includes(search.tab as string)

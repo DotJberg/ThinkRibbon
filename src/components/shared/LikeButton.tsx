@@ -6,6 +6,7 @@ interface LikeButtonProps {
 	likeCount: number;
 	onToggle: () => Promise<{ liked: boolean }>;
 	disabled?: boolean;
+	onCountClick?: () => void;
 }
 
 export function LikeButton({
@@ -13,6 +14,7 @@ export function LikeButton({
 	likeCount,
 	onToggle,
 	disabled,
+	onCountClick,
 }: LikeButtonProps) {
 	const [liked, setLiked] = useState(initialLiked);
 	const [count, setCount] = useState(likeCount);
@@ -53,7 +55,20 @@ export function LikeButton({
 			} ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 		>
 			<PixelHeart size={16} filled={liked} animateOnFill />
-			<span>{count}</span>
+			{onCountClick ? (
+				<button
+					type="button"
+					onClick={(e) => {
+						e.stopPropagation();
+						onCountClick();
+					}}
+					className="hover:underline"
+				>
+					{count}
+				</button>
+			) : (
+				<span>{count}</span>
+			)}
 		</button>
 	);
 }

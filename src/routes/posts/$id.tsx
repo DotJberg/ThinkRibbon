@@ -25,6 +25,7 @@ import { CommentItem } from "../../components/shared/CommentItem";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { EmojiPickerButton } from "../../components/shared/EmojiPickerButton";
 import { LikeButton } from "../../components/shared/LikeButton";
+import { LikersModal } from "../../components/shared/LikersModal";
 import { LinkPreviewCard } from "../../components/shared/LinkPreviewCard";
 import { PixelSpeechBubble } from "../../components/shared/PixelSpeechBubble";
 import { ReportModal } from "../../components/shared/ReportModal";
@@ -99,6 +100,7 @@ function PostDetailPage() {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showHistoryModal, setShowHistoryModal] = useState(false);
 	const [showReportModal, setShowReportModal] = useState(false);
+	const [showLikersModal, setShowLikersModal] = useState(false);
 	const createCommentMut = useMutation(api.comments.create);
 	const toggleLike = useMutation(api.likes.toggle);
 	const deletePostMut = useMutation(api.posts.deletePost);
@@ -338,6 +340,7 @@ function PostDetailPage() {
 									: async () => ({ liked: false })
 							}
 							disabled={!isSignedIn}
+							onCountClick={() => setShowLikersModal(true)}
 						/>
 						<div className="flex items-center gap-2 text-gray-400">
 							<PixelSpeechBubble size={20} />
@@ -442,6 +445,13 @@ function PostDetailPage() {
 			<ReportModal
 				isOpen={showReportModal}
 				onClose={() => setShowReportModal(false)}
+				targetType="post"
+				targetId={post._id}
+			/>
+
+			<LikersModal
+				isOpen={showLikersModal}
+				onClose={() => setShowLikersModal(false)}
 				targetType="post"
 				targetId={post._id}
 			/>

@@ -85,6 +85,40 @@ export const toggle = mutation({
 	},
 });
 
+export const getLikers = query({
+	args: {
+		targetType: v.union(
+			v.literal("post"),
+			v.literal("article"),
+			v.literal("review"),
+		),
+		targetId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const likes = await ctx.db
+			.query("likes")
+			.withIndex("by_target", (q) =>
+				q.eq("targetType", args.targetType).eq("targetId", args.targetId),
+			)
+			.collect();
+
+		const users = await Promise.all(
+			likes.map(async (like) => {
+				const user = await ctx.db.get(like.userId);
+				if (!user) return null;
+				return {
+					_id: user._id,
+					username: user.username,
+					displayName: user.displayName,
+					avatarUrl: user.avatarUrl,
+				};
+			}),
+		);
+
+		return users.filter((u) => u !== null);
+	},
+});
+
 export const hasLiked = query({
 	args: {
 		clerkId: v.string(),

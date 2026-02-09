@@ -21,6 +21,7 @@ import { EditPostModal } from "../posts/EditPostModal";
 import { PostImageGrid } from "../posts/PostImageGrid";
 import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
 import { EmojiPickerButton } from "../shared/EmojiPickerButton";
+import { LikersModal } from "../shared/LikersModal";
 import { LinkPreviewCard } from "../shared/LinkPreviewCard";
 import { PixelHeart } from "../shared/PixelHeart";
 import { PixelSpeechBubble } from "../shared/PixelSpeechBubble";
@@ -145,6 +146,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 	const [showReportModal, setShowReportModal] = useState(false);
 	const [isDeleted, setIsDeleted] = useState(false);
 	const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
+	const [showLikersModal, setShowLikersModal] = useState(false);
 
 	const isAdmin = useQuery(
 		api.users.isAdmin,
@@ -738,18 +740,28 @@ export const FeedItemCard = memo(function FeedItemCard({
 			)}
 
 			{/* Footer */}
-			<div className="flex items-center gap-4 text-sm text-gray-500 pt-3 mt-3 border-t border-gray-700/50">
-				<button
-					type="button"
-					onClick={handleToggleLike}
-					disabled={!isSignedIn || isLiking}
-					className={`flex items-center gap-1 transition-colors ${
-						hasLiked ? "text-red-500 hover:text-red-400" : "hover:text-red-400"
-					} ${!isSignedIn ? "cursor-default" : ""}`}
-				>
-					<PixelHeart size={16} filled={hasLiked} animateOnFill />
-					{localLikeCount}
-				</button>
+			<div className="flex items-center gap-6 text-sm text-gray-500 pt-3 mt-3 border-t border-gray-700/50">
+				<div className="flex items-center gap-2.5">
+					<button
+						type="button"
+						onClick={handleToggleLike}
+						disabled={!isSignedIn || isLiking}
+						className={`flex items-center transition-colors ${
+							hasLiked
+								? "text-red-500 hover:text-red-400"
+								: "hover:text-red-400"
+						} ${!isSignedIn ? "cursor-default" : ""}`}
+					>
+						<PixelHeart size={16} filled={hasLiked} animateOnFill />
+					</button>
+					<button
+						type="button"
+						onClick={() => setShowLikersModal(true)}
+						className={`hover:underline ${hasLiked ? "text-red-500" : ""}`}
+					>
+						{localLikeCount}
+					</button>
+				</div>
 				<button
 					type="button"
 					onClick={() => {
@@ -864,6 +876,13 @@ export const FeedItemCard = memo(function FeedItemCard({
 			<ReportModal
 				isOpen={showReportModal}
 				onClose={() => setShowReportModal(false)}
+				targetType={item.type}
+				targetId={item.id}
+			/>
+
+			<LikersModal
+				isOpen={showLikersModal}
+				onClose={() => setShowLikersModal(false)}
 				targetType={item.type}
 				targetId={item.id}
 			/>

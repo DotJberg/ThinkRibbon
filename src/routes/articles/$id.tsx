@@ -25,6 +25,7 @@ import { CommentItem } from "../../components/shared/CommentItem";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { EmojiPickerButton } from "../../components/shared/EmojiPickerButton";
 import { LikeButton } from "../../components/shared/LikeButton";
+import { LikersModal } from "../../components/shared/LikersModal";
 import { PixelSpeechBubble } from "../../components/shared/PixelSpeechBubble";
 import { ReportModal } from "../../components/shared/ReportModal";
 import {
@@ -128,6 +129,7 @@ function ArticleDetailPage() {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showHistoryModal, setShowHistoryModal] = useState(false);
 	const [showReportModal, setShowReportModal] = useState(false);
+	const [showLikersModal, setShowLikersModal] = useState(false);
 	const toggleLike = useMutation(api.likes.toggle);
 	const createCommentMut = useMutation(api.comments.create);
 	const deleteArticleMut = useMutation(api.articles.deleteArticle);
@@ -458,6 +460,7 @@ function ArticleDetailPage() {
 									: async () => ({ liked: false })
 							}
 							disabled={!isSignedIn}
+							onCountClick={() => setShowLikersModal(true)}
 						/>
 						<span className="flex items-center gap-1 text-gray-400">
 							<PixelSpeechBubble size={18} />
@@ -554,6 +557,13 @@ function ArticleDetailPage() {
 			<ReportModal
 				isOpen={showReportModal}
 				onClose={() => setShowReportModal(false)}
+				targetType="article"
+				targetId={article._id}
+			/>
+
+			<LikersModal
+				isOpen={showLikersModal}
+				onClose={() => setShowLikersModal(false)}
 				targetType="article"
 				targetId={article._id}
 			/>

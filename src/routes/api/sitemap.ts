@@ -5,6 +5,15 @@ import { getConvexClient } from "../../lib/convex-server";
 
 const BASE_URL = "https://www.thinkribbon.com";
 
+function escapeXml(str: string): string {
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&apos;");
+}
+
 function toW3CDate(timestamp: number): string {
 	return new Date(timestamp).toISOString().split("T")[0];
 }
@@ -54,7 +63,7 @@ ${urls.join("\n")}
 }
 
 function url(path: string, changefreq: string, lastmod?: number): string {
-	const loc = `  <loc>${BASE_URL}${path}</loc>`;
+	const loc = `  <loc>${escapeXml(BASE_URL + path)}</loc>`;
 	const mod = lastmod ? `\n  <lastmod>${toW3CDate(lastmod)}</lastmod>` : "";
 	const freq = `\n  <changefreq>${changefreq}</changefreq>`;
 	return `<url>\n${loc}${mod}${freq}\n</url>`;

@@ -287,7 +287,7 @@ export default function Header() {
 							<Link
 								to="/drafts"
 								onClick={() => setIsOpen(false)}
-								className="flex items-center gap-3 p-3 pl-6 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 							>
 								<FileText size={20} />
 								<span className="font-medium">Open a Draft</span>
@@ -297,10 +297,10 @@ export default function Header() {
 								to="/reviews/new"
 								search={{ gameId: undefined, draftId: undefined }}
 								onClick={() => setIsOpen(false)}
-								className="flex items-center gap-3 p-3 pl-6 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 								activeProps={{
 									className:
-										"flex items-center gap-3 p-3 pl-6 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
+										"flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 								}}
 							>
 								<Star size={20} />
@@ -313,7 +313,7 @@ export default function Header() {
 									setIsOpen(false);
 									setQuickReviewModalOpen(true);
 								}}
-								className="w-full flex items-center gap-3 p-3 pl-6 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+								className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 							>
 								<Zap size={20} />
 								<span className="font-medium">Quick Review</span>

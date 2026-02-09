@@ -83,7 +83,7 @@ export function ArticleCard({
 						params={{ id: article.id }}
 						className="block flex-1"
 					>
-						<h3 className="text-xl font-bold text-white hover:text-purple-400 transition-colors line-clamp-2">
+						<h3 className="text-xl font-bold text-white hover:text-slate-400 transition-colors line-clamp-2">
 							{article.title}
 						</h3>
 					</Link>
@@ -138,7 +138,7 @@ export function ArticleCard({
 							to="/profile/$username"
 							params={{ username: article.author.username }}
 						>
-							<div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+							<div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 								<SafeImage
 									src={article.author.avatarUrl || undefined}
 									alt=""

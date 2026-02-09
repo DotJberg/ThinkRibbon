@@ -52,11 +52,11 @@ const UserCard = memo(function UserCard({ user }: { user: UserWithStats }) {
 		<Link
 			to="/profile/$username"
 			params={{ username: user.username }}
-			className="group bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-purple-500/50 rounded-xl p-4 transition-all"
+			className="group bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-slate-500/50 rounded-xl p-4 transition-all"
 		>
 			<div className="flex items-start gap-4">
 				{/* Avatar */}
-				<div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 overflow-hidden">
+				<div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 flex-shrink-0 overflow-hidden">
 					<SafeImage
 						src={user.avatarUrl}
 						alt={user.username}
@@ -71,7 +71,7 @@ const UserCard = memo(function UserCard({ user }: { user: UserWithStats }) {
 
 				{/* Info */}
 				<div className="flex-1 min-w-0">
-					<h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors truncate">
+					<h3 className="font-semibold text-white group-hover:text-slate-400 transition-colors truncate">
 						{user.displayName || user.username}
 					</h3>
 					<p className="text-sm text-gray-500 truncate">@{user.username}</p>
@@ -108,7 +108,7 @@ const UserCard = memo(function UserCard({ user }: { user: UserWithStats }) {
 						)}
 						{user._count.questLog > 0 && (
 							<span className="flex items-center gap-1">
-								<Gamepad2 size={12} className="text-purple-400" />
+								<Gamepad2 size={12} className="text-slate-400" />
 								{user._count.questLog} playing
 							</span>
 						)}
@@ -172,7 +172,7 @@ function UsersPage() {
 		: (discoverUsers as UserWithStats[] | undefined);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="text-center mb-8">
@@ -196,11 +196,11 @@ function UsersPage() {
 							value={inputValue}
 							onChange={(e) => setInputValue(e.target.value)}
 							placeholder="Search for users..."
-							className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 transition-colors"
 						/>
 						{isSearching && (
 							<div className="absolute right-4 top-1/2 -translate-y-1/2">
-								<div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+								<div className="w-5 h-5 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 							</div>
 						)}
 					</div>
@@ -209,7 +209,7 @@ function UsersPage() {
 				{/* Results */}
 				{isLoading ? (
 					<div className="flex flex-col items-center justify-center py-12">
-						<Loader2 className="w-8 h-8 text-purple-500 animate-spin mb-4" />
+						<Loader2 className="w-8 h-8 text-slate-500 animate-spin mb-4" />
 						<p className="text-gray-400">Loading users...</p>
 					</div>
 				) : displayedUsers && displayedUsers.length > 0 ? (

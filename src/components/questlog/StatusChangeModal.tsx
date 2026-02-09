@@ -213,7 +213,7 @@ export function StatusChangeModal({
 										onClick={() => setNewStatus(status.value)}
 										className={`p-3 rounded-lg border text-left transition-all ${
 											newStatus === status.value
-												? "border-purple-500 bg-purple-500/10 text-white"
+												? "border-slate-500 bg-slate-500/10 text-white"
 												: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
 										}`}
 									>
@@ -241,7 +241,7 @@ export function StatusChangeModal({
 								type="date"
 								value={startedAt}
 								onChange={(e) => setStartedAt(e.target.value)}
-								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-slate-500 transition-colors"
 							/>
 						</div>
 
@@ -263,7 +263,7 @@ export function StatusChangeModal({
 									type="date"
 									value={completedAt}
 									onChange={(e) => setCompletedAt(e.target.value)}
-									className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+									className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-slate-500 transition-colors"
 								/>
 							</div>
 						)}
@@ -283,7 +283,7 @@ export function StatusChangeModal({
 								id={platformId}
 								value={platform}
 								onChange={(e) => setPlatform(e.target.value)}
-								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-slate-500 transition-colors"
 							>
 								<option value="">Select platform...</option>
 								{gamePlatforms.map((p) => (
@@ -310,7 +310,7 @@ export function StatusChangeModal({
 							onChange={(e) => setDifficulty(e.target.value)}
 							placeholder="e.g., Hard, Normal, Story Mode"
 							list={difficultyListId}
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 transition-colors"
 						/>
 						<datalist id={difficultyListId}>
 							{difficultySuggestions.map((d) => (
@@ -325,7 +325,7 @@ export function StatusChangeModal({
 									onClick={() => setDifficulty(d)}
 									className={`px-2 py-0.5 text-xs rounded-full transition-colors ${
 										difficulty === d
-											? "bg-purple-600 text-white"
+											? "bg-slate-700 text-white"
 											: "bg-gray-700 text-gray-400 hover:text-white"
 									}`}
 								>
@@ -348,7 +348,7 @@ export function StatusChangeModal({
 										onClick={() => setReviewOption("none")}
 										className={`w-full p-3 rounded-lg border text-left transition-all ${
 											reviewOption === "none"
-												? "border-purple-500 bg-purple-500/10 text-white"
+												? "border-slate-500 bg-slate-500/10 text-white"
 												: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
 										}`}
 									>
@@ -363,7 +363,7 @@ export function StatusChangeModal({
 										onClick={() => setReviewOption("quick")}
 										className={`w-full p-3 rounded-lg border text-left transition-all ${
 											reviewOption === "quick"
-												? "border-purple-500 bg-purple-500/10 text-white"
+												? "border-slate-500 bg-slate-500/10 text-white"
 												: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
 										}`}
 									>
@@ -378,7 +378,7 @@ export function StatusChangeModal({
 										onClick={() => setReviewOption("full")}
 										className={`w-full p-3 rounded-lg border text-left transition-all ${
 											reviewOption === "full"
-												? "border-purple-500 bg-purple-500/10 text-white"
+												? "border-slate-500 bg-slate-500/10 text-white"
 												: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
 										}`}
 									>
@@ -430,7 +430,7 @@ export function StatusChangeModal({
 													type="checkbox"
 													checked={shareAsPost}
 													onChange={(e) => setShareAsPost(e.target.checked)}
-													className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500 focus:ring-offset-gray-900"
+													className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-slate-500 focus:ring-slate-500 focus:ring-offset-gray-900"
 												/>
 												<span className="flex items-center gap-2 text-sm text-gray-300">
 													<Share2 size={16} />
@@ -509,7 +509,7 @@ export function StatusChangeModal({
 						disabled={
 							isSubmitting || (reviewOption === "quick" && quickRating === 0)
 						}
-						className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+						className="px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
 					>
 						{isSubmitting && <Loader2 size={16} className="animate-spin" />}
 						{reviewOption === "full" ? "Continue to Review" : "Update Status"}

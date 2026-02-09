@@ -147,7 +147,7 @@ export function CommentItem({
 				params={{ username: comment.author.username }}
 				className="flex-shrink-0"
 			>
-				<div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+				<div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 					{comment.author.avatarUrl ? (
 						<img
 							src={comment.author.avatarUrl}
@@ -169,7 +169,7 @@ export function CommentItem({
 						<Link
 							to="/profile/$username"
 							params={{ username: comment.author.username }}
-							className="text-sm font-semibold text-white hover:text-purple-400"
+							className="text-sm font-semibold text-white hover:text-slate-400"
 						>
 							{comment.author.displayName || comment.author.username}
 						</Link>
@@ -208,7 +208,7 @@ export function CommentItem({
 					<button
 						type="button"
 						onClick={() => setShowReplyInput(!showReplyInput)}
-						className="flex items-center gap-1 text-xs text-gray-500 hover:text-purple-400 transition-colors"
+						className="flex items-center gap-1 text-xs text-gray-500 hover:text-slate-400 transition-colors"
 					>
 						<Reply size={12} />
 						Reply
@@ -233,7 +233,7 @@ export function CommentItem({
 							type="text"
 							value={replyText}
 							onChange={(e) => setReplyText(e.target.value)}
-							className="flex-1 min-w-0 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500"
+							className="flex-1 min-w-0 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-slate-500"
 							placeholder="Write a reply..."
 						/>
 						<EmojiPickerButton
@@ -244,7 +244,7 @@ export function CommentItem({
 							type="button"
 							onClick={handleReply}
 							disabled={!replyText.trim() || isSubmitting}
-							className="p-1.5 bg-purple-600 rounded-lg text-white disabled:opacity-50"
+							className="p-1.5 bg-slate-700 rounded-lg text-white disabled:opacity-50"
 						>
 							<Send size={14} />
 						</button>

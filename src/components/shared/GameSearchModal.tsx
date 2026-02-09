@@ -116,12 +116,12 @@ export function GameSearchModal({
 							value={query}
 							onChange={(e) => handleQueryChange(e.target.value)}
 							placeholder="Search for a game..."
-							className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-slate-500 transition-colors"
 						/>
 						{isSearching && (
 							<Loader2
 								size={18}
-								className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400 animate-spin"
+								className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 animate-spin"
 							/>
 						)}
 					</div>
@@ -188,7 +188,7 @@ export function GameSearchModal({
 										key={game._id}
 										type="button"
 										onClick={() => onGameSelect(game)}
-										className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-purple-500/50 rounded-xl transition-all text-left group"
+										className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-slate-500/50 rounded-xl transition-all text-left group"
 									>
 										{/* Game Cover */}
 										<div className="w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-700">
@@ -208,11 +208,11 @@ export function GameSearchModal({
 										{/* Game Info */}
 										<div className="flex-1 min-w-0">
 											<div className="flex items-center gap-2">
-												<h3 className="font-semibold text-white truncate group-hover:text-purple-300 transition-colors">
+												<h3 className="font-semibold text-white truncate group-hover:text-slate-300 transition-colors">
 													{game.name}
 												</h3>
 												{game.categoryLabel && (
-													<span className="flex-shrink-0 px-1.5 py-0.5 bg-purple-600/80 rounded text-xs font-medium text-white">
+													<span className="flex-shrink-0 px-1.5 py-0.5 bg-slate-600/80 rounded text-xs font-medium text-white">
 														{game.categoryLabel}
 													</span>
 												)}
@@ -227,7 +227,7 @@ export function GameSearchModal({
 										{/* Add Icon */}
 										<Plus
 											size={20}
-											className="text-gray-500 group-hover:text-purple-400 transition-colors"
+											className="text-gray-500 group-hover:text-slate-400 transition-colors"
 										/>
 									</button>
 								);

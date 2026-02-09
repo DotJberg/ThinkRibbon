@@ -110,7 +110,7 @@ export function NavigationWarning({
 					<button
 						type="button"
 						onClick={handleKeepDraft}
-						className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg transition-colors"
+						className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
 					>
 						<FileText size={18} />
 						Keep Draft

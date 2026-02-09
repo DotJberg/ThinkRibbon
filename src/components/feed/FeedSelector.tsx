@@ -47,7 +47,7 @@ export function FeedSelector({
 								onClick={() => onTabChange(tab.id)}
 								className={`flex items-center gap-1.5 px-3 py-1.5 sm:gap-2 sm:px-4 sm:py-2 text-sm sm:text-base rounded-full font-medium transition-all ${
 									isActive
-										? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/20"
+										? "bg-gradient-to-r from-slate-700 to-slate-600 text-white shadow-lg shadow-slate-500/20"
 										: "bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700"
 								}`}
 							>

@@ -238,7 +238,7 @@ function CollectionPage() {
 				const groups = sortedPlatforms.map(([name, items]) => ({
 					name,
 					items,
-					color: "text-purple-400",
+					color: "text-slate-400",
 				}));
 
 				if (noPlatform.length > 0) {
@@ -341,7 +341,7 @@ function CollectionPage() {
 		return (
 			<div
 				key={item.game._id}
-				className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all"
+				className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden hover:border-slate-500/50 transition-all"
 			>
 				{/* Game Header */}
 				<div className="flex gap-4 p-4">
@@ -375,7 +375,7 @@ function CollectionPage() {
 									params={{ slug: item.game.slug }}
 									className="block"
 								>
-									<h3 className="font-semibold text-white truncate hover:text-purple-400 transition-colors">
+									<h3 className="font-semibold text-white truncate hover:text-slate-400 transition-colors">
 										{item.game.name}
 									</h3>
 								</Link>
@@ -481,7 +481,7 @@ function CollectionPage() {
 						<Link
 							to="/reviews/$id"
 							params={{ id: item.review._id }}
-							className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+							className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-300 transition-colors"
 						>
 							<BookOpen size={14} />
 							View Review
@@ -493,7 +493,7 @@ function CollectionPage() {
 								gameId: item.game._id,
 								rating: item.latestRating,
 							}}
-							className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+							className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-300 transition-colors"
 						>
 							<Pencil size={14} />
 							Write Review
@@ -593,7 +593,7 @@ function CollectionPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="flex items-center justify-between mb-6 flex-wrap gap-4">
@@ -607,7 +607,7 @@ function CollectionPage() {
 						</Link>
 						<div>
 							<h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-								<Library className="text-purple-400" />
+								<Library className="text-slate-400" />
 								{profile?.displayName || profile?.username}'s Collection
 							</h1>
 							<p className="text-gray-400 text-sm">
@@ -622,7 +622,7 @@ function CollectionPage() {
 							<button
 								type="button"
 								onClick={() => setShowGameSearch(true)}
-								className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg shadow-lg transition-all"
+								className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium rounded-lg shadow-lg transition-all"
 							>
 								<Plus size={18} />
 								Add Game
@@ -644,8 +644,8 @@ function CollectionPage() {
 				{/* Stats */}
 				{stats && stats.totalOwned > 0 && (
 					<div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-						<div className="bg-purple-500/10 rounded-lg p-3 text-center border border-purple-500/20">
-							<p className="text-xl sm:text-2xl font-bold text-purple-400">
+						<div className="bg-slate-500/10 rounded-lg p-3 text-center border border-slate-500/20">
+							<p className="text-xl sm:text-2xl font-bold text-slate-400">
 								{stats.totalOwned}
 							</p>
 							<p className="text-xs text-gray-400">Owned</p>
@@ -703,7 +703,7 @@ function CollectionPage() {
 							<select
 								value={sortBy}
 								onChange={(e) => setSortBy(e.target.value as SortOption)}
-								className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500"
+								className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-slate-500"
 							>
 								{sortOptions.map((option) => (
 									<option key={option.value} value={option.value}>
@@ -718,7 +718,7 @@ function CollectionPage() {
 				{/* Collection Grid */}
 				{collectionData === undefined ? (
 					<div className="flex justify-center py-12">
-						<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+						<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 					</div>
 				) : games.length === 0 ? (
 					<div className="text-center py-12 text-gray-500">

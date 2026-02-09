@@ -90,7 +90,7 @@ export function ReportModal({
 						<button
 							type="button"
 							onClick={onClose}
-							className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg transition-colors"
+							className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
 						>
 							Done
 						</button>
@@ -125,7 +125,7 @@ export function ReportModal({
 					value={message}
 					onChange={(e) => setMessage(e.target.value)}
 					placeholder="Describe the issue..."
-					className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all resize-none h-32 mb-4"
+					className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all resize-none h-32 mb-4"
 				/>
 				{error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 				<div className="flex gap-3">

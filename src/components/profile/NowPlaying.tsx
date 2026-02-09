@@ -37,8 +37,8 @@ const statusConfig: Record<
 	},
 	Completed: {
 		label: "100%",
-		color: "text-purple-400",
-		bgColor: "bg-purple-500/20",
+		color: "text-slate-400",
+		bgColor: "bg-slate-500/20",
 	},
 	OnHold: {
 		label: "On Hold",
@@ -73,7 +73,7 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 		return (
 			<div className="mb-6 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
 				<div className="flex items-center gap-2 mb-4">
-					<Gamepad2 size={20} className="text-purple-400" />
+					<Gamepad2 size={20} className="text-slate-400" />
 					<h3 className="font-semibold text-white">Now Playing</h3>
 				</div>
 				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 animate-pulse">
@@ -90,13 +90,13 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 			<div className="mb-6 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
 				<div className="flex items-center justify-between mb-4">
 					<div className="flex items-center gap-2">
-						<Gamepad2 size={20} className="text-purple-400" />
+						<Gamepad2 size={20} className="text-slate-400" />
 						<h3 className="font-semibold text-white">Now Playing</h3>
 					</div>
 					<Link
 						to="/questlog/$username"
 						params={{ username }}
-						className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+						className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-300 transition-colors"
 					>
 						Quest Log
 						<ChevronRight size={16} />
@@ -116,13 +116,13 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 			<div className="mb-6 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
 				<div className="flex items-center justify-between mb-4">
 					<div className="flex items-center gap-2">
-						<Gamepad2 size={20} className="text-purple-400" />
+						<Gamepad2 size={20} className="text-slate-400" />
 						<h3 className="font-semibold text-white">Now Playing</h3>
 					</div>
 					<Link
 						to="/questlog/$username"
 						params={{ username }}
-						className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+						className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-300 transition-colors"
 					>
 						Quest Log
 						<ChevronRight size={16} />
@@ -146,7 +146,7 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 									params={{ slug: entry.game.slug }}
 									className="block"
 								>
-									<div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-700 border-2 border-transparent group-hover:border-purple-500 transition-all shadow-lg">
+									<div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-700 border-2 border-transparent group-hover:border-slate-500 transition-all shadow-lg">
 										{entry.game.coverUrl ? (
 											<img
 												src={entry.game.coverUrl}
@@ -188,7 +188,7 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 									<button
 										type="button"
 										onClick={() => setSelectedEntry(entry)}
-										className="absolute top-2 left-2 p-2.5 bg-black/80 hover:bg-purple-600 text-white rounded-lg shadow-lg transition-all flex items-center gap-1.5"
+										className="absolute top-2 left-2 p-2.5 bg-black/80 hover:bg-slate-700 text-white rounded-lg shadow-lg transition-all flex items-center gap-1.5"
 										title="Update Status"
 									>
 										<Pencil size={16} />

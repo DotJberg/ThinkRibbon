@@ -162,20 +162,20 @@ function ProfilePage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
-				<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
+				<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		);
 	}
 
 	if (!profile) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-xl sm:text-2xl font-bold text-white mb-2">
 						User Not Found
 					</h1>
-					<Link to="/" className="text-purple-400 hover:underline">
+					<Link to="/" className="text-slate-400 hover:underline">
 						Back to Home
 					</Link>
 				</div>
@@ -189,10 +189,10 @@ function ProfilePage() {
 	});
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			{/* Banner - 3:1 aspect ratio (Twitter-style), full width */}
 			<div
-				className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
+				className="w-full bg-gradient-to-r from-slate-700 to-slate-600"
 				style={{
 					aspectRatio: "3/1",
 					...(profile.bannerUrl
@@ -210,7 +210,7 @@ function ProfilePage() {
 				<div className="relative -mt-16 mb-6">
 					<div className="flex flex-col md:flex-row items-start md:items-end gap-4">
 						{/* Avatar */}
-						<div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 border-4 border-gray-900 overflow-hidden">
+						<div className="w-32 h-32 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 border-4 border-gray-900 overflow-hidden">
 							<SafeImage
 								src={profile.avatarUrl || undefined}
 								alt={profile.username}
@@ -259,7 +259,7 @@ function ProfilePage() {
 											className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
 												following
 													? "bg-gray-800 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
-													: "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500"
+													: "bg-gradient-to-r from-slate-700 to-slate-600 text-white hover:from-slate-600 hover:to-slate-500"
 											}`}
 										>
 											{following ? (
@@ -333,13 +333,13 @@ function ProfilePage() {
 					<div className="mb-6 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
 						<div className="flex items-center justify-between mb-4">
 							<div className="flex items-center gap-2">
-								<Package size={20} className="text-purple-400" />
+								<Package size={20} className="text-slate-400" />
 								<h3 className="font-semibold text-white">Game Collection</h3>
 							</div>
 							<Link
 								to="/collection/$username"
 								params={{ username }}
-								className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+								className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-300 transition-colors"
 							>
 								View All
 								<ChevronRight size={16} />
@@ -349,8 +349,8 @@ function ProfilePage() {
 						{/* Stats Grid */}
 						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
 							{/* Total Owned */}
-							<div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
-								<div className="text-xl sm:text-2xl font-bold text-purple-400">
+							<div className="text-center p-3 bg-slate-500/10 rounded-lg border border-slate-500/20">
+								<div className="text-xl sm:text-2xl font-bold text-slate-400">
 									{collectionStats.totalOwned}
 								</div>
 								<div className="text-xs text-gray-400">Owned</div>

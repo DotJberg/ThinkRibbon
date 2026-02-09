@@ -69,7 +69,7 @@ export function RichTextEditor({
 				autolink: true,
 				linkOnPaste: true,
 				HTMLAttributes: {
-					class: "text-purple-400 underline hover:text-purple-300",
+					class: "text-slate-400 underline hover:text-slate-300",
 				},
 			}),
 			Placeholder.configure({
@@ -332,7 +332,7 @@ function ToolbarButton({
 			disabled={disabled}
 			title={title}
 			className={`p-2 rounded hover:bg-gray-700 transition-colors ${
-				active ? "bg-purple-600/30 text-purple-400" : "text-gray-400"
+				active ? "bg-slate-600/30 text-slate-400" : "text-gray-400"
 			} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
 		>
 			{children}
@@ -372,7 +372,7 @@ export function RichTextContent({
 			Link.configure({
 				openOnClick: true,
 				HTMLAttributes: {
-					class: "text-purple-400 underline hover:text-purple-300",
+					class: "text-slate-400 underline hover:text-slate-300",
 				},
 			}),
 			LinkPreviewExtension,

@@ -95,7 +95,7 @@ export function EditPostModal({
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 						rows={5}
-						className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-white placeholder:text-gray-500 resize-none focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-lg"
+						className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-white placeholder:text-gray-500 resize-none focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all text-lg"
 						placeholder="What's on your mind?"
 					/>
 					<div className="flex justify-end mt-2">
@@ -126,7 +126,7 @@ export function EditPostModal({
 							isOverLimit ||
 							content.trim() === currentContent.trim()
 						}
-						className="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+						className="flex-1 py-2.5 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 					>
 						{isSubmitting ? (
 							<>

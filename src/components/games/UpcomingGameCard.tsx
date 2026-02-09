@@ -24,7 +24,7 @@ export function UpcomingGameCard({ game }: UpcomingGameCardProps) {
 		<Link
 			to="/games/$slug"
 			params={{ slug: game.slug }}
-			className="group flex gap-4 p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-purple-500/50 rounded-xl transition-all"
+			className="group flex gap-4 p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-slate-500/50 rounded-xl transition-all"
 		>
 			{/* Cover Image */}
 			<div className="w-20 h-28 flex-shrink-0 bg-gray-700 rounded-lg overflow-hidden">
@@ -47,13 +47,13 @@ export function UpcomingGameCard({ game }: UpcomingGameCardProps) {
 				<div>
 					{/* Category Label */}
 					{game.categoryLabel && (
-						<span className="inline-block px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-300 rounded mb-1">
+						<span className="inline-block px-2 py-0.5 text-xs font-medium bg-slate-500/20 text-slate-300 rounded mb-1">
 							{game.categoryLabel}
 						</span>
 					)}
 
 					{/* Name */}
-					<h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors line-clamp-2">
+					<h3 className="font-semibold text-white group-hover:text-slate-400 transition-colors line-clamp-2">
 						{game.name}
 					</h3>
 
@@ -74,7 +74,7 @@ export function UpcomingGameCard({ game }: UpcomingGameCardProps) {
 					</div>
 
 					{/* Countdown */}
-					<div className="flex items-center gap-1 text-xs font-medium text-purple-400">
+					<div className="flex items-center gap-1 text-xs font-medium text-slate-400">
 						<Clock size={12} />
 						<span>{countdown}</span>
 					</div>

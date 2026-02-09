@@ -200,7 +200,7 @@ function GamesPage() {
 		}));
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="text-center mb-8">
@@ -222,11 +222,11 @@ function GamesPage() {
 							value={inputValue}
 							onChange={(e) => setInputValue(e.target.value)}
 							placeholder="Search for games..."
-							className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 transition-colors"
 						/>
 						{isSearching && (
 							<div className="absolute right-4 top-1/2 -translate-y-1/2">
-								<div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+								<div className="w-5 h-5 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 							</div>
 						)}
 					</div>
@@ -247,7 +247,7 @@ function GamesPage() {
 					// Upcoming games view
 					isLoadingUpcoming && upcomingGamesFormatted.length === 0 ? (
 						<div className="flex flex-col items-center justify-center py-12">
-							<Loader2 className="w-8 h-8 text-purple-500 animate-spin mb-4" />
+							<Loader2 className="w-8 h-8 text-slate-500 animate-spin mb-4" />
 							<p className="text-gray-400">Loading upcoming games...</p>
 						</div>
 					) : (

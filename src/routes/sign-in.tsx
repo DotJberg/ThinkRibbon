@@ -7,7 +7,7 @@ export const Route = createFileRoute("/sign-in")({
 
 function SignInPage() {
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
 			<div className="w-full max-w-md p-4">
 				<SignIn
 					appearance={{
@@ -21,9 +21,9 @@ function SignInPage() {
 							formFieldLabel: "text-gray-300",
 							formFieldInput:
 								"bg-gray-700 border-gray-600 text-white placeholder:text-gray-400",
-							footerActionLink: "text-purple-400 hover:text-purple-300",
+							footerActionLink: "text-slate-400 hover:text-slate-300",
 							formButtonPrimary:
-								"bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500",
+								"bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500",
 						},
 					}}
 					signUpUrl="/sign-up"

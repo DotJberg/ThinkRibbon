@@ -13,7 +13,7 @@ function getTierStyles(hours: number): string {
 		return "bg-orange-500/20 text-orange-400 border-orange-500/30";
 	}
 	if (hours >= 100) {
-		return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+		return "bg-indigo-500/20 text-indigo-400 border-indigo-500/30";
 	}
 	if (hours >= 50) {
 		return "bg-blue-500/20 text-blue-400 border-blue-500/30";

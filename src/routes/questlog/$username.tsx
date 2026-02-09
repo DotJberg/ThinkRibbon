@@ -60,7 +60,7 @@ const statusLabels: Record<QuestLogStatus, string> = {
 const statusColors: Record<QuestLogStatus, string> = {
 	Playing: "bg-green-500",
 	Beaten: "bg-blue-500",
-	Completed: "bg-purple-500",
+	Completed: "bg-emerald-500",
 	OnHold: "bg-yellow-500",
 	Dropped: "bg-red-500",
 	Backlog: "bg-gray-500",
@@ -113,7 +113,7 @@ function QuestLogPage() {
 			: entries.filter((e) => e.status === statusFilter);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="flex items-center justify-between mb-8 flex-wrap gap-4">
@@ -127,7 +127,7 @@ function QuestLogPage() {
 						</Link>
 						<div>
 							<h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-								<Gamepad2 className="text-purple-400" />
+								<Gamepad2 className="text-slate-400" />
 								{profile?.displayName || profile?.username}'s Quest Log
 							</h1>
 							<p className="text-gray-400 text-sm">
@@ -141,7 +141,7 @@ function QuestLogPage() {
 						<button
 							type="button"
 							onClick={() => setShowGameSearch(true)}
-							className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg shadow-lg transition-all"
+							className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium rounded-lg shadow-lg transition-all"
 						>
 							<Plus size={18} />
 							Add Game
@@ -156,7 +156,7 @@ function QuestLogPage() {
 								onClick={() => setViewMode("timeline")}
 								className={`p-2 rounded transition-colors ${
 									viewMode === "timeline"
-										? "bg-purple-500 text-white"
+										? "bg-slate-600 text-white"
 										: "text-gray-400 hover:text-white"
 								}`}
 								title="Timeline View"
@@ -168,7 +168,7 @@ function QuestLogPage() {
 								onClick={() => setViewMode("grid")}
 								className={`p-2 rounded transition-colors ${
 									viewMode === "grid"
-										? "bg-purple-500 text-white"
+										? "bg-slate-600 text-white"
 										: "text-gray-400 hover:text-white"
 								}`}
 								title="Grid View"
@@ -198,7 +198,7 @@ function QuestLogPage() {
 										}}
 										className={`w-full px-3 py-2 text-left hover:bg-gray-700 transition-colors ${
 											statusFilter === "all"
-												? "text-purple-400"
+												? "text-slate-400"
 												: "text-gray-300"
 										}`}
 									>
@@ -216,7 +216,7 @@ function QuestLogPage() {
 											}}
 											className={`w-full px-3 py-2 text-left hover:bg-gray-700 transition-colors flex items-center gap-2 ${
 												statusFilter === value
-													? "text-purple-400"
+													? "text-slate-400"
 													: "text-gray-300"
 											}`}
 										>
@@ -235,7 +235,7 @@ function QuestLogPage() {
 				{/* Content */}
 				{isLoading ? (
 					<div className="flex justify-center py-12">
-						<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+						<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 					</div>
 				) : filteredEntries.length === 0 ? (
 					<div className="text-center py-12 text-gray-500">
@@ -311,7 +311,7 @@ function TimelineView({
 			{entries.map((entry) => (
 				<div
 					key={entry._id}
-					className="relative bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-purple-500/50 transition-all"
+					className="relative bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-slate-500/50 transition-all"
 				>
 					<Link
 						to="/games/$slug"
@@ -386,7 +386,7 @@ function TimelineView({
 								e.stopPropagation();
 								onEditEntry(entry);
 							}}
-							className="absolute top-3 right-3 p-2 bg-gray-900/80 hover:bg-purple-600 text-gray-400 hover:text-white rounded-lg transition-all"
+							className="absolute top-3 right-3 p-2 bg-gray-900/80 hover:bg-slate-700 text-gray-400 hover:text-white rounded-lg transition-all"
 							title="Edit entry"
 						>
 							<Pencil size={16} />
@@ -417,7 +417,7 @@ function GridView({
 						params={{ slug: entry.game?.slug ?? "" }}
 						className="block"
 					>
-						<div className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-800 border-2 border-transparent group-hover:border-purple-500 transition-all">
+						<div className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-800 border-2 border-transparent group-hover:border-slate-500 transition-all">
 							{entry.game?.coverUrl ? (
 								<img
 									src={entry.game.coverUrl}
@@ -462,7 +462,7 @@ function GridView({
 								e.stopPropagation();
 								onEditEntry(entry);
 							}}
-							className="absolute top-2 left-2 p-1.5 bg-gray-900/80 hover:bg-purple-600 text-gray-400 hover:text-white rounded-lg transition-all opacity-0 group-hover:opacity-100"
+							className="absolute top-2 left-2 p-1.5 bg-gray-900/80 hover:bg-slate-700 text-gray-400 hover:text-white rounded-lg transition-all opacity-0 group-hover:opacity-100"
 							title="Edit entry"
 						>
 							<Pencil size={14} />

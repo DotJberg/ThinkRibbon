@@ -46,7 +46,7 @@ export function PostCard({
 					to="/profile/$username"
 					params={{ username: post.author.username }}
 				>
-					<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden flex-shrink-0">
+					<div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 flex items-center justify-center overflow-hidden flex-shrink-0">
 						<SafeImage
 							src={post.author.avatarUrl || undefined}
 							alt={post.author.username}

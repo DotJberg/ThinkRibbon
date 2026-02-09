@@ -37,7 +37,7 @@ export function GenreSelector({
 							onClick={() => toggle(genre)}
 							className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
 								selected
-									? "bg-purple-500/20 text-purple-300 border-purple-500/40"
+									? "bg-slate-500/20 text-slate-300 border-slate-500/40"
 									: isIgdb
 										? "bg-gray-700/50 text-gray-300 border-dashed border-gray-500/50 hover:bg-gray-700 hover:text-white"
 										: "bg-gray-700/50 text-gray-400 border-gray-600/50 hover:bg-gray-700 hover:text-gray-300"

@@ -179,7 +179,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 	const typeConfig = {
 		post: {
 			icon: TrendingUp,
-			color: "purple",
+			color: "slate",
 			label: "Post",
 			link: `/posts/${item.id}`,
 		},
@@ -340,7 +340,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 						params={{ username: item.author.username }}
 						className="flex-shrink-0"
 					>
-						<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+						<div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 							<SafeImage
 								src={item.author.avatarUrl || undefined}
 								alt=""
@@ -358,7 +358,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 						<Link
 							to="/profile/$username"
 							params={{ username: item.author.username }}
-							className="font-medium text-white hover:text-purple-400 transition-colors"
+							className="font-medium text-white hover:text-slate-400 transition-colors"
 						>
 							{item.author.displayName || item.author.username}
 						</Link>
@@ -378,7 +378,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 					<span
 						className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${
 							item.type === "post"
-								? "bg-purple-500/20 text-purple-300"
+								? "bg-slate-500/20 text-slate-300"
 								: item.type === "review"
 									? "bg-yellow-500/20 text-yellow-300"
 									: "bg-blue-500/20 text-blue-300"
@@ -483,7 +483,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 						{config.link ? (
 							<Link
 								to={config.link}
-								className="hover:text-purple-400 transition-colors"
+								className="hover:text-slate-400 transition-colors"
 							>
 								{item.title}
 							</Link>
@@ -621,7 +621,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 			{config.link && (
 				<Link
 					to={config.link}
-					className="text-sm text-purple-400 hover:text-purple-300 transition-colors mb-3 inline-block"
+					className="text-sm text-slate-400 hover:text-slate-300 transition-colors mb-3 inline-block"
 				>
 					Read more →
 				</Link>
@@ -636,7 +636,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 							params={{ username: localTopComment.author.username }}
 							className="flex-shrink-0"
 						>
-							<div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+							<div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 								<SafeImage
 									src={localTopComment.author.avatarUrl || undefined}
 									alt=""
@@ -655,7 +655,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 								<Link
 									to="/profile/$username"
 									params={{ username: localTopComment.author.username }}
-									className="text-sm font-medium text-white hover:text-purple-400"
+									className="text-sm font-medium text-white hover:text-slate-400"
 								>
 									{localTopComment.author.displayName ||
 										localTopComment.author.username}
@@ -760,7 +760,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 						setShowCommentInput(!showCommentInput);
 						setReplyToCommentId(null);
 					}}
-					className="flex items-center gap-1 hover:text-purple-400 transition-colors"
+					className="flex items-center gap-1 hover:text-slate-400 transition-colors"
 				>
 					<MessageCircle size={16} />
 					{localCommentCount}
@@ -774,7 +774,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 						<div className="flex items-center gap-2 mb-1 ml-10 text-xs text-gray-400">
 							<span>
 								Replying to{" "}
-								<span className="text-purple-400">
+								<span className="text-slate-400">
 									@
 									{localTopComment.author.displayName ||
 										localTopComment.author.username}
@@ -790,7 +790,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 						</div>
 					)}
 					<div className="flex items-center gap-2">
-						<div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
+						<div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden flex-shrink-0">
 							<SafeImage
 								src={user?.imageUrl}
 								alt=""
@@ -828,7 +828,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 								type="button"
 								onClick={handleSubmitComment}
 								disabled={!commentText.trim() || isSubmitting}
-								className="p-1.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-500 hover:to-pink-500 transition-all"
+								className="p-1.5 rounded-full bg-gradient-to-r from-slate-700 to-slate-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-600 hover:to-slate-500 transition-all"
 							>
 								<Send size={14} />
 							</button>
@@ -839,7 +839,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 
 			{showCommentInput && !isSignedIn && (
 				<div className="mt-3 text-sm text-gray-500 text-center">
-					<Link to="/sign-in" className="text-purple-400 hover:underline">
+					<Link to="/sign-in" className="text-slate-400 hover:underline">
 						Sign in
 					</Link>{" "}
 					to comment

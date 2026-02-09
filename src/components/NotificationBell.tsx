@@ -120,7 +120,7 @@ export default function NotificationBell() {
 											!n.viewedAt ? "bg-gray-750" : ""
 										}`}
 									>
-										<div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0">
+										<div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-slate-600 to-slate-500 flex-shrink-0">
 											{n.actor?.avatarUrl ? (
 												<img
 													src={n.actor.avatarUrl}
@@ -148,7 +148,7 @@ export default function NotificationBell() {
 											</p>
 										</div>
 										{!n.viewedAt && (
-											<span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0 mt-2" />
+											<span className="w-2 h-2 bg-slate-600 rounded-full flex-shrink-0 mt-2" />
 										)}
 									</Link>
 								);

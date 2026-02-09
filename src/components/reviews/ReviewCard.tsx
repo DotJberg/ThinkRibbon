@@ -97,7 +97,7 @@ export function ReviewCard({
 								<Link
 									to="/reviews/$id"
 									params={{ id: review.id }}
-									className="text-lg font-bold text-white hover:text-purple-400 transition-colors line-clamp-1"
+									className="text-lg font-bold text-white hover:text-slate-400 transition-colors line-clamp-1"
 								>
 									{review.title}
 								</Link>
@@ -130,7 +130,7 @@ export function ReviewCard({
 								to="/profile/$username"
 								params={{ username: review.author.username }}
 							>
-								<div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+								<div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 									{review.author.avatarUrl ? (
 										<img
 											src={review.author.avatarUrl}

@@ -47,8 +47,8 @@ function AdminPage() {
 
 	if (!isLoaded || isAdmin === undefined) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
-				<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
+				<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		);
 	}
@@ -61,11 +61,11 @@ function AdminPage() {
 	const resolvedCount = completedReports?.length ?? 0;
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8 max-w-4xl">
 				<div className="flex items-center gap-3 mb-8">
-					<div className="p-2 bg-purple-500/20 rounded-lg">
-						<Shield className="text-purple-400" size={24} />
+					<div className="p-2 bg-slate-500/20 rounded-lg">
+						<Shield className="text-slate-400" size={24} />
 					</div>
 					<h1 className="text-3xl font-bold text-white">Admin Panel</h1>
 				</div>
@@ -76,7 +76,7 @@ function AdminPage() {
 						onClick={() => setActiveTab("pending")}
 						className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
 							activeTab === "pending"
-								? "bg-purple-600 text-white"
+								? "bg-slate-700 text-white"
 								: "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
 						}`}
 					>
@@ -93,7 +93,7 @@ function AdminPage() {
 						onClick={() => setActiveTab("resolved")}
 						className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
 							activeTab === "resolved"
-								? "bg-purple-600 text-white"
+								? "bg-slate-700 text-white"
 								: "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
 						}`}
 					>

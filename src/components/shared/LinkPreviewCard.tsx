@@ -55,7 +55,7 @@ export function LinkPreviewCard({
 					<span>{siteName || domain}</span>
 				</div>
 				{title && (
-					<h4 className="text-sm font-medium text-white line-clamp-2 group-hover:text-purple-400 transition-colors">
+					<h4 className="text-sm font-medium text-white line-clamp-2 group-hover:text-slate-400 transition-colors">
 						{title}
 					</h4>
 				)}

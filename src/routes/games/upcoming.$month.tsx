@@ -86,12 +86,12 @@ function UpcomingMonthPage() {
 
 	if (!parsed) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 				<div className="container mx-auto px-4 py-8 text-center">
 					<p className="text-gray-400">Invalid month format</p>
 					<Link
 						to="/games"
-						className="text-purple-400 hover:text-purple-300 mt-4 inline-block"
+						className="text-slate-400 hover:text-slate-300 mt-4 inline-block"
 					>
 						Back to Games
 					</Link>
@@ -116,7 +116,7 @@ function UpcomingMonthPage() {
 		}));
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="mb-8">
@@ -130,8 +130,8 @@ function UpcomingMonthPage() {
 					</Link>
 
 					<div className="flex items-center gap-4">
-						<div className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-xl">
-							<Calendar size={24} className="text-purple-400" />
+						<div className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-slate-600/20 to-slate-500/20 border border-slate-500/30 rounded-xl">
+							<Calendar size={24} className="text-slate-400" />
 							<h1 className="text-2xl font-bold text-white">{monthLabel}</h1>
 						</div>
 						{data && (
@@ -145,7 +145,7 @@ function UpcomingMonthPage() {
 				{/* Games Grid */}
 				{isLoading ? (
 					<div className="flex flex-col items-center justify-center py-12">
-						<Loader2 className="w-8 h-8 text-purple-500 animate-spin mb-4" />
+						<Loader2 className="w-8 h-8 text-slate-500 animate-spin mb-4" />
 						<p className="text-gray-400">Loading games...</p>
 					</div>
 				) : formattedGames.length > 0 ? (
@@ -159,7 +159,7 @@ function UpcomingMonthPage() {
 						{/* Loading more indicator */}
 						{isLoadingMore && (
 							<div className="flex justify-center py-8">
-								<Loader2 className="w-6 h-6 text-purple-500 animate-spin" />
+								<Loader2 className="w-6 h-6 text-slate-500 animate-spin" />
 							</div>
 						)}
 

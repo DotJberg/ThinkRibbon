@@ -48,7 +48,7 @@ export default function HeaderUser() {
 					<button
 						type="button"
 						onClick={() => setIsOpen(!isOpen)}
-						className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 hover:ring-2 hover:ring-purple-400 transition-all cursor-pointer"
+						className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-slate-600 to-slate-500 hover:ring-2 hover:ring-slate-400 transition-all cursor-pointer"
 					>
 						{avatarUrl ? (
 							<img

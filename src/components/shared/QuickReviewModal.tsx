@@ -132,12 +132,12 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 									value={query}
 									onChange={(e) => handleQueryChange(e.target.value)}
 									placeholder="Search for a game..."
-									className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+									className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-slate-500 transition-colors"
 								/>
 								{isSearching && (
 									<Loader2
 										size={18}
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400 animate-spin"
+										className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 animate-spin"
 									/>
 								)}
 							</div>
@@ -161,7 +161,7 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 											key={game._id}
 											type="button"
 											onClick={() => setSelectedGame(game)}
-											className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-purple-500/50 rounded-xl transition-all text-left group"
+											className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-slate-500/50 rounded-xl transition-all text-left group"
 										>
 											<div className="w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-700">
 												{game.coverUrl ? (
@@ -178,11 +178,11 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 											</div>
 											<div className="flex-1 min-w-0">
 												<div className="flex items-center gap-2">
-													<h3 className="font-semibold text-white truncate group-hover:text-purple-300 transition-colors">
+													<h3 className="font-semibold text-white truncate group-hover:text-slate-300 transition-colors">
 														{game.name}
 													</h3>
 													{game.categoryLabel && (
-														<span className="flex-shrink-0 px-1.5 py-0.5 bg-purple-600/80 rounded text-xs font-medium text-white">
+														<span className="flex-shrink-0 px-1.5 py-0.5 bg-slate-600/80 rounded text-xs font-medium text-white">
 															{game.categoryLabel}
 														</span>
 													)}
@@ -230,7 +230,7 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 							<button
 								type="button"
 								onClick={handleBack}
-								className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+								className="text-sm text-slate-400 hover:text-slate-300 transition-colors"
 							>
 								Change
 							</button>
@@ -267,7 +267,7 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 							type="button"
 							onClick={handleSubmit}
 							disabled={rating === 0 || isSubmitting}
-							className="w-full py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+							className="w-full py-3 bg-slate-700 hover:bg-slate-800 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
 						>
 							{isSubmitting ? (
 								<>

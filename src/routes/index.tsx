@@ -171,11 +171,11 @@ function HomePage() {
 	);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8">
 				{/* Hero Section */}
 				<div className="text-center mb-8">
-					<h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+					<h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-500 to-red-400 bg-clip-text text-transparent mb-2">
 						Think Ribbon
 					</h1>
 					<p className="text-gray-400">
@@ -259,7 +259,7 @@ function HomePage() {
 								{activeTab === "following" && (
 									<Link
 										to="/games"
-										className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium hover:from-purple-500 hover:to-pink-500 transition-all"
+										className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-full font-medium hover:from-slate-600 hover:to-slate-500 transition-all"
 									>
 										<Gamepad2 size={18} />
 										Browse Games & Find People
@@ -280,7 +280,7 @@ function HomePage() {
 					<div className="fixed bottom-6 right-6">
 						<Link
 							to="/games"
-							className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl hover:from-purple-500 hover:to-pink-500 transition-all"
+							className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl hover:from-slate-600 hover:to-slate-500 transition-all"
 						>
 							<Gamepad2 size={20} />
 							Browse Games

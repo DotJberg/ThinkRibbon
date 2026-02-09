@@ -167,7 +167,7 @@ export function EditCollectionModal({
 				{/* Header */}
 				<div className="flex items-center justify-between p-5 border-b border-gray-800">
 					<h2 className="text-lg font-bold text-white flex items-center gap-2">
-						<Package size={20} className="text-purple-400" />
+						<Package size={20} className="text-slate-400" />
 						Edit Collection Entry
 					</h2>
 					<button
@@ -206,7 +206,7 @@ export function EditCollectionModal({
 									onClick={() => setOwnershipType(option.value)}
 									className={`flex-1 p-3 rounded-lg border text-center transition-all ${
 										ownershipType === option.value
-											? "border-purple-500 bg-purple-500/10 text-white"
+											? "border-slate-500 bg-slate-500/10 text-white"
 											: "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
 									}`}
 								>
@@ -231,7 +231,7 @@ export function EditCollectionModal({
 									onClick={() => setStatus(option.value)}
 									className={`p-2 rounded-lg border text-center transition-all ${
 										status === option.value
-											? "border-purple-500 bg-purple-500/10"
+											? "border-slate-500 bg-slate-500/10"
 											: "border-gray-700 bg-gray-800 hover:border-gray-600"
 									}`}
 								>
@@ -260,7 +260,7 @@ export function EditCollectionModal({
 								id={platformId}
 								value={platform}
 								onChange={(e) => setPlatform(e.target.value)}
-								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-slate-500 transition-colors"
 							>
 								<option value="">Select platform...</option>
 								{gamePlatforms.map((p) => (
@@ -287,7 +287,7 @@ export function EditCollectionModal({
 							onChange={(e) => setDifficulty(e.target.value)}
 							placeholder="e.g., Hard, Normal, Story Mode"
 							list={difficultyListId}
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 transition-colors"
 						/>
 						<datalist id={difficultyListId}>
 							{difficultySuggestions.map((d) => (
@@ -302,7 +302,7 @@ export function EditCollectionModal({
 									onClick={() => setDifficulty(d)}
 									className={`px-2 py-0.5 text-xs rounded-full transition-colors ${
 										difficulty === d
-											? "bg-purple-600 text-white"
+											? "bg-slate-700 text-white"
 											: "bg-gray-700 text-gray-400 hover:text-white"
 									}`}
 								>
@@ -329,7 +329,7 @@ export function EditCollectionModal({
 							value={hoursPlayed}
 							onChange={(e) => setHoursPlayed(e.target.value)}
 							placeholder="e.g., 50"
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 transition-colors"
 						/>
 					</div>
 
@@ -347,7 +347,7 @@ export function EditCollectionModal({
 							type="date"
 							value={acquiredAt}
 							onChange={(e) => setAcquiredAt(e.target.value)}
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-slate-500 transition-colors"
 						/>
 					</div>
 
@@ -407,7 +407,7 @@ export function EditCollectionModal({
 						type="button"
 						onClick={handleSubmit}
 						disabled={isSubmitting}
-						className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+						className="px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
 					>
 						{isSubmitting && <Loader2 size={16} className="animate-spin" />}
 						Save Changes

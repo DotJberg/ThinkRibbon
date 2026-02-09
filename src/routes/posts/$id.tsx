@@ -118,18 +118,18 @@ function PostDetailPage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
-				<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
+				<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		);
 	}
 
 	if (!post || !post.author) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold text-white mb-2">Post Not Found</h1>
-					<Link to="/" className="text-purple-400 hover:underline">
+					<Link to="/" className="text-slate-400 hover:underline">
 						Back to Home
 					</Link>
 				</div>
@@ -138,7 +138,7 @@ function PostDetailPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8 max-w-2xl">
 				<button
 					type="button"
@@ -156,7 +156,7 @@ function PostDetailPage() {
 							params={{ username: post.author.username }}
 							className="flex-shrink-0"
 						>
-							<div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+							<div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 								{post.author.avatarUrl ? (
 									<img
 										src={post.author.avatarUrl}
@@ -177,7 +177,7 @@ function PostDetailPage() {
 								<Link
 									to="/profile/$username"
 									params={{ username: post.author.username }}
-									className="font-bold text-white hover:text-purple-400"
+									className="font-bold text-white hover:text-slate-400"
 								>
 									{post.author.displayName || post.author.username}
 								</Link>
@@ -324,7 +324,7 @@ function PostDetailPage() {
 					{/* Comment Input */}
 					{isSignedIn && (
 						<div className="flex gap-3 mb-8">
-							<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
+							<div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden flex-shrink-0">
 								{user?.imageUrl ? (
 									<img
 										src={user.imageUrl}
@@ -342,7 +342,7 @@ function PostDetailPage() {
 									type="text"
 									value={commentText}
 									onChange={(e) => setCommentText(e.target.value)}
-									className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+									className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all"
 									placeholder="Write a comment..."
 									onKeyDown={(e) =>
 										e.key === "Enter" && !e.shiftKey && handleCreateComment()
@@ -357,7 +357,7 @@ function PostDetailPage() {
 									type="button"
 									onClick={handleCreateComment}
 									disabled={!commentText.trim() || isSubmitting}
-									className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+									className="p-2 bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
 								>
 									<Send size={20} />
 								</button>

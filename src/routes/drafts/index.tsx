@@ -61,12 +61,12 @@ function DraftsPage() {
 
 	if (!isSignedIn) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold text-white mb-4">
 						Sign in to view your drafts
 					</h1>
-					<Link to="/sign-in" className="text-purple-400 hover:underline">
+					<Link to="/sign-in" className="text-slate-400 hover:underline">
 						Sign In
 					</Link>
 				</div>
@@ -77,7 +77,7 @@ function DraftsPage() {
 	const totalDrafts = articleDrafts.length + reviewDrafts.length;
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<Toaster position="top-right" theme="dark" />
 
 			<div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -91,7 +91,7 @@ function DraftsPage() {
 
 				<div className="flex items-center justify-between mb-8">
 					<h1 className="text-3xl font-bold text-white flex items-center gap-3">
-						<FileText className="text-purple-400" />
+						<FileText className="text-slate-400" />
 						My Drafts
 					</h1>
 					<span className="text-gray-400">
@@ -101,7 +101,7 @@ function DraftsPage() {
 
 				{isLoading ? (
 					<div className="flex items-center justify-center py-12">
-						<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+						<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 					</div>
 				) : totalDrafts === 0 ? (
 					<div className="text-center py-12">
@@ -117,7 +117,7 @@ function DraftsPage() {
 							<Link
 								to="/articles/new"
 								search={{ draftId: undefined }}
-								className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors"
+								className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
 							>
 								Write Article
 							</Link>
@@ -136,7 +136,7 @@ function DraftsPage() {
 						{articleDrafts.length > 0 && (
 							<section>
 								<h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-									<Edit size={20} className="text-purple-400" />
+									<Edit size={20} className="text-slate-400" />
 									Article Drafts ({articleDrafts.length})
 								</h2>
 								<div className="space-y-3">
@@ -222,11 +222,11 @@ function DraftCard({
 		<div className="flex items-center gap-4 p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-colors">
 			<div
 				className={`p-2 rounded-lg ${
-					type === "article" ? "bg-purple-500/20" : "bg-yellow-500/20"
+					type === "article" ? "bg-slate-500/20" : "bg-yellow-500/20"
 				}`}
 			>
 				{type === "article" ? (
-					<Edit className="text-purple-400" size={20} />
+					<Edit className="text-slate-400" size={20} />
 				) : (
 					<Star className="text-yellow-400" size={20} />
 				)}
@@ -245,7 +245,7 @@ function DraftCard({
 				<button
 					type="button"
 					onClick={onEdit}
-					className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-sm rounded-lg transition-colors"
+					className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg transition-colors"
 				>
 					Continue
 				</button>

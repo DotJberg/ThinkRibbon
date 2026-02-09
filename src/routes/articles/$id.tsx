@@ -142,20 +142,20 @@ function ArticleDetailPage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
-				<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
+				<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		);
 	}
 
 	if (!article || !article.author) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold text-white mb-2">
 						Article Not Found
 					</h1>
-					<Link to="/" className="text-purple-400 hover:underline">
+					<Link to="/" className="text-slate-400 hover:underline">
 						Back to Home
 					</Link>
 				</div>
@@ -189,7 +189,7 @@ function ArticleDetailPage() {
 		article.content.startsWith("{") || article.content.startsWith("[");
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<div className="container mx-auto px-4 py-8 max-w-4xl">
 				<button
 					type="button"
@@ -302,7 +302,7 @@ function ArticleDetailPage() {
 								to="/profile/$username"
 								params={{ username: article.author.username }}
 							>
-								<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+								<div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 									{article.author.avatarUrl ? (
 										<img
 											src={article.author.avatarUrl}
@@ -321,7 +321,7 @@ function ArticleDetailPage() {
 								<Link
 									to="/profile/$username"
 									params={{ username: article.author.username }}
-									className="text-white font-medium hover:text-purple-400"
+									className="text-white font-medium hover:text-slate-400"
 								>
 									{article.author.displayName || article.author.username}
 								</Link>
@@ -426,7 +426,7 @@ function ArticleDetailPage() {
 
 						{isSignedIn && (
 							<div className="flex gap-3 mb-8">
-								<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
+								<div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden flex-shrink-0">
 									{user?.imageUrl ? (
 										<img
 											src={user.imageUrl}
@@ -446,7 +446,7 @@ function ArticleDetailPage() {
 										type="text"
 										value={commentText}
 										onChange={(e) => setCommentText(e.target.value)}
-										className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+										className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all"
 										placeholder="Write a comment..."
 										onKeyDown={(e) =>
 											e.key === "Enter" && !e.shiftKey && handleCreateComment()
@@ -461,7 +461,7 @@ function ArticleDetailPage() {
 										type="button"
 										onClick={handleCreateComment}
 										disabled={!commentText.trim() || isSubmittingComment}
-										className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+										className="p-2 bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
 									>
 										<Send size={20} />
 									</button>

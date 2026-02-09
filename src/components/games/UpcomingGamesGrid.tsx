@@ -54,11 +54,11 @@ export function UpcomingGamesGrid({
 					<div key={monthKey}>
 						{/* Month Header */}
 						<div className="flex items-center gap-3 mb-4">
-							<div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full">
-								<Calendar size={16} className="text-purple-400" />
+							<div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-600/20 to-slate-500/20 border border-slate-500/30 rounded-full">
+								<Calendar size={16} className="text-slate-400" />
 								<h2 className="font-semibold text-white">{monthLabel}</h2>
 							</div>
-							<div className="flex-1 h-px bg-gradient-to-r from-purple-500/30 to-transparent" />
+							<div className="flex-1 h-px bg-gradient-to-r from-slate-500/30 to-transparent" />
 							<span className="text-sm text-gray-500">
 								{monthGames.length} game{monthGames.length !== 1 ? "s" : ""}
 							</span>

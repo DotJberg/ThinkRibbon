@@ -364,12 +364,12 @@ function NewReviewPage() {
 
 	if (!isSignedIn) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold text-white mb-4">
 						Sign in to write a review
 					</h1>
-					<Link to="/sign-in" className="text-purple-400 hover:underline">
+					<Link to="/sign-in" className="text-slate-400 hover:underline">
 						Sign In
 					</Link>
 				</div>
@@ -380,7 +380,7 @@ function NewReviewPage() {
 	// Show redirect if user already has a review for this game
 	if (existingReview && preselectedGameData) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center p-4">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center p-4">
 				<div className="bg-gray-900 border border-gray-700 rounded-xl max-w-lg w-full p-6 text-center">
 					<div className="w-16 h-16 mx-auto mb-4 bg-yellow-500/20 rounded-full flex items-center justify-center">
 						<FileText className="text-yellow-400" size={32} />
@@ -402,7 +402,7 @@ function NewReviewPage() {
 						<Link
 							to="/reviews/edit/$id"
 							params={{ id: existingReview._id }}
-							className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transition-all"
+							className="px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium rounded-lg transition-all"
 						>
 							Edit Review
 						</Link>
@@ -415,10 +415,10 @@ function NewReviewPage() {
 	// Draft picker modal
 	if (showDraftPicker && availableDrafts.length > 0) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center p-4">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center p-4">
 				<div className="bg-gray-900 border border-gray-700 rounded-xl max-w-lg w-full p-6">
 					<div className="flex items-center gap-3 mb-6">
-						<FileText className="text-purple-400" size={24} />
+						<FileText className="text-slate-400" size={24} />
 						<h2 className="text-xl font-semibold text-white">
 							Resume a Draft?
 						</h2>
@@ -467,7 +467,7 @@ function NewReviewPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<Toaster position="top-right" theme="dark" />
 			<NavigationWarning
 				hasUnsavedChanges={hasUnsavedChanges}
@@ -536,7 +536,7 @@ function NewReviewPage() {
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
 									placeholder="Search for a game..."
-									className="w-full pl-12 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500"
+									className="w-full pl-12 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500"
 								/>
 							</div>
 
@@ -576,7 +576,7 @@ function NewReviewPage() {
 												{game.name}
 											</span>
 											{game.categoryLabel && (
-												<span className="px-1.5 py-0.5 bg-purple-600/80 rounded text-xs font-medium text-white">
+												<span className="px-1.5 py-0.5 bg-slate-600/80 rounded text-xs font-medium text-white">
 													{game.categoryLabel}
 												</span>
 											)}
@@ -660,7 +660,7 @@ function NewReviewPage() {
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							placeholder="Give your review a title..."
-							className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500"
+							className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500"
 							required
 						/>
 					</div>
@@ -687,7 +687,7 @@ function NewReviewPage() {
 					<button
 						type="submit"
 						disabled={isSubmitting || !selectedGame || rating === 0}
-						className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+						className="w-full py-3 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{isSubmitting ? "Publishing..." : "Publish Review"}
 					</button>

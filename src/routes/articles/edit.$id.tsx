@@ -259,12 +259,12 @@ function EditArticlePage() {
 
 	if (!isSignedIn) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold text-white mb-4">
 						Sign in to edit this article
 					</h1>
-					<Link to="/sign-in" className="text-purple-400 hover:underline">
+					<Link to="/sign-in" className="text-slate-400 hover:underline">
 						Sign In
 					</Link>
 				</div>
@@ -274,14 +274,14 @@ function EditArticlePage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
-				<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
+				<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			<Toaster position="top-right" theme="dark" />
 
 			<div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -339,7 +339,7 @@ function EditArticlePage() {
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							placeholder="Give your article a title..."
-							className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 text-xl"
+							className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 text-xl"
 							required
 						/>
 					</div>
@@ -359,7 +359,7 @@ function EditArticlePage() {
 							placeholder="A brief summary for previews..."
 							rows={2}
 							maxLength={500}
-							className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 resize-none"
+							className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 resize-none"
 						/>
 					</div>
 
@@ -378,7 +378,7 @@ function EditArticlePage() {
 								{selectedGames.map((game) => (
 									<span
 										key={game.id}
-										className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 rounded-full text-sm"
+										className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-700/20 border border-slate-500/30 rounded-full text-sm"
 									>
 										{game.coverUrl && (
 											<img
@@ -387,11 +387,11 @@ function EditArticlePage() {
 												className="w-4 h-4 rounded object-cover"
 											/>
 										)}
-										<span className="text-purple-300">{game.name}</span>
+										<span className="text-slate-300">{game.name}</span>
 										<button
 											type="button"
 											onClick={() => handleRemoveGame(game.id)}
-											className="text-purple-400 hover:text-purple-200"
+											className="text-slate-400 hover:text-slate-100"
 										>
 											<X size={14} />
 										</button>
@@ -412,7 +412,7 @@ function EditArticlePage() {
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								placeholder="Search games to tag..."
-								className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 text-sm"
+								className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500 text-sm"
 							/>
 						</div>
 
@@ -444,7 +444,7 @@ function EditArticlePage() {
 										)}
 										<span className="text-white">{game.name}</span>
 										{game.categoryLabel && (
-											<span className="px-1.5 py-0.5 bg-purple-600/80 rounded text-xs font-medium text-white">
+											<span className="px-1.5 py-0.5 bg-slate-600/80 rounded text-xs font-medium text-white">
 												{game.categoryLabel}
 											</span>
 										)}
@@ -496,7 +496,7 @@ function EditArticlePage() {
 						<button
 							type="submit"
 							disabled={isSubmitting || !title.trim() || !content.trim()}
-							className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+							className="flex-1 py-3 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{isSubmitting ? "Saving..." : "Save Changes"}
 						</button>

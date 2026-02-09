@@ -38,9 +38,9 @@ export const TAGS: Record<string, TagDefinition> = {
 	},
 	Completed: {
 		label: "Completed",
-		bg: "bg-purple-500/20",
-		text: "text-purple-400",
-		border: "border-purple-500/30",
+		bg: "bg-slate-500/20",
+		text: "text-slate-400",
+		border: "border-slate-500/30",
 	},
 	Beaten: {
 		label: "Beaten",

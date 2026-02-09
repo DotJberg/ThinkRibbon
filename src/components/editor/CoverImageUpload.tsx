@@ -109,13 +109,13 @@ export function CoverImageUpload({
 					onClick={() => fileInputRef.current?.click()}
 					className={`aspect-video w-full border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors ${
 						isUploading
-							? "border-purple-500 bg-purple-500/10"
-							: "border-gray-600 hover:border-purple-500"
+							? "border-slate-500 bg-slate-500/10"
+							: "border-gray-600 hover:border-slate-500"
 					}`}
 				>
 					{isUploading ? (
 						<>
-							<div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin mb-2" />
+							<div className="w-8 h-8 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mb-2" />
 							<p className="text-sm text-gray-300">Uploading...</p>
 						</>
 					) : (

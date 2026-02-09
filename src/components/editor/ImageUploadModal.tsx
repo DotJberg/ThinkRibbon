@@ -156,7 +156,7 @@ export function ImageUploadModal({
 										? handleNativePick
 										: () => fileInputRef.current?.click()
 								}
-								className="w-full border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 transition-colors"
+								className="w-full border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-slate-500 transition-colors"
 							>
 								<Upload className="mx-auto mb-3 text-gray-400" size={40} />
 								<p className="text-gray-300 mb-1">Click to upload an image</p>
@@ -232,7 +232,7 @@ export function ImageUploadModal({
 								}
 							}}
 							placeholder="Describe the image..."
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500"
+							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-slate-500"
 						/>
 					</div>
 
@@ -258,7 +258,7 @@ export function ImageUploadModal({
 						type="button"
 						onClick={handleUpload}
 						disabled={!file || isUploading}
-						className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{isUploading ? (
 							<>

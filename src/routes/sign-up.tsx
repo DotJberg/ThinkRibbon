@@ -18,7 +18,7 @@ const isNew = dateStr === currentMonthYear;
 
 function SignUpPage() {
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
 			<div className="w-full max-w-md p-4">
 				<SignUp
 					appearance={{
@@ -32,9 +32,9 @@ function SignUpPage() {
 							formFieldLabel: "text-gray-300",
 							formFieldInput:
 								"bg-gray-700 border-gray-600 text-white placeholder:text-gray-400",
-							footerActionLink: "text-purple-400 hover:text-purple-300",
+							footerActionLink: "text-slate-400 hover:text-slate-300",
 							formButtonPrimary:
-								"bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500",
+								"bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500",
 						},
 					}}
 					signInUrl="/sign-in"
@@ -47,7 +47,7 @@ function SignUpPage() {
 					>
 						Community Guidelines
 						{isNew && (
-							<span className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg shadow-purple-500/20">
+							<span className="bg-gradient-to-r from-red-500 to-red-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg shadow-red-500/20">
 								NEW
 							</span>
 						)}

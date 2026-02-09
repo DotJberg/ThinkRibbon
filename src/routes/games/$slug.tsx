@@ -69,19 +69,19 @@ function GameDetailPage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
-				<div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
+				<div className="w-8 h-8 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		);
 	}
 
 	if (!game) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20 flex items-center justify-center">
 				<div className="text-center">
 					<Gamepad2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
 					<h1 className="text-2xl font-bold text-white mb-2">Game Not Found</h1>
-					<Link to="/games" className="text-purple-400 hover:underline">
+					<Link to="/games" className="text-slate-400 hover:underline">
 						Back to Games
 					</Link>
 				</div>
@@ -94,7 +94,7 @@ function GameDetailPage() {
 		: null;
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			{/* Hero */}
 			<div className="relative">
 				<div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900" />
@@ -202,7 +202,7 @@ function GameDetailPage() {
 						onClick={() => setActiveTab("reviews")}
 						className={`flex items-center gap-2 py-2 px-4 rounded-lg font-medium transition-all ${
 							activeTab === "reviews"
-								? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+								? "bg-gradient-to-r from-slate-700 to-slate-600 text-white"
 								: "bg-gray-800/50 text-gray-400 hover:text-white"
 						}`}
 					>
@@ -214,7 +214,7 @@ function GameDetailPage() {
 						onClick={() => setActiveTab("articles")}
 						className={`flex items-center gap-2 py-2 px-4 rounded-lg font-medium transition-all ${
 							activeTab === "articles"
-								? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+								? "bg-gradient-to-r from-slate-700 to-slate-600 text-white"
 								: "bg-gray-800/50 text-gray-400 hover:text-white"
 						}`}
 					>
@@ -275,7 +275,7 @@ function GameDetailPage() {
 										params={{ id: article._id as string }}
 										className="block bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-gray-600/50 transition-colors"
 									>
-										<h3 className="text-lg font-semibold text-white hover:text-purple-400">
+										<h3 className="text-lg font-semibold text-white hover:text-slate-400">
 											{article.title}
 										</h3>
 										<p className="text-sm text-gray-400 mt-1">

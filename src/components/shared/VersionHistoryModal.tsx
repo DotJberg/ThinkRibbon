@@ -55,7 +55,7 @@ export function VersionHistoryModal({
 				{/* Header */}
 				<div className="flex items-center justify-between p-6 border-b border-gray-700/50">
 					<div className="flex items-center gap-3">
-						<History className="text-purple-400" size={20} />
+						<History className="text-slate-400" size={20} />
 						<h3 className="text-lg font-bold text-white">Version History</h3>
 					</div>
 					<button
@@ -82,7 +82,7 @@ export function VersionHistoryModal({
 									<div
 										className={`w-3 h-3 rounded-full border-2 ${
 											entry.isCurrent
-												? "bg-purple-500 border-purple-400"
+												? "bg-slate-600 border-slate-400"
 												: "bg-gray-700 border-gray-600"
 										}`}
 									/>
@@ -92,13 +92,13 @@ export function VersionHistoryModal({
 								<div
 									className={`flex-1 p-4 rounded-lg border ${
 										entry.isCurrent
-											? "bg-purple-500/10 border-purple-500/30"
+											? "bg-slate-500/10 border-slate-500/30"
 											: "bg-gray-800/50 border-gray-700/50"
 									}`}
 								>
 									<div className="flex items-center gap-2 mb-2">
 										{entry.isCurrent && (
-											<span className="px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-300 rounded-full">
+											<span className="px-2 py-0.5 text-xs font-medium bg-slate-500/20 text-slate-300 rounded-full">
 												Current
 											</span>
 										)}

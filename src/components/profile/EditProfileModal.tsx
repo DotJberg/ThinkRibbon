@@ -210,7 +210,7 @@ export function EditProfileModal({
 									: () => bannerInputRef.current?.click()
 							}
 							disabled={isUploading}
-							className="relative w-full rounded-xl overflow-hidden bg-gray-800 border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							className="relative w-full rounded-xl overflow-hidden bg-gray-800 border-2 border-dashed border-gray-700 hover:border-slate-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							style={{ aspectRatio: "3/1" }}
 						>
 							{bannerUrl && (
@@ -253,7 +253,7 @@ export function EditProfileModal({
 							disabled={isUploading}
 							className="relative w-24 h-24 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							<div className="w-full h-full rounded-full overflow-hidden bg-gray-800 border-2 border-gray-700 hover:border-purple-500 transition-colors">
+							<div className="w-full h-full rounded-full overflow-hidden bg-gray-800 border-2 border-gray-700 hover:border-slate-500 transition-colors">
 								{avatarUrl ? (
 									<img
 										src={avatarUrl}
@@ -261,7 +261,7 @@ export function EditProfileModal({
 										className="w-full h-full object-cover pointer-events-none"
 									/>
 								) : (
-									<div className="w-full h-full flex items-center justify-center text-2xl text-white font-bold bg-gradient-to-br from-purple-500 to-pink-500 pointer-events-none">
+									<div className="w-full h-full flex items-center justify-center text-2xl text-white font-bold bg-gradient-to-br from-slate-600 to-slate-500 pointer-events-none">
 										{displayName?.[0]?.toUpperCase()}
 									</div>
 								)}
@@ -302,7 +302,7 @@ export function EditProfileModal({
 							type="text"
 							value={displayName}
 							onChange={(e) => setDisplayName(e.target.value)}
-							className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+							className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-slate-500 transition-colors"
 							placeholder="Your display name"
 						/>
 					</div>
@@ -320,7 +320,7 @@ export function EditProfileModal({
 							value={bio}
 							onChange={(e) => setBio(e.target.value)}
 							rows={4}
-							className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors resize-none"
+							className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-slate-500 transition-colors resize-none"
 							placeholder="Tell us about yourself..."
 							maxLength={160}
 						/>
@@ -341,7 +341,7 @@ export function EditProfileModal({
 						type="button"
 						onClick={handleSave}
 						disabled={isSaving}
-						className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+						className="px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
 					>
 						{isSaving ? (
 							<Loader2 size={16} className="animate-spin" />

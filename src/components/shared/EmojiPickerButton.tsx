@@ -18,7 +18,7 @@ export function EmojiPickerButton({
 			<button
 				type="button"
 				onClick={() => setShowPicker(!showPicker)}
-				className="text-gray-400 hover:text-purple-400 transition-colors"
+				className="text-gray-400 hover:text-slate-400 transition-colors"
 				title="Add emoji"
 			>
 				<Smile size={size} />

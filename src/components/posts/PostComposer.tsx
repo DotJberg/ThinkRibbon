@@ -238,7 +238,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 		>
 			<div className="flex gap-3">
 				{/* Avatar */}
-				<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden flex-shrink-0">
+				<div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 flex items-center justify-center overflow-hidden flex-shrink-0">
 					{displayAvatarUrl ? (
 						<img
 							src={displayAvatarUrl}
@@ -346,7 +346,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 									selectedFiles.length >= POST_IMAGE_CONSTRAINTS.maxCount ||
 									busy
 								}
-								className="text-gray-400 hover:text-purple-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+								className="text-gray-400 hover:text-slate-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
 								title="Add images"
 							>
 								<ImagePlus size={20} />
@@ -371,7 +371,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 						<button
 							type="submit"
 							disabled={isEmpty || isOverLimit || busy}
-							className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-full text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+							className="px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-semibold rounded-full text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{busy ? "Posting..." : "Post"}
 						</button>

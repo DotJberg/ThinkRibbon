@@ -66,7 +66,7 @@ export function GamesFeedSelector({
 					className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
 						isUpcomingSelected
 							? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-							: "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+							: "bg-gradient-to-r from-slate-700 to-slate-600 text-white"
 					}`}
 				>
 					{selectedOption.icon}
@@ -89,12 +89,12 @@ export function GamesFeedSelector({
 								}}
 								className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
 									selectedFeed === option.type
-										? "bg-purple-600/20 text-white"
+										? "bg-slate-700/20 text-white"
 										: "text-gray-300 hover:bg-gray-700/50 hover:text-white"
 								}`}
 							>
 								<span
-									className={`mt-0.5 ${selectedFeed === option.type ? "text-purple-400" : "text-gray-500"}`}
+									className={`mt-0.5 ${selectedFeed === option.type ? "text-slate-400" : "text-gray-500"}`}
 								>
 									{option.icon}
 								</span>
@@ -116,7 +116,7 @@ export function GamesFeedSelector({
 				onClick={() => onFeedChange("upcoming")}
 				className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
 					isUpcomingSelected
-						? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+						? "bg-gradient-to-r from-slate-700 to-slate-600 text-white"
 						: "bg-gray-800 text-gray-300 hover:bg-gray-700"
 				}`}
 			>

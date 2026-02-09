@@ -67,7 +67,7 @@ export function FollowListModal({
 				<div className="flex-1 overflow-y-auto">
 					{users === undefined ? (
 						<div className="flex items-center justify-center py-12">
-							<div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+							<div className="w-6 h-6 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
 						</div>
 					) : users.length === 0 ? (
 						<div className="text-center py-12 text-gray-500">
@@ -85,7 +85,7 @@ export function FollowListModal({
 									onClick={onClose}
 									className="flex items-center gap-3 p-4 hover:bg-gray-800/50 transition-colors"
 								>
-									<div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden flex-shrink-0">
+									<div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden flex-shrink-0">
 										<SafeImage
 											src={user.avatarUrl || undefined}
 											alt={user.username}

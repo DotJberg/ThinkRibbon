@@ -62,10 +62,10 @@ export default function Header() {
 						<Menu size={24} />
 					</button>
 					<Link to="/" className="flex items-center gap-2">
-						<div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+						<div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-500 rounded-lg flex items-center justify-center">
 							<Gamepad2 size={18} className="text-white" />
 						</div>
-						<span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent hidden sm:inline">
+						<span className="text-xl font-bold bg-gradient-to-r from-red-500 to-red-400 bg-clip-text text-transparent hidden sm:inline">
 							Think Ribbon
 						</span>
 					</Link>
@@ -190,7 +190,7 @@ export default function Header() {
 					>
 						Guidelines
 						{isNew && (
-							<span className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[9px] font-bold px-1 py-0.5 rounded-full animate-pulse">
+							<span className="bg-gradient-to-r from-red-500 to-red-400 text-white text-[9px] font-bold px-1 py-0.5 rounded-full animate-pulse">
 								NEW
 							</span>
 						)}
@@ -222,7 +222,7 @@ export default function Header() {
 			>
 				<div className="flex items-center justify-between p-4 border-b border-gray-800">
 					<div className="flex items-center gap-2">
-						<div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+						<div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-500 rounded-lg flex items-center justify-center">
 							<Gamepad2 size={18} className="text-white" />
 						</div>
 						<span className="font-bold text-lg">Menu</span>
@@ -244,7 +244,7 @@ export default function Header() {
 						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 						activeProps={{
 							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+								"flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 						}}
 					>
 						<Home size={20} />
@@ -257,7 +257,7 @@ export default function Header() {
 						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 						activeProps={{
 							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+								"flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 						}}
 					>
 						<Gamepad2 size={20} />
@@ -270,7 +270,7 @@ export default function Header() {
 						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 						activeProps={{
 							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+								"flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 						}}
 					>
 						<Users size={20} />
@@ -300,7 +300,7 @@ export default function Header() {
 								className="flex items-center gap-3 p-3 pl-6 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 								activeProps={{
 									className:
-										"flex items-center gap-3 p-3 pl-6 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+										"flex items-center gap-3 p-3 pl-6 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 								}}
 							>
 								<Star size={20} />
@@ -326,7 +326,7 @@ export default function Header() {
 								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 								activeProps={{
 									className:
-										"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+										"flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 								}}
 							>
 								<FileText size={20} />
@@ -352,7 +352,7 @@ export default function Header() {
 									className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 									activeProps={{
 										className:
-											"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+											"flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 									}}
 								>
 									<div className="relative">
@@ -372,14 +372,14 @@ export default function Header() {
 						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
 						activeProps={{
 							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors mb-2",
+								"flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-800 transition-colors mb-2",
 						}}
 					>
 						<BookOpen size={20} />
 						<div className="flex items-center gap-2">
 							<span className="font-medium">Guidelines</span>
 							{isNew && (
-								<span className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg shadow-purple-500/20">
+								<span className="bg-gradient-to-r from-red-500 to-red-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg shadow-red-500/20">
 									NEW
 								</span>
 							)}

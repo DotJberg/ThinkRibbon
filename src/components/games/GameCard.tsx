@@ -30,7 +30,7 @@ export const GameCard = memo(function GameCard({ game }: GameCardProps) {
 			params={{ slug: game.slug }}
 			className="group block"
 		>
-			<article className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all hover:shadow-lg hover:shadow-purple-500/10">
+			<article className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden hover:border-slate-500/50 transition-all hover:shadow-lg hover:shadow-slate-500/10">
 				{/* Cover */}
 				<div className="aspect-[3/4] bg-gray-700 overflow-hidden relative">
 					{game.coverUrl ? (
@@ -48,7 +48,7 @@ export const GameCard = memo(function GameCard({ game }: GameCardProps) {
 
 					{/* Category Badge (DLC, Expansion, etc.) */}
 					{game.categoryLabel && (
-						<div className="absolute top-2 left-2 px-2 py-0.5 bg-purple-600/90 backdrop-blur-sm rounded text-xs font-medium text-white">
+						<div className="absolute top-2 left-2 px-2 py-0.5 bg-slate-600/90 backdrop-blur-sm rounded text-xs font-medium text-white">
 							{game.categoryLabel}
 						</div>
 					)}
@@ -66,7 +66,7 @@ export const GameCard = memo(function GameCard({ game }: GameCardProps) {
 
 				{/* Info */}
 				<div className="p-3">
-					<h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors line-clamp-1">
+					<h3 className="font-semibold text-white group-hover:text-slate-400 transition-colors line-clamp-1">
 						{game.name}
 					</h3>
 					<div className="flex items-center gap-2 mt-1">

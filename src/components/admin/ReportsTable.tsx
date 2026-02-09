@@ -114,9 +114,9 @@ export function ReportsTable({
 								<Link
 									to="/profile/$username"
 									params={{ username: report.reporter.username }}
-									className="flex items-center gap-2 hover:text-purple-400 transition-colors"
+									className="flex items-center gap-2 hover:text-slate-400 transition-colors"
 								>
-									<div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+									<div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 										{report.reporter.avatarUrl ? (
 											<img
 												src={report.reporter.avatarUrl}
@@ -228,9 +228,9 @@ export function CompletedReportsTable({ reports }: CompletedReportsTableProps) {
 								<Link
 									to="/profile/$username"
 									params={{ username: report.reporter.username }}
-									className="flex items-center gap-2 hover:text-purple-400 transition-colors"
+									className="flex items-center gap-2 hover:text-slate-400 transition-colors"
 								>
-									<div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
+									<div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-500 overflow-hidden">
 										{report.reporter.avatarUrl ? (
 											<img
 												src={report.reporter.avatarUrl}

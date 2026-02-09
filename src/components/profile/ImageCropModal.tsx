@@ -103,7 +103,7 @@ export function ImageCropModal({
 							step={0.1}
 							value={zoom}
 							onChange={(e) => setZoom(Number(e.target.value))}
-							className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+							className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-slate-500"
 						/>
 						<ZoomIn size={18} className="text-gray-400" />
 					</div>
@@ -131,7 +131,7 @@ export function ImageCropModal({
 								type="button"
 								onClick={handleConfirm}
 								disabled={isProcessing}
-								className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+								className="px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white text-sm font-medium rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
 							>
 								{isProcessing ? (
 									<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

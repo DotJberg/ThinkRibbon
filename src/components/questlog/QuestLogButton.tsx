@@ -35,7 +35,7 @@ const statusLabels: Record<QuestLogStatus, string> = {
 const statusColors: Record<QuestLogStatus, string> = {
 	Playing: "from-green-600 to-green-500",
 	Beaten: "from-blue-600 to-blue-500",
-	Completed: "from-purple-600 to-purple-500",
+	Completed: "from-emerald-600 to-emerald-500",
 	OnHold: "from-yellow-600 to-yellow-500",
 	Dropped: "from-red-600 to-red-500",
 	Backlog: "from-gray-600 to-gray-500",
@@ -88,7 +88,7 @@ export function QuestLogButton({
 				<button
 					type="button"
 					onClick={() => setShowAddModal(true)}
-					className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg shadow-lg transition-all"
+					className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium rounded-lg shadow-lg transition-all"
 				>
 					<Plus size={18} />
 					Add to Quest Log

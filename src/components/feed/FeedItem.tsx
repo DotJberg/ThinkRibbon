@@ -679,7 +679,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 									disabled={!isSignedIn || isLikingComment}
 									className={`flex items-center gap-1 text-xs transition-colors ${
 										hasLikedComment
-											? "text-pink-500 hover:text-pink-400"
+											? "text-red-500 hover:text-red-400"
 											: "text-gray-500 hover:text-gray-400"
 									}`}
 								>
@@ -745,8 +745,8 @@ export const FeedItemCard = memo(function FeedItemCard({
 					disabled={!isSignedIn || isLiking}
 					className={`flex items-center gap-1 transition-colors ${
 						hasLiked
-							? "text-pink-500 hover:text-pink-400"
-							: "hover:text-pink-400"
+							? "text-red-500 hover:text-red-400"
+							: "hover:text-red-400"
 					} ${!isSignedIn ? "cursor-default" : ""}`}
 				>
 					<PixelHeart size={16} filled={hasLiked} animateOnFill />

@@ -200,7 +200,7 @@ export function CommentItem({
 						type="button"
 						onClick={handleLike}
 						disabled={!isSignedIn}
-						className={`flex items-center gap-1 text-xs transition-colors ${hasLiked ? "text-pink-500" : "text-gray-500 hover:text-pink-400"}`}
+						className={`flex items-center gap-1 text-xs transition-colors ${hasLiked ? "text-red-500" : "text-gray-500 hover:text-red-400"}`}
 					>
 						<PixelHeart size={12} filled={hasLiked} />
 						{likeCount > 0 && <span>{likeCount}</span>}

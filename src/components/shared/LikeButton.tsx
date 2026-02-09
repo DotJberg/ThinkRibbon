@@ -48,7 +48,7 @@ export function LikeButton({
 			disabled={disabled || isLoading}
 			className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
 				liked
-					? "bg-pink-500/20 text-pink-400 hover:bg-pink-500/30"
+					? "bg-red-500/20 text-red-500 hover:bg-red-500/30"
 					: "bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-gray-300"
 			} ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 		>

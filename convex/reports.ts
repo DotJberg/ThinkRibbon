@@ -9,6 +9,7 @@ export const create = mutation({
 			v.literal("post"),
 			v.literal("article"),
 			v.literal("review"),
+			v.literal("user"),
 		),
 		targetId: v.string(),
 		message: v.string(),
@@ -30,6 +31,11 @@ export const create = mutation({
 		} else if (args.targetType === "review") {
 			const review = await ctx.db.get(args.targetId as Id<"reviews">);
 			if (!review) throw new Error("Review not found");
+		} else if (args.targetType === "user") {
+			if (user._id === args.targetId)
+				throw new Error("You cannot report yourself");
+			const targetUser = await ctx.db.get(args.targetId as Id<"users">);
+			if (!targetUser) throw new Error("User not found");
 		}
 
 		// Check for duplicate report
@@ -54,7 +60,7 @@ export const create = mutation({
 
 async function getTargetPreview(
 	ctx: { db: { get: (id: Id<"posts"> | Id<"articles"> | Id<"reviews"> | Id<"users">) => Promise<unknown> } },
-	targetType: "post" | "article" | "review",
+	targetType: "post" | "article" | "review" | "user",
 	targetId: string,
 ): Promise<{ authorUsername?: string; title?: string; content?: string }> {
 	if (targetType === "post") {
@@ -82,6 +88,14 @@ async function getTargetPreview(
 			return {
 				authorUsername: author?.username,
 				title: review.title,
+			};
+		}
+	} else if (targetType === "user") {
+		const targetUser = await ctx.db.get(targetId as Id<"users">) as { username: string; bio?: string } | null;
+		if (targetUser) {
+			return {
+				authorUsername: targetUser.username,
+				content: targetUser.bio?.slice(0, 100),
 			};
 		}
 	}

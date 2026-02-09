@@ -6,7 +6,9 @@ import {
 	ChevronRight,
 	Edit,
 	FileText,
+	Flag,
 	Package,
+	Shield,
 	UserMinus,
 	UserPlus,
 	Users,
@@ -15,9 +17,11 @@ import { useMemo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { FeedItem } from "../../components/feed/FeedItem";
 import { FeedItemCard } from "../../components/feed/FeedItem";
+import { AdminEditProfileModal } from "../../components/profile/AdminEditProfileModal";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 import { FollowListModal } from "../../components/profile/FollowListModal";
 import { NowPlaying } from "../../components/profile/NowPlaying";
+import { ReportModal } from "../../components/shared/ReportModal";
 import { SafeImage } from "../../components/shared/SafeImage";
 import { getConvexClient } from "../../lib/convex-server";
 import { buildMeta, seoTitle, seoUrl, truncate } from "../../lib/seo";
@@ -59,6 +63,8 @@ function ProfilePage() {
 	const { user: currentUser, isSignedIn } = useUser();
 	const [isFollowingLoading, setIsFollowingLoading] = useState(false);
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+	const [showReportModal, setShowReportModal] = useState(false);
+	const [isAdminEditModalOpen, setIsAdminEditModalOpen] = useState(false);
 	const [followListType, setFollowListType] = useState<
 		"followers" | "following" | null
 	>(null);
@@ -100,6 +106,10 @@ function ProfilePage() {
 		isSignedIn && currentUser && profile && !isOwnProfile
 			? { clerkId: currentUser.id, targetUserId: profile._id }
 			: "skip",
+	);
+	const isAdmin = useQuery(
+		api.users.isAdmin,
+		isSignedIn && currentUser ? { clerkId: currentUser.id } : "skip",
 	);
 	const collectionStats = useQuery(api.collections.getCollectionStats, {
 		username,
@@ -282,28 +292,48 @@ function ProfilePage() {
 									</div>
 								) : (
 									isSignedIn && (
-										<button
-											type="button"
-											onClick={handleFollowToggle}
-											disabled={isFollowingLoading}
-											className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-												following
-													? "bg-gray-800 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
-													: "bg-gradient-to-r from-slate-700 to-slate-600 text-white hover:from-slate-600 hover:to-slate-500"
-											}`}
-										>
-											{following ? (
-												<>
-													<UserMinus size={18} />
-													<span>Unfollow</span>
-												</>
-											) : (
-												<>
-													<UserPlus size={18} />
-													<span>Follow</span>
-												</>
+										<div className="flex items-center gap-2">
+											<button
+												type="button"
+												onClick={handleFollowToggle}
+												disabled={isFollowingLoading}
+												className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+													following
+														? "bg-gray-800 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
+														: "bg-gradient-to-r from-slate-700 to-slate-600 text-white hover:from-slate-600 hover:to-slate-500"
+												}`}
+											>
+												{following ? (
+													<>
+														<UserMinus size={18} />
+														<span>Unfollow</span>
+													</>
+												) : (
+													<>
+														<UserPlus size={18} />
+														<span>Follow</span>
+													</>
+												)}
+											</button>
+											<button
+												type="button"
+												onClick={() => setShowReportModal(true)}
+												className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+												title="Report Profile"
+											>
+												<Flag size={18} className="text-gray-400" />
+											</button>
+											{isAdmin && (
+												<button
+													type="button"
+													onClick={() => setIsAdminEditModalOpen(true)}
+													className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+													title="Admin: Edit Profile"
+												>
+													<Shield size={18} className="text-gray-400" />
+												</button>
 											)}
-										</button>
+										</div>
 									)
 								)}
 							</div>
@@ -500,6 +530,28 @@ function ProfilePage() {
 						userId={profile._id}
 						type={followListType ?? "followers"}
 					/>
+					{!isOwnProfile && (
+						<>
+							<ReportModal
+								isOpen={showReportModal}
+								onClose={() => setShowReportModal(false)}
+								targetType="user"
+								targetId={profile._id}
+							/>
+							{isAdmin && (
+								<AdminEditProfileModal
+									isOpen={isAdminEditModalOpen}
+									onClose={() => setIsAdminEditModalOpen(false)}
+									user={{
+										id: profile._id,
+										username: profile.username,
+										displayName: profile.displayName,
+										bio: profile.bio,
+									}}
+								/>
+							)}
+						</>
+					)}
 				</>
 			)}
 		</div>

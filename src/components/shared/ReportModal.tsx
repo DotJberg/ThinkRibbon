@@ -7,7 +7,7 @@ import { api } from "../../../convex/_generated/api";
 interface ReportModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	targetType: "post" | "article" | "review";
+	targetType: "post" | "article" | "review" | "user";
 	targetId: string;
 }
 
@@ -64,7 +64,9 @@ export function ReportModal({
 			? "post"
 			: targetType === "article"
 				? "article"
-				: "review";
+				: targetType === "review"
+					? "review"
+					: "user profile";
 
 	if (success) {
 		return (

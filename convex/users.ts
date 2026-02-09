@@ -141,6 +141,34 @@ export const updateProfile = mutation({
 	},
 });
 
+export const adminUpdateProfile = mutation({
+	args: {
+		clerkId: v.string(),
+		userId: v.id("users"),
+		displayName: v.optional(v.string()),
+		bio: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const admin = await ctx.db
+			.query("users")
+			.withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+			.unique();
+		if (!admin || !admin.admin) throw new Error("Unauthorized");
+
+		const target = await ctx.db.get(args.userId);
+		if (!target) throw new Error("User not found");
+
+		await ctx.db.patch(args.userId, {
+			...(args.displayName !== undefined
+				? { displayName: args.displayName }
+				: {}),
+			...(args.bio !== undefined ? { bio: args.bio } : {}),
+			updatedAt: Date.now(),
+		});
+		return args.userId;
+	},
+});
+
 export const checkUsernameAvailable = query({
 	args: { username: v.string() },
 	handler: async (ctx, args) => {

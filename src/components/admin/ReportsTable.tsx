@@ -10,7 +10,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 interface Report {
 	_id: Id<"reports">;
 	reporterId: Id<"users">;
-	targetType: "post" | "article" | "review";
+	targetType: "post" | "article" | "review" | "user";
 	targetId: string;
 	message: string;
 	createdAt: number;
@@ -30,7 +30,7 @@ interface Report {
 interface CompletedReport {
 	_id: Id<"completedReports">;
 	reporterId: Id<"users">;
-	targetType: "post" | "article" | "review";
+	targetType: "post" | "article" | "review" | "user";
 	targetId: string;
 	message: string;
 	createdAt: number;
@@ -64,8 +64,9 @@ interface CompletedReportsTableProps {
 }
 
 function getContentLink(
-	targetType: "post" | "article" | "review",
+	targetType: "post" | "article" | "review" | "user",
 	targetId: string,
+	targetPreview?: { authorUsername?: string; title?: string; content?: string },
 ): string {
 	switch (targetType) {
 		case "post":
@@ -74,6 +75,8 @@ function getContentLink(
 			return `/articles/${targetId}`;
 		case "review":
 			return `/reviews/${targetId}`;
+		case "user":
+			return `/profile/${targetPreview?.authorUsername ?? targetId}`;
 	}
 }
 
@@ -167,7 +170,11 @@ export function ReportsTable({
 								)}
 							</div>
 							<Link
-								to={getContentLink(report.targetType, report.targetId)}
+								to={getContentLink(
+									report.targetType,
+									report.targetId,
+									report.targetPreview,
+								)}
 								className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
 							>
 								<ExternalLink size={16} />
@@ -281,7 +288,11 @@ export function CompletedReportsTable({ reports }: CompletedReportsTableProps) {
 								)}
 							</div>
 							<Link
-								to={getContentLink(report.targetType, report.targetId)}
+								to={getContentLink(
+									report.targetType,
+									report.targetId,
+									report.targetPreview,
+								)}
 								className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
 							>
 								<ExternalLink size={16} />

@@ -6,7 +6,6 @@ import {
 	FileText,
 	Flag,
 	Gamepad2,
-	MessageCircle,
 	MoreHorizontal,
 	Reply,
 	Send,
@@ -24,6 +23,7 @@ import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
 import { EmojiPickerButton } from "../shared/EmojiPickerButton";
 import { LinkPreviewCard } from "../shared/LinkPreviewCard";
 import { PixelHeart } from "../shared/PixelHeart";
+import { PixelSpeechBubble } from "../shared/PixelSpeechBubble";
 import { ReportModal } from "../shared/ReportModal";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
@@ -756,9 +756,9 @@ export const FeedItemCard = memo(function FeedItemCard({
 						setShowCommentInput(!showCommentInput);
 						setReplyToCommentId(null);
 					}}
-					className="flex items-center gap-1 hover:text-slate-400 transition-colors"
+					className="flex items-center gap-1 text-white hover:text-slate-300 transition-colors"
 				>
-					<MessageCircle size={16} />
+					<PixelSpeechBubble size={16} active={showCommentInput} />
 					{localCommentCount}
 				</button>
 			</div>

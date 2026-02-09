@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, Gamepad2, MessageCircle } from "lucide-react";
+import { Calendar, Gamepad2 } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
+import { PixelSpeechBubble } from "../shared/PixelSpeechBubble";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
 import { StarRating } from "../shared/StarRating";
 import { TagDisplay } from "../shared/TagDisplay";
@@ -167,7 +168,7 @@ export function ReviewCard({
 								disabled={!isAuthenticated || !onLike}
 							/>
 							<span className="flex items-center gap-1 text-sm text-gray-400">
-								<MessageCircle size={14} />
+								<PixelSpeechBubble size={14} />
 								{review._count.comments}
 							</span>
 						</div>

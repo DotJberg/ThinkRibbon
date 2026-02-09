@@ -12,7 +12,6 @@ import {
 	Edit3,
 	Flag,
 	History,
-	MessageCircle,
 	MoreHorizontal,
 	Send,
 	Trash2,
@@ -27,6 +26,7 @@ import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmat
 import { EmojiPickerButton } from "../../components/shared/EmojiPickerButton";
 import { LikeButton } from "../../components/shared/LikeButton";
 import { LinkPreviewCard } from "../../components/shared/LinkPreviewCard";
+import { PixelSpeechBubble } from "../../components/shared/PixelSpeechBubble";
 import { ReportModal } from "../../components/shared/ReportModal";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
 import { getConvexClient } from "../../lib/convex-server";
@@ -340,7 +340,7 @@ function PostDetailPage() {
 							disabled={!isSignedIn}
 						/>
 						<div className="flex items-center gap-2 text-gray-400">
-							<MessageCircle size={20} />
+							<PixelSpeechBubble size={20} />
 							<span>{post._count.comments}</span>
 						</div>
 					</div>

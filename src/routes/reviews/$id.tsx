@@ -13,7 +13,6 @@ import {
 	Flag,
 	Gamepad2,
 	History,
-	MessageCircle,
 	MoreHorizontal,
 	Send,
 	Trash2,
@@ -26,6 +25,7 @@ import { CommentItem } from "../../components/shared/CommentItem";
 import { DeleteConfirmationModal } from "../../components/shared/DeleteConfirmationModal";
 import { EmojiPickerButton } from "../../components/shared/EmojiPickerButton";
 import { LikeButton } from "../../components/shared/LikeButton";
+import { PixelSpeechBubble } from "../../components/shared/PixelSpeechBubble";
 import { ReportModal } from "../../components/shared/ReportModal";
 import { SafeImage } from "../../components/shared/SafeImage";
 import {
@@ -443,7 +443,7 @@ function ReviewDetailPage() {
 							disabled={!isSignedIn}
 						/>
 						<span className="flex items-center gap-1 text-gray-400">
-							<MessageCircle size={18} />
+							<PixelSpeechBubble size={18} />
 							{review._count.comments} comments
 						</span>
 					</div>

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
+import { PixelSpeechBubble } from "../shared/PixelSpeechBubble";
 import { SafeImage } from "../shared/SafeImage";
 import { PostImageGrid } from "./PostImageGrid";
 
@@ -99,7 +99,7 @@ export function PostCard({
 							type="button"
 							className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-gray-300 transition-colors"
 						>
-							<MessageCircle size={16} />
+							<PixelSpeechBubble size={16} />
 							<span>{post._count.comments}</span>
 						</button>
 					</div>

@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, Gamepad2, MessageCircle } from "lucide-react";
+import { Calendar, Gamepad2 } from "lucide-react";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
+import { PixelSpeechBubble } from "../shared/PixelSpeechBubble";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
 import { TagDisplay } from "../shared/TagDisplay";
@@ -173,7 +174,7 @@ export function ArticleCard({
 							disabled={!isAuthenticated || !onLike}
 						/>
 						<span className="flex items-center gap-1 text-sm text-gray-400">
-							<MessageCircle size={14} />
+							<PixelSpeechBubble size={14} />
 							{article._count.comments}
 						</span>
 					</div>

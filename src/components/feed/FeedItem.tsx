@@ -740,8 +740,8 @@ export const FeedItemCard = memo(function FeedItemCard({
 			)}
 
 			{/* Footer */}
-			<div className="flex items-center gap-6 text-sm text-gray-500 pt-3 mt-3 border-t border-gray-700/50">
-				<div className="flex items-center gap-2.5">
+			<div className="flex items-center gap-6 text-base text-gray-500 pt-3 mt-3 border-t border-gray-700/50">
+				<div className="flex items-center gap-2">
 					<button
 						type="button"
 						onClick={handleToggleLike}
@@ -752,7 +752,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 								: "hover:text-red-400"
 						} ${!isSignedIn ? "cursor-default" : ""}`}
 					>
-						<PixelHeart size={16} filled={hasLiked} animateOnFill />
+						<PixelHeart size={20} filled={hasLiked} animateOnFill />
 					</button>
 					<button
 						type="button"
@@ -768,9 +768,9 @@ export const FeedItemCard = memo(function FeedItemCard({
 						setShowCommentInput(!showCommentInput);
 						setReplyToCommentId(null);
 					}}
-					className="flex items-center gap-1 text-white hover:text-slate-300 transition-colors"
+					className="flex items-center gap-2 text-white hover:text-slate-300 transition-colors"
 				>
-					<PixelSpeechBubble size={16} active={showCommentInput} />
+					<PixelSpeechBubble size={20} active={showCommentInput} />
 					{localCommentCount}
 				</button>
 			</div>

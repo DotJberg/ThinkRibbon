@@ -2,11 +2,12 @@ import { useUser } from "@clerk/clerk-react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, Reply, Send, Trash2 } from "lucide-react";
+import { Reply, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { EmojiPickerButton } from "./EmojiPickerButton";
 import { LinkPreviewCard } from "./LinkPreviewCard";
+import { PixelHeart } from "./PixelHeart";
 
 interface CommentItemProps {
 	// biome-ignore lint/suspicious/noExplicitAny: Complex nested comment type
@@ -201,7 +202,7 @@ export function CommentItem({
 						disabled={!isSignedIn}
 						className={`flex items-center gap-1 text-xs transition-colors ${hasLiked ? "text-pink-500" : "text-gray-500 hover:text-pink-400"}`}
 					>
-						<Heart size={12} className={hasLiked ? "fill-current" : ""} />
+						<PixelHeart size={12} filled={hasLiked} />
 						{likeCount > 0 && <span>{likeCount}</span>}
 						<span className="sr-only">Like</span>
 					</button>

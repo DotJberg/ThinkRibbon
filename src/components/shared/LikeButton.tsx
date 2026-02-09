@@ -1,5 +1,5 @@
-import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PixelHeart } from "./PixelHeart";
 
 interface LikeButtonProps {
 	initialLiked?: boolean;
@@ -52,10 +52,7 @@ export function LikeButton({
 					: "bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-gray-300"
 			} ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 		>
-			<Heart
-				size={16}
-				className={`transition-transform duration-200 ${liked ? "fill-current scale-110" : ""}`}
-			/>
+			<PixelHeart size={16} filled={liked} animateOnFill />
 			<span>{count}</span>
 		</button>
 	);

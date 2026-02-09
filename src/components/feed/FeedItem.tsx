@@ -6,7 +6,6 @@ import {
 	FileText,
 	Flag,
 	Gamepad2,
-	Heart,
 	MessageCircle,
 	MoreHorizontal,
 	Reply,
@@ -24,6 +23,7 @@ import { PostImageGrid } from "../posts/PostImageGrid";
 import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
 import { EmojiPickerButton } from "../shared/EmojiPickerButton";
 import { LinkPreviewCard } from "../shared/LinkPreviewCard";
+import { PixelHeart } from "../shared/PixelHeart";
 import { ReportModal } from "../shared/ReportModal";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
@@ -683,9 +683,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 											: "text-gray-500 hover:text-gray-400"
 									}`}
 								>
-									<Heart
-										className={`w-3 h-3 ${hasLikedComment ? "fill-current" : ""}`}
-									/>
+									<PixelHeart size={12} filled={hasLikedComment} />
 									{commentLikeCount > 0 && <span>{commentLikeCount}</span>}
 								</button>
 								<button
@@ -751,7 +749,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 							: "hover:text-pink-400"
 					} ${!isSignedIn ? "cursor-default" : ""}`}
 				>
-					<Heart size={16} className={hasLiked ? "fill-current" : ""} />
+					<PixelHeart size={16} filled={hasLiked} animateOnFill />
 					{localLikeCount}
 				</button>
 				<button

@@ -744,9 +744,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 					onClick={handleToggleLike}
 					disabled={!isSignedIn || isLiking}
 					className={`flex items-center gap-1 transition-colors ${
-						hasLiked
-							? "text-red-500 hover:text-red-400"
-							: "hover:text-red-400"
+						hasLiked ? "text-red-500 hover:text-red-400" : "hover:text-red-400"
 					} ${!isSignedIn ? "cursor-default" : ""}`}
 				>
 					<PixelHeart size={16} filled={hasLiked} animateOnFill />

@@ -8,7 +8,7 @@ import { SafeImage } from "./SafeImage";
 interface LikersModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	targetType: "post" | "article" | "review";
+	targetType: "post" | "article" | "review" | "comment";
 	targetId: string;
 }
 

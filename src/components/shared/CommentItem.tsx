@@ -4,8 +4,10 @@ import { useMutation, useQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 import { Reply, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { api } from "../../../convex/_generated/api";
 import { EmojiPickerButton } from "./EmojiPickerButton";
+import { LikersModal } from "./LikersModal";
 import { LinkPreviewCard } from "./LinkPreviewCard";
 import { PixelHeart } from "./PixelHeart";
 
@@ -40,6 +42,7 @@ export function CommentItem({
 	);
 	const [likeCount, setLikeCount] = useState(comment._count?.likes ?? 0);
 	const [isLiking, setIsLiking] = useState(false);
+	const [showLikersModal, setShowLikersModal] = useState(false);
 
 	const commentId = comment._id || comment.id;
 
@@ -196,16 +199,26 @@ export function CommentItem({
 				</div>
 
 				<div className="flex items-center gap-4 mt-1 ml-1">
-					<button
-						type="button"
-						onClick={handleLike}
-						disabled={!isSignedIn}
-						className={`flex items-center gap-1 text-xs transition-colors ${hasLiked ? "text-red-500" : "text-gray-500 hover:text-red-400"}`}
-					>
-						<PixelHeart size={12} filled={hasLiked} />
-						{likeCount > 0 && <span>{likeCount}</span>}
-						<span className="sr-only">Like</span>
-					</button>
+					<div className="flex items-center gap-2">
+						<button
+							type="button"
+							onClick={handleLike}
+							disabled={!isSignedIn}
+							className={`flex items-center transition-colors ${hasLiked ? "text-red-500 hover:text-red-400" : "text-gray-500 hover:text-red-400"}`}
+						>
+							<PixelHeart size={12} filled={hasLiked} />
+							<span className="sr-only">Like</span>
+						</button>
+						{likeCount > 0 && (
+							<button
+								type="button"
+								onClick={() => setShowLikersModal(true)}
+								className={`text-xs hover:underline ${hasLiked ? "text-red-500" : "text-gray-500"}`}
+							>
+								{likeCount}
+							</button>
+						)}
+					</div>
 					<button
 						type="button"
 						onClick={() => setShowReplyInput(!showReplyInput)}
@@ -269,6 +282,17 @@ export function CommentItem({
 					</div>
 				)}
 			</div>
+
+			{showLikersModal &&
+				createPortal(
+					<LikersModal
+						isOpen={showLikersModal}
+						onClose={() => setShowLikersModal(false)}
+						targetType="comment"
+						targetId={commentId}
+					/>,
+					document.body,
+				)}
 		</div>
 	);
 }

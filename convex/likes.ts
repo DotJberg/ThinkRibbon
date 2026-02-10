@@ -91,6 +91,7 @@ export const getLikers = query({
 			v.literal("post"),
 			v.literal("article"),
 			v.literal("review"),
+			v.literal("comment"),
 		),
 		targetId: v.string(),
 	},

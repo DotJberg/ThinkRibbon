@@ -94,6 +94,7 @@ function NewReviewPage() {
 
 	// Auto-save debounce ref
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const draftLoadedRef = useRef(false);
 
 	// Track if there are unsaved changes (for navigation warning)
 	const hasUnsavedChanges =
@@ -162,9 +163,10 @@ function NewReviewPage() {
 	);
 
 	useEffect(() => {
-		if (initialDraftId && allDraftsForLoad) {
+		if (initialDraftId && allDraftsForLoad && !draftLoadedRef.current) {
 			const draft = allDraftsForLoad.find((d) => d._id === initialDraftId);
 			if (draft) {
+				draftLoadedRef.current = true;
 				setTitle(draft.title || "");
 				setContent(draft.content || "");
 				setRating(draft.rating || 0);

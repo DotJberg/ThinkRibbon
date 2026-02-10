@@ -16,4 +16,5 @@ todos.json
 CLAUDE.md
 ios/
 android/
+*.log
 

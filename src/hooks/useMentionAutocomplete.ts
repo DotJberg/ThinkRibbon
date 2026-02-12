@@ -177,6 +177,15 @@ export function useMentionAutocomplete() {
 		setState((prev) => ({ ...prev, mentions: [] }));
 	}, []);
 
+	const seedMention = useCallback((item: MentionData) => {
+		setState((prev) => {
+			const exists = prev.mentions.some(
+				(m) => m.type === item.type && m.id === item.id,
+			);
+			return exists ? prev : { ...prev, mentions: [...prev.mentions, item] };
+		});
+	}, []);
+
 	return {
 		isOpen: state.isOpen,
 		triggerType: state.triggerType,
@@ -188,5 +197,6 @@ export function useMentionAutocomplete() {
 		selectItem,
 		setSelectedIndex,
 		clearMentions,
+		seedMention,
 	};
 }

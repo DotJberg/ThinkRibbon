@@ -868,6 +868,7 @@ export const FeedItemCard = memo(function FeedItemCard({
 					postId={item.id as Id<"posts">}
 					currentContent={item.content}
 					hasLinkPreview={!!item.linkPreview}
+					currentMentions={item.mentions}
 				/>
 			)}
 

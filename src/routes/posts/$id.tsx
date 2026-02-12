@@ -424,6 +424,7 @@ function PostDetailPage() {
 				postId={post._id}
 				currentContent={post.content}
 				hasLinkPreview={!!post.linkPreview}
+				currentMentions={post.mentions}
 			/>
 
 			<DeleteConfirmationModal

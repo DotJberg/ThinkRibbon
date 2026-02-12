@@ -1,10 +1,13 @@
 import { useUser } from "@clerk/clerk-react";
 import { useMutation } from "convex/react";
 import { Loader2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { useMentionAutocomplete } from "../../hooks/useMentionAutocomplete";
 import { stripFirstUrl } from "../../lib/link-preview";
+import type { MentionData } from "../../lib/mentions";
+import { MentionDropdown, type MentionDropdownRef } from "./MentionDropdown";
 
 interface EditPostModalProps {
 	isOpen: boolean;
@@ -12,6 +15,7 @@ interface EditPostModalProps {
 	postId: string;
 	currentContent: string;
 	hasLinkPreview?: boolean;
+	currentMentions?: MentionData[];
 }
 
 export function EditPostModal({
@@ -20,11 +24,15 @@ export function EditPostModal({
 	postId,
 	currentContent,
 	hasLinkPreview,
+	currentMentions,
 }: EditPostModalProps) {
 	const { user } = useUser();
 	const [content, setContent] = useState(currentContent);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const updatePost = useMutation(api.posts.updatePost);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const mentionDropdownRef = useRef<MentionDropdownRef>(null);
+	const mention = useMentionAutocomplete();
 
 	const maxLength = 280;
 	const effectiveLength = hasLinkPreview
@@ -36,8 +44,20 @@ export function EditPostModal({
 	useEffect(() => {
 		if (isOpen) {
 			setContent(currentContent);
+			mention.clearMentions();
+			if (currentMentions) {
+				for (const m of currentMentions) {
+					mention.seedMention(m);
+				}
+			}
 		}
-	}, [isOpen, currentContent]);
+	}, [
+		isOpen,
+		currentContent,
+		currentMentions,
+		mention.clearMentions,
+		mention.seedMention,
+	]);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -59,6 +79,7 @@ export function EditPostModal({
 				postId: postId as Id<"posts">,
 				content: content.trim(),
 				clerkId: user.id,
+				mentions: mention.mentions.length > 0 ? mention.mentions : undefined,
 			});
 			onClose();
 		} catch (error) {
@@ -91,13 +112,46 @@ export function EditPostModal({
 
 				{/* Content */}
 				<div className="p-4">
-					<textarea
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
-						rows={5}
-						className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-white placeholder:text-gray-500 resize-none focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all text-lg"
-						placeholder="What's on your mind?"
-					/>
+					<div className="relative">
+						<textarea
+							ref={textareaRef}
+							value={content}
+							onChange={(e) => {
+								setContent(e.target.value);
+								mention.detectTrigger(
+									e.target.value,
+									e.target.selectionStart ?? 0,
+								);
+							}}
+							onKeyDown={(e) => {
+								if (!mention.isOpen) return;
+								if (mentionDropdownRef.current?.handleKeyDown(e)) {
+									e.preventDefault();
+									return;
+								}
+								if (e.key === "Escape") {
+									e.preventDefault();
+									e.stopPropagation();
+									mention.close();
+								}
+							}}
+							rows={5}
+							className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-white placeholder:text-gray-500 resize-none focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all text-lg"
+							placeholder="What's on your mind?"
+						/>
+						{mention.isOpen && mention.triggerType && (
+							<MentionDropdown
+								ref={mentionDropdownRef}
+								triggerType={mention.triggerType}
+								query={mention.query}
+								selectedIndex={mention.selectedIndex}
+								onSelect={(item) => {
+									mention.selectItem(item, content, setContent);
+								}}
+								onSetSelectedIndex={mention.setSelectedIndex}
+							/>
+						)}
+					</div>
 					<div className="flex justify-end mt-2">
 						<span
 							className={`text-sm ${isOverLimit ? "text-red-400" : remaining < 20 ? "text-yellow-400" : "text-gray-500"}`}

@@ -8,6 +8,17 @@ import { useMentionAutocomplete } from "../../hooks/useMentionAutocomplete";
 import { stripFirstUrl } from "../../lib/link-preview";
 import type { MentionData } from "../../lib/mentions";
 import { MentionDropdown, type MentionDropdownRef } from "./MentionDropdown";
+import { MentionHighlightOverlay } from "./MentionHighlightOverlay";
+
+function mentionsEqual(
+	a: MentionData[] | undefined,
+	b: MentionData[],
+): boolean {
+	const prev = a ?? [];
+	if (prev.length !== b.length) return false;
+	const keys = new Set(prev.map((m) => `${m.type}:${m.id}`));
+	return b.every((m) => keys.has(`${m.type}:${m.id}`));
+}
 
 interface EditPostModalProps {
 	isOpen: boolean;
@@ -113,6 +124,12 @@ export function EditPostModal({
 				{/* Content */}
 				<div className="p-4">
 					<div className="relative">
+						<MentionHighlightOverlay
+							content={content}
+							mentions={mention.mentions}
+							textareaRef={textareaRef}
+							className="bg-gray-800/50 border border-transparent rounded-lg p-4 text-lg"
+						/>
 						<textarea
 							ref={textareaRef}
 							value={content}
@@ -136,7 +153,7 @@ export function EditPostModal({
 								}
 							}}
 							rows={5}
-							className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-white placeholder:text-gray-500 resize-none focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all text-lg"
+							className="relative w-full bg-transparent border border-gray-700 rounded-lg p-4 text-transparent caret-white placeholder:text-gray-500 resize-none focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all text-lg"
 							placeholder="What's on your mind?"
 						/>
 						{mention.isOpen && mention.triggerType && (
@@ -178,7 +195,8 @@ export function EditPostModal({
 							isSubmitting ||
 							!content.trim() ||
 							isOverLimit ||
-							content.trim() === currentContent.trim()
+							(content.trim() === currentContent.trim() &&
+								mentionsEqual(currentMentions, mention.mentions))
 						}
 						className="flex-1 py-2.5 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 					>

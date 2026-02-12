@@ -20,6 +20,7 @@ import type { MentionData } from "../../lib/mentions";
 import { useUploadThing } from "../../lib/uploadthing";
 import { EmojiPickerButton } from "../shared/EmojiPickerButton";
 import { MentionDropdown, type MentionDropdownRef } from "./MentionDropdown";
+import { MentionHighlightOverlay } from "./MentionHighlightOverlay";
 
 interface PostComposerProps {
 	onSubmit: (
@@ -268,6 +269,12 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 
 				<div className="flex-1">
 					<div className="relative">
+						<MentionHighlightOverlay
+							content={content}
+							mentions={mention.mentions}
+							textareaRef={textareaRef}
+							className="bg-transparent text-lg"
+						/>
 						<textarea
 							ref={textareaRef}
 							value={content}
@@ -291,7 +298,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 							}}
 							placeholder="What's on your mind?"
 							rows={3}
-							className="w-full bg-transparent text-white placeholder:text-gray-500 resize-none focus:outline-none text-lg"
+							className="relative w-full bg-transparent text-transparent caret-white placeholder:text-gray-500 resize-none focus:outline-none text-lg"
 						/>
 						{mention.isOpen && mention.triggerType && (
 							<MentionDropdown

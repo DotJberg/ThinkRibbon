@@ -155,6 +155,14 @@ export function useMentionAutocomplete() {
 				const exists = prev.mentions.some(
 					(m) => m.type === item.type && m.id === item.id,
 				);
+				// Only store MentionData fields — extra properties (e.g. sublabel)
+				// from dropdown items cause Convex strict-object validation to reject.
+				const cleaned: MentionData = {
+					type: item.type,
+					id: item.id,
+					slug: item.slug,
+					displayText: item.displayText,
+				};
 				return {
 					...prev,
 					isOpen: false,
@@ -162,7 +170,7 @@ export function useMentionAutocomplete() {
 					query: "",
 					triggerIndex: -1,
 					selectedIndex: 0,
-					mentions: exists ? prev.mentions : [...prev.mentions, item],
+					mentions: exists ? prev.mentions : [...prev.mentions, cleaned],
 				};
 			});
 		},

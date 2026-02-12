@@ -49,6 +49,16 @@ export default defineSchema({
 		authorId: v.id("users"),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
+		mentions: v.optional(
+			v.array(
+				v.object({
+					type: v.union(v.literal("user"), v.literal("game")),
+					id: v.string(),
+					slug: v.string(),
+					displayText: v.string(),
+				}),
+			),
+		),
 			})
 		.index("by_authorId", ["authorId"]),
 
@@ -89,6 +99,16 @@ export default defineSchema({
 		genres: v.optional(v.array(v.string())),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
+		mentions: v.optional(
+			v.array(
+				v.object({
+					type: v.union(v.literal("user"), v.literal("game")),
+					id: v.string(),
+					slug: v.string(),
+					displayText: v.string(),
+				}),
+			),
+		),
 			})
 		.index("by_authorId", ["authorId"])
 		.index("by_published", ["published"]),
@@ -133,6 +153,16 @@ export default defineSchema({
 		genres: v.optional(v.array(v.string())),
 		editCount: v.optional(v.number()),
 		updatedAt: v.optional(v.number()),
+		mentions: v.optional(
+			v.array(
+				v.object({
+					type: v.union(v.literal("user"), v.literal("game")),
+					id: v.string(),
+					slug: v.string(),
+					displayText: v.string(),
+				}),
+			),
+		),
 			})
 		.index("by_authorId", ["authorId"])
 		.index("by_gameId", ["gameId"])
@@ -325,6 +355,9 @@ export default defineSchema({
 			v.literal("comment_article"),
 			v.literal("comment_review"),
 			v.literal("reply_comment"),
+			v.literal("mention_post"),
+			v.literal("mention_article"),
+			v.literal("mention_review"),
 		),
 		targetId: v.string(),
 		viewedAt: v.optional(v.number()),

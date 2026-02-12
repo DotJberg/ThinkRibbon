@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { createNotification } from "./notifications";
 
 export const create = mutation({
 	args: {
@@ -16,6 +17,16 @@ export const create = mutation({
 		gameIds: v.optional(v.array(v.id("games"))),
 		published: v.optional(v.boolean()),
 		authorClerkId: v.string(),
+		mentions: v.optional(
+			v.array(
+				v.object({
+					type: v.union(v.literal("user"), v.literal("game")),
+					id: v.string(),
+					slug: v.string(),
+					displayText: v.string(),
+				}),
+			),
+		),
 	},
 	handler: async (ctx, args) => {
 		const user = await ctx.db
@@ -37,6 +48,7 @@ export const create = mutation({
 			published: args.published ?? false,
 			authorId: user._id,
 			updatedAt: Date.now(),
+			mentions: args.mentions,
 		});
 
 		// Insert article-game junctions
@@ -46,6 +58,21 @@ export const create = mutation({
 					articleId,
 					gameId,
 				});
+			}
+		}
+
+		// Send mention notifications (only if published)
+		if (args.mentions && args.published) {
+			for (const mention of args.mentions) {
+				if (mention.type === "user") {
+					await createNotification(
+						ctx,
+						mention.id as Id<"users">,
+						user._id,
+						"mention_article",
+						articleId,
+					);
+				}
 			}
 		}
 
@@ -69,6 +96,16 @@ export const update = mutation({
 		published: v.optional(v.boolean()),
 		saveHistory: v.optional(v.boolean()),
 		clerkId: v.string(),
+		mentions: v.optional(
+			v.array(
+				v.object({
+					type: v.union(v.literal("user"), v.literal("game")),
+					id: v.string(),
+					slug: v.string(),
+					displayText: v.string(),
+				}),
+			),
+		),
 	},
 	handler: async (ctx, args) => {
 		const article = await ctx.db.get(args.articleId);
@@ -130,11 +167,34 @@ export const update = mutation({
 		if (args.tags !== undefined) updateData.tags = args.tags;
 		if (args.genres !== undefined) updateData.genres = args.genres;
 		if (args.published !== undefined) updateData.published = args.published;
+		if (args.mentions !== undefined) updateData.mentions = args.mentions;
 		if (args.saveHistory) {
 			updateData.editCount = (article.editCount ?? 0) + 1;
 		}
 
 		await ctx.db.patch(args.articleId, updateData);
+
+		// Send mention notifications for newly added mentions (only if published)
+		const isPublished = args.published ?? article.published;
+		if (args.mentions && isPublished) {
+			const oldMentionIds = new Set(
+				(article.mentions || [])
+					.filter((m) => m.type === "user")
+					.map((m) => m.id),
+			);
+			for (const mention of args.mentions) {
+				if (mention.type === "user" && !oldMentionIds.has(mention.id)) {
+					await createNotification(
+						ctx,
+						mention.id as Id<"users">,
+						article.authorId,
+						"mention_article",
+						args.articleId,
+					);
+				}
+			}
+		}
+
 		return args.articleId;
 	},
 });

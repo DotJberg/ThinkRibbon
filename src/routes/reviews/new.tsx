@@ -21,6 +21,10 @@ import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
 import { TagSelector } from "../../components/shared/TagSelector";
 import { normalizeIgdbGenres } from "../../lib/genres";
+import {
+	extractMentionsFromTipTap,
+	type MentionData,
+} from "../../lib/mentions";
 
 export const Route = createFileRoute("/reviews/new")({
 	component: NewReviewPage,
@@ -295,6 +299,15 @@ function NewReviewPage() {
 
 		setIsSubmitting(true);
 		try {
+			// Extract mentions from TipTap content
+			let mentions: MentionData[] | undefined;
+			try {
+				const parsed = JSON.parse(content);
+				mentions = extractMentionsFromTipTap(parsed);
+			} catch {
+				// Not JSON content, no mentions
+			}
+
 			const reviewId = await createReviewMut({
 				title,
 				content,
@@ -307,6 +320,7 @@ function NewReviewPage() {
 				genres: genres.length > 0 ? genres : undefined,
 				published: true,
 				authorClerkId: user.id,
+				mentions: mentions && mentions.length > 0 ? mentions : undefined,
 			});
 
 			// Delete the draft if it exists

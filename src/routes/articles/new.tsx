@@ -21,6 +21,10 @@ import { GenreSelector } from "../../components/shared/GenreSelector";
 import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { TagSelector } from "../../components/shared/TagSelector";
 import { normalizeIgdbGenres } from "../../lib/genres";
+import {
+	extractMentionsFromTipTap,
+	type MentionData,
+} from "../../lib/mentions";
 
 export const Route = createFileRoute("/articles/new")({
 	component: NewArticlePage,
@@ -261,6 +265,15 @@ function NewArticlePage() {
 
 		setIsSubmitting(true);
 		try {
+			// Extract mentions from TipTap content
+			let mentions: MentionData[] | undefined;
+			try {
+				const parsed = JSON.parse(content);
+				mentions = extractMentionsFromTipTap(parsed);
+			} catch {
+				// Not JSON content, no mentions
+			}
+
 			const articleId = await createArticleMut({
 				title,
 				content,
@@ -273,6 +286,7 @@ function NewArticlePage() {
 				gameIds: selectedGames.map((g) => g.id as Id<"games">),
 				published: true,
 				authorClerkId: user.id,
+				mentions: mentions && mentions.length > 0 ? mentions : undefined,
 			});
 
 			// Delete the draft if it exists

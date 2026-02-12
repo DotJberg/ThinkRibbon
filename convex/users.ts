@@ -419,6 +419,54 @@ export const getDiscoverUsers = query({
 	},
 });
 
+// Lightweight user search for mention autocomplete
+export const searchUsersLight = query({
+	args: { query: v.string(), limit: v.optional(v.number()) },
+	handler: async (ctx, args) => {
+		const limit = args.limit || 10;
+		const searchQuery = args.query.toLowerCase().trim();
+
+		if (!searchQuery) return [];
+
+		const allUsers = await ctx.db.query("users").collect();
+
+		return allUsers
+			.filter((user) => {
+				const username = user.username.toLowerCase();
+				const displayName = (user.displayName || "").toLowerCase();
+				return (
+					username.includes(searchQuery) ||
+					displayName.includes(searchQuery)
+				);
+			})
+			.sort((a, b) => {
+				const aUsername = a.username.toLowerCase();
+				const bUsername = b.username.toLowerCase();
+
+				if (aUsername === searchQuery) return -1;
+				if (bUsername === searchQuery) return 1;
+				if (
+					aUsername.startsWith(searchQuery) &&
+					!bUsername.startsWith(searchQuery)
+				)
+					return -1;
+				if (
+					bUsername.startsWith(searchQuery) &&
+					!aUsername.startsWith(searchQuery)
+				)
+					return 1;
+				return 0;
+			})
+			.slice(0, limit)
+			.map((u) => ({
+				_id: u._id,
+				username: u.username,
+				displayName: u.displayName,
+				avatarUrl: u.avatarUrl,
+			}));
+	},
+});
+
 // Search users by username or display name
 export const searchUsers = query({
 	args: { query: v.string(), limit: v.optional(v.number()) },

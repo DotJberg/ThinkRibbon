@@ -13,6 +13,10 @@ import { SpoilerToggle } from "../../components/shared/SpoilerWarning";
 import { StarRating } from "../../components/shared/StarRating";
 import { TagSelector } from "../../components/shared/TagSelector";
 import { normalizeIgdbGenres } from "../../lib/genres";
+import {
+	extractMentionsFromTipTap,
+	type MentionData,
+} from "../../lib/mentions";
 
 export const Route = createFileRoute("/reviews/edit/$id")({
 	component: EditReviewPage,
@@ -172,6 +176,15 @@ function EditReviewPage() {
 
 		setIsSubmitting(true);
 		try {
+			// Extract mentions from TipTap content
+			let mentions: MentionData[] | undefined;
+			try {
+				const parsed = JSON.parse(content);
+				mentions = extractMentionsFromTipTap(parsed);
+			} catch {
+				// Not JSON content, no mentions
+			}
+
 			await updateReviewMut({
 				reviewId: id as Id<"reviews">,
 				title,
@@ -185,6 +198,7 @@ function EditReviewPage() {
 				published: true,
 				saveHistory: true,
 				clerkId: user.id,
+				mentions: mentions && mentions.length > 0 ? mentions : undefined,
 			});
 
 			toast.success("Review updated");

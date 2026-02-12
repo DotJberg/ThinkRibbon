@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import type { MentionData } from "../../lib/mentions";
+import { renderPostContent } from "../../lib/renderPostContent";
 import { formatDistanceToNow } from "../../lib/utils";
 import { LikeButton } from "../shared/LikeButton";
 import { PixelSpeechBubble } from "../shared/PixelSpeechBubble";
@@ -17,6 +19,7 @@ interface PostCardProps {
 			avatarUrl: string | null;
 		};
 		images?: Array<{ url: string; caption?: string }>;
+		mentions?: MentionData[];
 		_count: {
 			likes: number;
 			comments: number;
@@ -80,7 +83,7 @@ export function PostCard({
 
 					{/* Content */}
 					<p className="text-gray-200 mt-1 whitespace-pre-wrap break-words">
-						{post.content}
+						{renderPostContent(post.content, post.mentions)}
 					</p>
 
 					{post.images && post.images.length > 0 && (

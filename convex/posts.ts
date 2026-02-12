@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { createNotification } from "./notifications";
 
 export const create = mutation({
 	args: {
@@ -25,6 +26,16 @@ export const create = mutation({
 				domain: v.string(),
 			}),
 		),
+		mentions: v.optional(
+			v.array(
+				v.object({
+					type: v.union(v.literal("user"), v.literal("game")),
+					id: v.string(),
+					slug: v.string(),
+					displayText: v.string(),
+				}),
+			),
+		),
 	},
 	handler: async (ctx, args) => {
 		const user = await ctx.db
@@ -42,7 +53,23 @@ export const create = mutation({
 			content: args.content.slice(0, sliceLimit),
 			authorId: user._id,
 			updatedAt: Date.now(),
+			mentions: args.mentions,
 		});
+
+		// Send mention notifications
+		if (args.mentions) {
+			for (const mention of args.mentions) {
+				if (mention.type === "user") {
+					await createNotification(
+						ctx,
+						mention.id as Id<"users">,
+						user._id,
+						"mention_post",
+						postId,
+					);
+				}
+			}
+		}
 
 		if (args.images) {
 			for (const img of args.images.slice(0, 4)) {
@@ -235,6 +262,16 @@ export const updatePost = mutation({
 		postId: v.id("posts"),
 		content: v.string(),
 		clerkId: v.string(),
+		mentions: v.optional(
+			v.array(
+				v.object({
+					type: v.union(v.literal("user"), v.literal("game")),
+					id: v.string(),
+					slug: v.string(),
+					displayText: v.string(),
+				}),
+			),
+		),
 	},
 	handler: async (ctx, args) => {
 		const post = await ctx.db.get(args.postId);
@@ -270,7 +307,28 @@ export const updatePost = mutation({
 			content: args.content.slice(0, sliceLimit),
 			updatedAt: Date.now(),
 			editCount: (post.editCount ?? 0) + 1,
+			mentions: args.mentions,
 		});
+
+		// Send mention notifications for newly added mentions
+		if (args.mentions) {
+			const oldMentionIds = new Set(
+				(post.mentions || [])
+					.filter((m) => m.type === "user")
+					.map((m) => m.id),
+			);
+			for (const mention of args.mentions) {
+				if (mention.type === "user" && !oldMentionIds.has(mention.id)) {
+					await createNotification(
+						ctx,
+						mention.id as Id<"users">,
+						post.authorId,
+						"mention_post",
+						args.postId,
+					);
+				}
+			}
+		}
 
 		return args.postId;
 	},

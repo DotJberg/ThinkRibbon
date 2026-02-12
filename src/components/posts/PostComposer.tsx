@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { ExternalLink, ImagePlus, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { useMentionAutocomplete } from "../../hooks/useMentionAutocomplete";
 import { isNativePlatform, pickImageNative } from "../../lib/capacitor";
 import { cleanEmbedPaste, getEmbedInfo } from "../../lib/embed-utils";
 import {
@@ -15,14 +16,17 @@ import {
 	type LinkPreviewData,
 	stripFirstUrl,
 } from "../../lib/link-preview";
+import type { MentionData } from "../../lib/mentions";
 import { useUploadThing } from "../../lib/uploadthing";
 import { EmojiPickerButton } from "../shared/EmojiPickerButton";
+import { MentionDropdown, type MentionDropdownRef } from "./MentionDropdown";
 
 interface PostComposerProps {
 	onSubmit: (
 		content: string,
 		images: { url: string; fileKey: string }[],
 		linkPreview?: LinkPreviewData,
+		mentions?: MentionData[],
 	) => Promise<void>;
 	maxLength?: number;
 }
@@ -37,8 +41,12 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 	const [isFetchingPreview, setIsFetchingPreview] = useState(false);
 	const [lastFetchedUrl, setLastFetchedUrl] = useState<string | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const mentionDropdownRef = useRef<MentionDropdownRef>(null);
 
 	const { startUpload, isUploading } = useUploadThing("postImage");
+
+	const mention = useMentionAutocomplete();
 
 	// Fetch link preview when content contains a URL (debounced)
 	const fetchPreview = useCallback(async (url: string) => {
@@ -204,7 +212,12 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 				}
 			}
 
-			await onSubmit(content, uploadedImages, linkPreview || undefined);
+			await onSubmit(
+				content,
+				uploadedImages,
+				linkPreview || undefined,
+				mention.mentions.length > 0 ? mention.mentions : undefined,
+			);
 			setContent("");
 			// Clean up previews
 			for (const url of previews) {
@@ -214,6 +227,7 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 			setPreviews([]);
 			setLinkPreview(null);
 			setLastFetchedUrl(null);
+			mention.clearMentions();
 		} catch (error) {
 			console.error("Failed to create post:", error);
 		} finally {
@@ -253,13 +267,45 @@ export function PostComposer({ onSubmit, maxLength = 280 }: PostComposerProps) {
 				</div>
 
 				<div className="flex-1">
-					<textarea
-						value={content}
-						onChange={(e) => handleContentChange(e.target.value)}
-						placeholder="What's on your mind?"
-						rows={3}
-						className="w-full bg-transparent text-white placeholder:text-gray-500 resize-none focus:outline-none text-lg"
-					/>
+					<div className="relative">
+						<textarea
+							ref={textareaRef}
+							value={content}
+							onChange={(e) => {
+								handleContentChange(e.target.value);
+								mention.detectTrigger(
+									e.target.value,
+									e.target.selectionStart ?? 0,
+								);
+							}}
+							onKeyDown={(e) => {
+								if (!mention.isOpen) return;
+								if (mentionDropdownRef.current?.handleKeyDown(e)) {
+									e.preventDefault();
+									return;
+								}
+								if (e.key === "Escape") {
+									e.preventDefault();
+									mention.close();
+								}
+							}}
+							placeholder="What's on your mind?"
+							rows={3}
+							className="w-full bg-transparent text-white placeholder:text-gray-500 resize-none focus:outline-none text-lg"
+						/>
+						{mention.isOpen && mention.triggerType && (
+							<MentionDropdown
+								ref={mentionDropdownRef}
+								triggerType={mention.triggerType}
+								query={mention.query}
+								selectedIndex={mention.selectedIndex}
+								onSelect={(item) => {
+									mention.selectItem(item, content, setContent);
+								}}
+								onSetSelectedIndex={mention.setSelectedIndex}
+							/>
+						)}
+					</div>
 
 					{/* Image previews */}
 					{previews.length > 0 && (

@@ -321,6 +321,43 @@ export const getUpcomingByMonth = query({
 	},
 });
 
+// Search cached games by name for mention autocomplete
+export const searchGames = query({
+	args: { query: v.string(), limit: v.optional(v.number()) },
+	handler: async (ctx, args) => {
+		const limit = args.limit || 10;
+		const searchQuery = args.query.toLowerCase().trim();
+
+		if (!searchQuery) return [];
+
+		const allGames = await ctx.db.query("games").collect();
+
+		return allGames
+			.filter((game) => game.name.toLowerCase().includes(searchQuery))
+			.sort((a, b) => {
+				const aName = a.name.toLowerCase();
+				const bName = b.name.toLowerCase();
+
+				if (aName === searchQuery) return -1;
+				if (bName === searchQuery) return 1;
+				if (aName.startsWith(searchQuery) && !bName.startsWith(searchQuery))
+					return -1;
+				if (bName.startsWith(searchQuery) && !aName.startsWith(searchQuery))
+					return 1;
+				return 0;
+			})
+			.slice(0, limit)
+			.map((g) => ({
+				_id: g._id,
+				name: g.name,
+				slug: g.slug,
+				coverUrl: g.coverUrl,
+				releaseDate: g.releaseDate,
+				categoryLabel: g.categoryLabel,
+			}));
+	},
+});
+
 // Cleanup orphaned games that aren't referenced by any other table
 // and were cached more than `maxAgeDays` days ago
 export const cleanupOrphanedGames = internalMutation({

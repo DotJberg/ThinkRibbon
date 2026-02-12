@@ -13,6 +13,7 @@ import {
 } from "../components/feed/FeedSelector";
 import { PostComposer } from "../components/posts/PostComposer";
 import type { LinkPreviewData } from "../lib/link-preview";
+import type { MentionData } from "../lib/mentions";
 
 // Cache feed data across navigations so scroll restoration works on back nav
 const feedCache = new Map<string, FeedItem[]>();
@@ -132,6 +133,7 @@ function HomePage() {
 			content: string,
 			images: { url: string; fileKey: string }[],
 			linkPreview?: LinkPreviewData,
+			mentions?: MentionData[],
 		) => {
 			if (!user) return;
 			await createPostMut({
@@ -155,6 +157,7 @@ function HomePage() {
 								domain: linkPreview.domain,
 							}
 						: undefined,
+				mentions,
 			});
 		},
 		[user, createPostMut],

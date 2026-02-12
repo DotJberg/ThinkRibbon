@@ -49,6 +49,12 @@ interface FeedItem {
 		siteName: string | undefined;
 		domain: string;
 	};
+	mentions?: Array<{
+		type: "user" | "game";
+		id: string;
+		slug: string;
+		displayText: string;
+	}>;
 	likeCount: number;
 	commentCount: number;
 	topComment?: {
@@ -258,6 +264,7 @@ async function enrichItems(
 				caption: img.caption,
 			})),
 			linkPreview,
+			mentions: post.mentions,
 			likeCount: postLikes.length,
 			commentCount: postComments.length,
 			hasLiked: currentUserId
@@ -321,6 +328,7 @@ async function enrichItems(
 				slug: g.slug,
 				coverUrl: g.coverUrl,
 			})),
+			mentions: article.mentions,
 			likeCount: articleLikes.length,
 			commentCount: articleComments.length,
 			hasLiked: currentUserId
@@ -381,6 +389,7 @@ async function enrichItems(
 						coverUrl: game.coverUrl,
 					}
 				: undefined,
+			mentions: review.mentions,
 			likeCount: reviewLikes.length,
 			commentCount: reviewComments.length,
 			hasLiked: currentUserId

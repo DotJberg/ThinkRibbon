@@ -27,19 +27,34 @@ const notificationMessages: Record<string, string> = {
 	comment_article: "commented on your article",
 	comment_review: "commented on your review",
 	reply_comment: "replied to your comment",
+	mention_post: "mentioned you in a post",
+	mention_article: "mentioned you in an article",
+	mention_review: "mentioned you in a review",
 };
 
 function getNotificationLink(
 	type: string,
 	targetId: string,
 ): { to: string; params: Record<string, string> } {
-	if (type === "like_post" || type === "comment_post") {
+	if (
+		type === "like_post" ||
+		type === "comment_post" ||
+		type === "mention_post"
+	) {
 		return { to: "/posts/$id", params: { id: targetId } };
 	}
-	if (type === "like_article" || type === "comment_article") {
+	if (
+		type === "like_article" ||
+		type === "comment_article" ||
+		type === "mention_article"
+	) {
 		return { to: "/articles/$id", params: { id: targetId } };
 	}
-	if (type === "like_review" || type === "comment_review") {
+	if (
+		type === "like_review" ||
+		type === "comment_review" ||
+		type === "mention_review"
+	) {
 		return { to: "/reviews/$id", params: { id: targetId } };
 	}
 	// For comment-related notifications (like_comment, reply_comment),

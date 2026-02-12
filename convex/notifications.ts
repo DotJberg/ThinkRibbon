@@ -16,6 +16,9 @@ const notificationType = v.union(
 	v.literal("comment_article"),
 	v.literal("comment_review"),
 	v.literal("reply_comment"),
+	v.literal("mention_post"),
+	v.literal("mention_article"),
+	v.literal("mention_review"),
 );
 
 export const getUnreadCount = query({

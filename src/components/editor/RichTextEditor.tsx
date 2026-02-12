@@ -2,9 +2,11 @@
 
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
+import Mention from "@tiptap/extension-mention";
 import Placeholder from "@tiptap/extension-placeholder";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useConvex } from "convex/react";
 import {
 	Bold,
 	Heading1,
@@ -27,8 +29,10 @@ import {
 	getEmbedInfo,
 } from "../../lib/embed-utils";
 import { transformContentForPreview } from "../../lib/tiptap-link-preview";
+import { createGameMention } from "./GameMention";
 import { ImageUploadModal } from "./ImageUploadModal";
 import { LinkPreviewExtension } from "./LinkPreviewNode";
+import { createUserMention } from "./UserMention";
 
 interface RichTextEditorProps {
 	content?: string; // JSON string
@@ -50,6 +54,7 @@ export function RichTextEditor({
 	className = "",
 }: RichTextEditorProps) {
 	const [imageModalOpen, setImageModalOpen] = useState(false);
+	const convex = useConvex();
 
 	const editor = useEditor({
 		extensions: [
@@ -75,6 +80,8 @@ export function RichTextEditor({
 			Placeholder.configure({
 				placeholder,
 			}),
+			createUserMention(convex),
+			createGameMention(convex),
 		],
 		content: content ? JSON.parse(content) : undefined,
 		editable,
@@ -352,10 +359,60 @@ export function RichTextContent({
 	content: string;
 	className?: string;
 }) {
+	const handleMentionClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			const target = e.target as HTMLElement;
+			const mentionEl = target.closest("[data-type]") as HTMLElement | null;
+			if (!mentionEl) return;
+
+			const type = mentionEl.dataset.type;
+			const id = mentionEl.dataset.id;
+
+			if (type === "userMention" && id) {
+				// Find the username from attrs - stored in data-username
+				const username =
+					mentionEl.dataset.username || mentionEl.getAttribute("data-username");
+				if (username) {
+					window.location.href = `/profile/${username}`;
+				}
+			} else if (type === "gameMention" && id) {
+				const slug =
+					mentionEl.dataset.slug || mentionEl.getAttribute("data-slug");
+				if (slug) {
+					window.location.href = `/games/${slug}`;
+				}
+			}
+		},
+		[],
+	);
 	const transformedContent = useMemo(
 		() => transformContentForPreview(JSON.parse(content)),
 		[content],
 	);
+
+	const userMentionReadonly = Mention.extend({
+		name: "userMention",
+	}).configure({
+		HTMLAttributes: {
+			class: "text-sky-400 font-medium cursor-pointer hover:underline",
+			"data-type": "userMention",
+		},
+		renderLabel({ node }) {
+			return node.attrs.displayText || node.attrs.label || "";
+		},
+	});
+
+	const gameMentionReadonly = Mention.extend({
+		name: "gameMention",
+	}).configure({
+		HTMLAttributes: {
+			class: "text-emerald-400 font-medium cursor-pointer hover:underline",
+			"data-type": "gameMention",
+		},
+		renderLabel({ node }) {
+			return node.attrs.displayText || node.attrs.label || "";
+		},
+	});
 
 	const editor = useEditor({
 		extensions: [
@@ -376,6 +433,8 @@ export function RichTextContent({
 				},
 			}),
 			LinkPreviewExtension,
+			userMentionReadonly,
+			gameMentionReadonly,
 		],
 		content: transformedContent,
 		editable: false,
@@ -403,7 +462,9 @@ export function RichTextContent({
 	}
 
 	return (
-		<div className={className}>
+		/* biome-ignore lint/a11y/noStaticElementInteractions: delegated click handler for mention navigation */
+		/* biome-ignore lint/a11y/useKeyWithClickEvents: mentions inside are already keyboard-accessible links */
+		<div className={className} onClick={handleMentionClick}>
 			<EditorContent editor={editor} />
 		</div>
 	);

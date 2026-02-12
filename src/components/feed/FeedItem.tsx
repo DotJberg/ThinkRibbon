@@ -17,6 +17,8 @@ import { memo, useCallback, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { stripFirstUrl } from "../../lib/link-preview";
+import type { MentionData } from "../../lib/mentions";
+import { renderPostContent } from "../../lib/renderPostContent";
 import { EditPostModal } from "../posts/EditPostModal";
 import { PostImageGrid } from "../posts/PostImageGrid";
 import { DeleteConfirmationModal } from "../shared/DeleteConfirmationModal";
@@ -76,6 +78,7 @@ interface FeedItem {
 		slug: string;
 		coverUrl: string | undefined;
 	}>;
+	mentions?: MentionData[];
 	likeCount: number;
 	commentCount: number;
 	topComment?: {
@@ -595,7 +598,10 @@ export const FeedItemCard = memo(function FeedItemCard({
 			{item.type === "post" && (
 				<div className="text-gray-300 mb-3">
 					<p className="whitespace-pre-wrap break-words">
-						{item.linkPreview ? stripFirstUrl(item.content) : item.content}
+						{renderPostContent(
+							item.linkPreview ? stripFirstUrl(item.content) : item.content,
+							item.mentions,
+						)}
 					</p>
 					{item.images && item.images.length > 0 && (
 						<PostImageGrid images={item.images} />

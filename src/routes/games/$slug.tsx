@@ -1,14 +1,33 @@
 import { useUser } from "@clerk/clerk-react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
-import { ArrowLeft, Calendar, FileText, Gamepad2, Star } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	ArrowLeft,
+	Calendar,
+	ChevronLeft,
+	ChevronRight,
+	FileText,
+	Gamepad2,
+	Play,
+	Star,
+	X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { CollectionButton } from "../../components/collection/CollectionButton";
+import { GameCard } from "../../components/games/GameCard";
 import { QuestLogButton } from "../../components/questlog/QuestLogButton";
 import { ReviewCard } from "../../components/reviews/ReviewCard";
 import { StarRatingDisplay } from "../../components/shared/StarRating";
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from "../../components/ui/carousel";
 import { getConvexClient } from "../../lib/convex-server";
+import { buildIgdbImageUrl } from "../../lib/igdb-images";
 import { buildMeta, seoTitle, seoUrl, truncate } from "../../lib/seo";
 
 const STALE_THRESHOLD_DAYS = 30;
@@ -56,10 +75,17 @@ function GameDetailPage() {
 	const router = useRouter();
 	const [activeTab, setActiveTab] = useState<"reviews" | "articles">("reviews");
 	const hasTriggeredRefresh = useRef(false);
+	const hasTriggeredSimilarFetch = useRef(false);
+
+	// Lightbox & modal state
+	const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+	const [selectedVideo, setSelectedVideo] = useState<{
+		name: string;
+		videoId: string;
+	} | null>(null);
 
 	// Smart back navigation - goes back in history or falls back to /games
 	const handleBack = useCallback(() => {
-		// Check if we have history to go back to
 		if (window.history.length > 1) {
 			router.history.back();
 		} else {
@@ -72,19 +98,55 @@ function GameDetailPage() {
 	const refreshGame = useAction(api.igdb.fetchBySlug);
 
 	// Stale-while-revalidate: refresh game data if cached for too long
+	// or if detail fields (added later) are missing
 	useEffect(() => {
 		if (!game || hasTriggeredRefresh.current) return;
 
 		const cachedAt = game.cachedAt;
 		const staleCutoff = Date.now() - STALE_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
+		const missingDetailFields = game.developers === undefined;
 
-		if (cachedAt < staleCutoff) {
+		if (cachedAt < staleCutoff || missingDetailFields) {
 			hasTriggeredRefresh.current = true;
 			refreshGame({ slug }).catch((err) => {
 				console.error("Failed to refresh game data:", err);
 			});
 		}
 	}, [game, slug, refreshGame]);
+
+	// Similar games
+	const similarIgdbIds = game?.similarGameIgdbIds;
+	const similarGamesFromCache = useQuery(
+		api.games.getByIgdbIds,
+		similarIgdbIds && similarIgdbIds.length > 0
+			? { igdbIds: similarIgdbIds.slice(0, 5) }
+			: "skip",
+	);
+	const fetchSimilarGames = useAction(api.igdb.fetchSimilarGames);
+
+	// Fetch uncached similar games once
+	useEffect(() => {
+		if (
+			!similarIgdbIds ||
+			similarIgdbIds.length === 0 ||
+			hasTriggeredSimilarFetch.current
+		)
+			return;
+		if (similarGamesFromCache === undefined) return; // still loading
+
+		const cachedIds = new Set(similarGamesFromCache.map((g) => g.igdbId));
+		const uncachedIds = similarIgdbIds
+			.slice(0, 5)
+			.filter((id) => !cachedIds.has(id));
+
+		if (uncachedIds.length > 0) {
+			hasTriggeredSimilarFetch.current = true;
+			fetchSimilarGames({ igdbIds: uncachedIds }).catch((err) => {
+				console.error("Failed to fetch similar games:", err);
+			});
+		}
+	}, [similarIgdbIds, similarGamesFromCache, fetchSimilarGames]);
+
 	const reviewsData = useQuery(
 		api.reviews.getByGame,
 		game ? { gameId: game._id, limit: 20 } : "skip",
@@ -98,9 +160,32 @@ function GameDetailPage() {
 		game ? { gameId: game._id } : "skip",
 	);
 
+	// Combine screenshots + artworks into a single gallery
+	const allImages = useMemo(() => {
+		if (!game) return [];
+		const images: string[] = [];
+		if (game.screenshots) images.push(...game.screenshots);
+		if (game.artworks) images.push(...game.artworks);
+		return images;
+	}, [game]);
+
 	const isLoading = game === undefined;
 	const reviews = reviewsData?.reviews ?? [];
 	const articles = articlesData ?? [];
+
+	// Hero backdrop image — first artwork, fallback to first screenshot
+	const backdropImageId = game?.artworks?.[0] ?? game?.screenshots?.[0] ?? null;
+
+	// Developer/publisher display
+	const developers = game?.developers?.length ? game.developers : null;
+	const publishers = game?.publishers?.length ? game.publishers : null;
+	const hasCompanyInfo = developers || publishers;
+
+	// Videos
+	const videos = game?.videos?.length ? game.videos : null;
+
+	// Platforms
+	const platforms = game?.platforms?.length ? game.platforms : null;
 
 	if (isLoading) {
 		return (
@@ -131,8 +216,22 @@ function GameDetailPage() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-slate-800/20">
 			{/* Hero */}
-			<div className="relative">
-				<div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900" />
+			<div className="relative overflow-hidden">
+				{/* Backdrop artwork */}
+				{backdropImageId && (
+					<div className="absolute inset-0">
+						<img
+							src={buildIgdbImageUrl(backdropImageId, "720p")}
+							alt=""
+							className="w-full h-full object-cover scale-110 blur-sm"
+						/>
+						<div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/80 to-gray-900" />
+					</div>
+				)}
+				{!backdropImageId && (
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900" />
+				)}
+
 				<div className="container mx-auto px-4 py-8">
 					<button
 						type="button"
@@ -183,7 +282,7 @@ function GameDetailPage() {
 							</div>
 
 							{game.genres.length > 0 && (
-								<div className="flex flex-wrap gap-2 mb-4">
+								<div className="flex flex-wrap gap-2 mb-3">
 									{game.genres.map((genre) => (
 										<span
 											key={genre}
@@ -193,6 +292,45 @@ function GameDetailPage() {
 										</span>
 									))}
 								</div>
+							)}
+
+							{/* Platforms */}
+							{platforms && (
+								<div className="flex flex-wrap gap-2 mb-4">
+									{platforms.map((platform) => (
+										<span
+											key={platform}
+											className="px-2.5 py-0.5 bg-slate-700/60 rounded-full text-xs text-slate-300 border border-slate-600/30"
+										>
+											{platform}
+										</span>
+									))}
+								</div>
+							)}
+
+							{/* Developer / Publisher */}
+							{hasCompanyInfo && (
+								<p className="text-sm text-gray-500 mb-4">
+									{developers && (
+										<span>
+											Developed by{" "}
+											<span className="text-gray-400">
+												{developers.join(", ")}
+											</span>
+										</span>
+									)}
+									{developers && publishers && (
+										<span className="mx-2 text-gray-600">&middot;</span>
+									)}
+									{publishers && (
+										<span>
+											Published by{" "}
+											<span className="text-gray-400">
+												{publishers.join(", ")}
+											</span>
+										</span>
+									)}
+								</p>
 							)}
 
 							{game.summary && (
@@ -228,6 +366,85 @@ function GameDetailPage() {
 					</div>
 				</div>
 			</div>
+
+			{/* Videos */}
+			{videos && (
+				<div className="container mx-auto px-4 pt-8">
+					<h2 className="text-lg font-semibold text-white mb-4">
+						Trailers & Videos
+					</h2>
+					<Carousel opts={{ align: "start", loop: true }} className="w-full">
+						<CarouselContent className="-ml-3">
+							{videos.map((video) => (
+								<CarouselItem
+									key={video.videoId}
+									className="pl-3 basis-full sm:basis-1/2 lg:basis-1/3"
+								>
+									<button
+										type="button"
+										onClick={() => setSelectedVideo(video)}
+										className="w-full group/vid relative rounded-lg overflow-hidden"
+									>
+										<img
+											src={`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
+											alt={video.name}
+											loading="lazy"
+											className="w-full aspect-video object-cover"
+										/>
+										<div className="absolute inset-0 bg-black/30 group-hover/vid:bg-black/10 transition-colors flex items-center justify-center">
+											<div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover/vid:bg-white/30 group-hover/vid:scale-110 transition-all">
+												<Play
+													size={20}
+													className="text-white fill-white ml-0.5"
+												/>
+											</div>
+										</div>
+										<div className="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+											<p className="text-xs text-gray-200 truncate">
+												{video.name}
+											</p>
+										</div>
+									</button>
+								</CarouselItem>
+							))}
+						</CarouselContent>
+						<CarouselPrevious className="left-2 bg-black/60 border-gray-700 text-white hover:bg-black/80 hover:text-white disabled:opacity-0" />
+						<CarouselNext className="right-2 bg-black/60 border-gray-700 text-white hover:bg-black/80 hover:text-white disabled:opacity-0" />
+					</Carousel>
+				</div>
+			)}
+
+			{/* Screenshots Carousel */}
+			{allImages.length > 0 && (
+				<div className="container mx-auto px-4 pt-8">
+					<h2 className="text-lg font-semibold text-white mb-4">Screenshots</h2>
+					<Carousel opts={{ align: "start", loop: true }} className="w-full">
+						<CarouselContent className="-ml-3">
+							{allImages.map((imageId, index) => (
+								<CarouselItem
+									key={imageId}
+									className="pl-3 basis-full sm:basis-1/2 lg:basis-1/3"
+								>
+									<button
+										type="button"
+										onClick={() => setLightboxIndex(index)}
+										className="group/ss w-full rounded-lg overflow-hidden aspect-video bg-gray-800"
+									>
+										<img
+											src={buildIgdbImageUrl(imageId, "screenshot_big")}
+											alt={`Screenshot ${index + 1}`}
+											loading="lazy"
+											className="w-full h-full object-cover group-hover/ss:scale-105 transition-transform duration-300"
+										/>
+									</button>
+								</CarouselItem>
+							))}
+						</CarouselContent>
+						<CarouselPrevious className="left-2 bg-black/60 border-gray-700 text-white hover:bg-black/80 hover:text-white disabled:opacity-0" />
+						<CarouselNext className="right-2 bg-black/60 border-gray-700 text-white hover:bg-black/80 hover:text-white disabled:opacity-0" />
+					</Carousel>
+				</div>
+			)}
 
 			{/* Tabs */}
 			<div className="container mx-auto px-4 py-8">
@@ -327,6 +544,165 @@ function GameDetailPage() {
 					</div>
 				)}
 			</div>
+
+			{/* Similar Games */}
+			{similarGamesFromCache && similarGamesFromCache.length > 0 && (
+				<div className="container mx-auto px-4 pb-12">
+					<h2 className="text-lg font-semibold text-white mb-4">
+						Similar Games
+					</h2>
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+						{similarGamesFromCache.map((sg) => (
+							<GameCard
+								key={sg._id}
+								game={{
+									id: sg._id,
+									name: sg.name,
+									slug: sg.slug,
+									coverUrl: sg.coverUrl ?? null,
+									genres: sg.genres,
+									releaseDate: sg.releaseDate ? new Date(sg.releaseDate) : null,
+									categoryLabel: sg.categoryLabel,
+								}}
+							/>
+						))}
+					</div>
+				</div>
+			)}
+
+			{/* Similar Games loading skeletons */}
+			{similarIgdbIds &&
+				similarIgdbIds.length > 0 &&
+				similarGamesFromCache === undefined && (
+					<div className="container mx-auto px-4 pb-12">
+						<h2 className="text-lg font-semibold text-white mb-4">
+							Similar Games
+						</h2>
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+							{["a", "b", "c", "d", "e"].map((key) => (
+								<div key={key}>
+									<div className="bg-gray-800/50 border border-gray-700/50 rounded-xl overflow-hidden">
+										<div className="aspect-[3/4] bg-gray-700 animate-pulse" />
+										<div className="p-3 space-y-2">
+											<div className="h-4 bg-gray-700 rounded animate-pulse" />
+											<div className="h-3 bg-gray-700/50 rounded w-2/3 animate-pulse" />
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+
+			{/* Screenshot Lightbox */}
+			{lightboxIndex !== null && allImages.length > 0 && (
+				<div
+					role="dialog"
+					aria-label="Screenshot viewer"
+					className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center"
+					onClick={() => setLightboxIndex(null)}
+					onKeyDown={(e) => {
+						if (e.key === "Escape") setLightboxIndex(null);
+						if (e.key === "ArrowLeft")
+							setLightboxIndex((prev) =>
+								prev !== null
+									? (prev - 1 + allImages.length) % allImages.length
+									: null,
+							);
+						if (e.key === "ArrowRight")
+							setLightboxIndex((prev) =>
+								prev !== null ? (prev + 1) % allImages.length : null,
+							);
+					}}
+				>
+					<button
+						type="button"
+						onClick={() => setLightboxIndex(null)}
+						className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors z-10"
+					>
+						<X size={24} />
+					</button>
+
+					{allImages.length > 1 && (
+						<>
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									setLightboxIndex((prev) =>
+										prev !== null
+											? (prev - 1 + allImages.length) % allImages.length
+											: null,
+									);
+								}}
+								className="absolute left-4 p-2 text-gray-400 hover:text-white transition-colors z-10"
+							>
+								<ChevronLeft size={32} />
+							</button>
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									setLightboxIndex((prev) =>
+										prev !== null ? (prev + 1) % allImages.length : null,
+									);
+								}}
+								className="absolute right-4 p-2 text-gray-400 hover:text-white transition-colors z-10"
+							>
+								<ChevronRight size={32} />
+							</button>
+						</>
+					)}
+
+					{/* biome-ignore lint/a11y/useKeyWithClickEvents: key events handled on parent dialog */}
+					<img
+						src={buildIgdbImageUrl(allImages[lightboxIndex], "screenshot_huge")}
+						alt={`Screenshot ${lightboxIndex + 1}`}
+						className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
+						onClick={(e) => e.stopPropagation()}
+					/>
+
+					<div className="absolute bottom-4 text-gray-500 text-sm">
+						{lightboxIndex + 1} / {allImages.length}
+					</div>
+				</div>
+			)}
+
+			{/* Video Modal */}
+			{selectedVideo && (
+				<div
+					role="dialog"
+					aria-label="Video player"
+					className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+					onClick={() => setSelectedVideo(null)}
+					onKeyDown={(e) => {
+						if (e.key === "Escape") setSelectedVideo(null);
+					}}
+				>
+					<button
+						type="button"
+						onClick={() => setSelectedVideo(null)}
+						className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors z-10"
+					>
+						<X size={24} />
+					</button>
+
+					{/* biome-ignore lint/a11y/useKeyWithClickEvents: key events handled on parent dialog */}
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for iframe */}
+					<div
+						className="w-full max-w-4xl aspect-video"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<iframe
+							src={`https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=1`}
+							title={selectedVideo.name}
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+							allowFullScreen
+							className="w-full h-full rounded-lg"
+						/>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

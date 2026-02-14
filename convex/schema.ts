@@ -36,6 +36,14 @@ export default defineSchema({
 		platforms: v.array(v.string()),
 		rating: v.optional(v.number()),
 		hypes: v.optional(v.number()), // IGDB hype count for upcoming games
+		screenshots: v.optional(v.array(v.string())), // IGDB image_ids
+		artworks: v.optional(v.array(v.string())), // IGDB image_ids
+		developers: v.optional(v.array(v.string())), // Company names
+		publishers: v.optional(v.array(v.string())), // Company names
+		videos: v.optional(
+			v.array(v.object({ name: v.string(), videoId: v.string() })),
+		),
+		similarGameIgdbIds: v.optional(v.array(v.number())), // IGDB game IDs
 		cachedAt: v.number(),
 		updatedAt: v.optional(v.number()),
 		categoryLabel: v.optional(v.string()), // DLC, Expansion, Remake, etc.

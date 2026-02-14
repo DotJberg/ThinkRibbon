@@ -21,6 +21,16 @@ interface IGDBGame {
 	rating?: number;
 	game_type?: { id: number; type: string }; // Main Game, DLC, Expansion, etc.
 	version_parent?: number; // If set, this is an edition/variant of another game
+	screenshots?: { id: number; image_id: string }[];
+	artworks?: { id: number; image_id: string }[];
+	involved_companies?: {
+		id: number;
+		company: { id: number; name: string };
+		developer: boolean;
+		publisher: boolean;
+	}[];
+	videos?: { id: number; name: string; video_id: string }[];
+	similar_games?: number[];
 }
 
 // In-memory token cache (per action invocation; short-lived)
@@ -171,6 +181,19 @@ function igdbToGameData(igdbGame: IGDBGame) {
 		platforms: igdbGame.platforms?.map((p) => p.name) || [],
 		rating: igdbGame.rating || undefined,
 		categoryLabel,
+		screenshots: igdbGame.screenshots?.map((s) => s.image_id),
+		artworks: igdbGame.artworks?.map((a) => a.image_id),
+		developers: igdbGame.involved_companies
+			?.filter((ic) => ic.developer)
+			.map((ic) => ic.company.name),
+		publishers: igdbGame.involved_companies
+			?.filter((ic) => ic.publisher)
+			.map((ic) => ic.company.name),
+		videos: igdbGame.videos?.map((v) => ({
+			name: v.name,
+			videoId: v.video_id,
+		})),
+		similarGameIgdbIds: igdbGame.similar_games,
 	};
 }
 
@@ -315,7 +338,11 @@ export const fetchBySlug = action({
 		}
 
 		const query = `
-			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, game_type.type;
+			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, game_type.type,
+				screenshots.image_id, artworks.image_id,
+				involved_companies.company.name, involved_companies.developer, involved_companies.publisher,
+				videos.name, videos.video_id,
+				similar_games;
 			where slug = "${args.slug}";
 			limit 1;
 		`;
@@ -337,6 +364,12 @@ export const fetchBySlug = action({
 				platforms: gameData.platforms,
 				rating: gameData.rating,
 				categoryLabel: gameData.categoryLabel,
+				screenshots: gameData.screenshots,
+				artworks: gameData.artworks,
+				developers: gameData.developers,
+				publishers: gameData.publishers,
+				videos: gameData.videos,
+				similarGameIgdbIds: gameData.similarGameIgdbIds,
 			},
 		);
 		return { _id: id, ...gameData };
@@ -538,6 +571,46 @@ export const fetchUpcomingByMonth = action({
 					rating: gameData.rating,
 					categoryLabel: gameData.categoryLabel,
 					hypes: gameData.hypes,
+				},
+			);
+			results.push({ _id: id, ...gameData });
+		}
+
+		return results;
+	},
+});
+
+export const fetchSimilarGames = action({
+	args: { igdbIds: v.array(v.number()) },
+	handler: async (ctx, args) => {
+		const ids = args.igdbIds.slice(0, 20);
+		if (ids.length === 0) return [];
+
+		const idList = ids.join(",");
+		const query = `
+			fields id, name, slug, summary, cover.image_id, first_release_date, genres.name, platforms.name, rating, game_type.type;
+			where id = (${idList});
+			limit 20;
+		`;
+
+		const igdbGames = await igdbRequest<IGDBGame[]>("games", query);
+
+		const results = [];
+		for (const igdbGame of igdbGames) {
+			const gameData = igdbToGameData(igdbGame);
+			const id: Id<"games"> = await ctx.runMutation(
+				internal.games.upsertFromIgdb,
+				{
+					igdbId: gameData.igdbId,
+					name: gameData.name,
+					slug: gameData.slug,
+					summary: gameData.summary,
+					coverUrl: gameData.coverUrl,
+					releaseDate: gameData.releaseDate,
+					genres: gameData.genres,
+					platforms: gameData.platforms,
+					rating: gameData.rating,
+					categoryLabel: gameData.categoryLabel,
 				},
 			);
 			results.push({ _id: id, ...gameData });

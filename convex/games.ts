@@ -14,6 +14,14 @@ export const upsertFromIgdb = internalMutation({
 		rating: v.optional(v.number()),
 		hypes: v.optional(v.number()),
 		categoryLabel: v.optional(v.string()),
+		screenshots: v.optional(v.array(v.string())),
+		artworks: v.optional(v.array(v.string())),
+		developers: v.optional(v.array(v.string())),
+		publishers: v.optional(v.array(v.string())),
+		videos: v.optional(
+			v.array(v.object({ name: v.string(), videoId: v.string() })),
+		),
+		similarGameIgdbIds: v.optional(v.array(v.number())),
 	},
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
@@ -21,20 +29,38 @@ export const upsertFromIgdb = internalMutation({
 			.withIndex("by_igdbId", (q) => q.eq("igdbId", args.igdbId))
 			.unique();
 
+		// Build patch — only include detail fields when explicitly provided
+		// so that search/list operations don't clear data written by fetchBySlug
+		const {
+			screenshots,
+			artworks,
+			developers,
+			publishers,
+			videos,
+			similarGameIgdbIds,
+			...baseFields
+		} = args;
+
+		const patch: Record<string, unknown> = {
+			...baseFields,
+			cachedAt: Date.now(),
+			updatedAt: Date.now(),
+		};
+
+		if (screenshots !== undefined) patch.screenshots = screenshots;
+		if (artworks !== undefined) patch.artworks = artworks;
+		if (developers !== undefined) patch.developers = developers;
+		if (publishers !== undefined) patch.publishers = publishers;
+		if (videos !== undefined) patch.videos = videos;
+		if (similarGameIgdbIds !== undefined)
+			patch.similarGameIgdbIds = similarGameIgdbIds;
+
 		if (existing) {
-			await ctx.db.patch(existing._id, {
-				...args,
-				cachedAt: Date.now(),
-				updatedAt: Date.now(),
-			});
+			await ctx.db.patch(existing._id, patch);
 			return existing._id;
 		}
 
-		return ctx.db.insert("games", {
-			...args,
-			cachedAt: Date.now(),
-			updatedAt: Date.now(),
-		});
+		return ctx.db.insert("games", patch as typeof args & { cachedAt: number; updatedAt: number });
 	},
 });
 
@@ -318,6 +344,32 @@ export const getUpcomingByMonth = query({
 		}
 
 		return { games: paginated, nextCursor, total: monthGames.length };
+	},
+});
+
+export const getByIgdbIds = query({
+	args: { igdbIds: v.array(v.number()) },
+	handler: async (ctx, args) => {
+		const results = [];
+		for (const igdbId of args.igdbIds) {
+			const game = await ctx.db
+				.query("games")
+				.withIndex("by_igdbId", (q) => q.eq("igdbId", igdbId))
+				.unique();
+			if (game) {
+				results.push({
+					_id: game._id,
+					igdbId: game.igdbId,
+					name: game.name,
+					slug: game.slug,
+					coverUrl: game.coverUrl,
+					genres: game.genres,
+					releaseDate: game.releaseDate,
+					categoryLabel: game.categoryLabel,
+				});
+			}
+		}
+		return results;
 	},
 });
 

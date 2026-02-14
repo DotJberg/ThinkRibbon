@@ -56,12 +56,17 @@ export const Route = createFileRoute("/games/$slug")({
 		const description = game.summary
 			? truncate(game.summary)
 			: `Explore ${game.name} on Think Ribbon — reviews, articles, and community discussion.`;
+		// Prefer widescreen artwork/screenshot for OG image, fall back to cover
+		const ogImageId = game.artworks?.[0] ?? game.screenshots?.[0];
+		const ogImage = ogImageId
+			? `https://images.igdb.com/igdb/image/upload/t_screenshot_huge/${ogImageId}.jpg`
+			: game.coverUrl;
 		return {
 			meta: buildMeta({
 				title,
 				description,
 				url: seoUrl(`/games/${game.slug}`),
-				image: game.coverUrl,
+				image: ogImage,
 				type: "website",
 			}),
 		};
@@ -76,6 +81,7 @@ function GameDetailPage() {
 	const [activeTab, setActiveTab] = useState<"reviews" | "articles">("reviews");
 	const hasTriggeredRefresh = useRef(false);
 	const hasTriggeredSimilarFetch = useRef(false);
+	const lightboxRef = useRef<HTMLDivElement>(null);
 
 	// Lightbox & modal state
 	const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -83,6 +89,23 @@ function GameDetailPage() {
 		name: string;
 		videoId: string;
 	} | null>(null);
+
+	// Auto-focus lightbox when opened for keyboard navigation
+	useEffect(() => {
+		if (lightboxIndex !== null) {
+			lightboxRef.current?.focus();
+		}
+	}, [lightboxIndex]);
+
+	// Lock body scroll when lightbox or video modal is open
+	useEffect(() => {
+		if (lightboxIndex !== null || selectedVideo) {
+			document.body.style.overflow = "hidden";
+			return () => {
+				document.body.style.overflow = "";
+			};
+		}
+	}, [lightboxIndex, selectedVideo]);
 
 	// Smart back navigation - goes back in history or falls back to /games
 	const handleBack = useCallback(() => {
@@ -224,6 +247,9 @@ function GameDetailPage() {
 							src={buildIgdbImageUrl(backdropImageId, "720p")}
 							alt=""
 							className="w-full h-full object-cover scale-110 blur-sm"
+							onError={(e) => {
+								e.currentTarget.parentElement?.classList.add("hidden");
+							}}
 						/>
 						<div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/80 to-gray-900" />
 					</div>
@@ -390,6 +416,9 @@ function GameDetailPage() {
 											alt={video.name}
 											loading="lazy"
 											className="w-full aspect-video object-cover"
+											onError={(e) => {
+												e.currentTarget.parentElement?.classList.add("hidden");
+											}}
 										/>
 										<div className="absolute inset-0 bg-black/30 group-hover/vid:bg-black/10 transition-colors flex items-center justify-center">
 											<div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover/vid:bg-white/30 group-hover/vid:scale-110 transition-all">
@@ -435,6 +464,9 @@ function GameDetailPage() {
 											alt={`Screenshot ${index + 1}`}
 											loading="lazy"
 											className="w-full h-full object-cover group-hover/ss:scale-105 transition-transform duration-300"
+											onError={(e) => {
+												e.currentTarget.parentElement?.classList.add("hidden");
+											}}
 										/>
 									</button>
 								</CarouselItem>
@@ -597,9 +629,11 @@ function GameDetailPage() {
 			{/* Screenshot Lightbox */}
 			{lightboxIndex !== null && allImages.length > 0 && (
 				<div
+					ref={lightboxRef}
 					role="dialog"
 					aria-label="Screenshot viewer"
-					className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center"
+					tabIndex={-1}
+					className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center outline-none"
 					onClick={() => setLightboxIndex(null)}
 					onKeyDown={(e) => {
 						if (e.key === "Escape") setLightboxIndex(null);
@@ -660,6 +694,9 @@ function GameDetailPage() {
 						alt={`Screenshot ${lightboxIndex + 1}`}
 						className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
 						onClick={(e) => e.stopPropagation()}
+						onError={(e) => {
+							e.currentTarget.style.display = "none";
+						}}
 					/>
 
 					<div className="absolute bottom-4 text-gray-500 text-sm">

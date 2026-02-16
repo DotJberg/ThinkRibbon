@@ -32,6 +32,7 @@ import { ReportModal } from "../../components/shared/ReportModal";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
 import { getConvexClient } from "../../lib/convex-server";
 import { stripFirstUrl } from "../../lib/link-preview";
+import { renderPostContent } from "../../lib/renderPostContent";
 import { buildMeta, seoTitle, seoUrl, truncate } from "../../lib/seo";
 
 export const Route = createFileRoute("/posts/$id")({
@@ -303,7 +304,10 @@ function PostDetailPage() {
 					</div>
 
 					<p className="text-white whitespace-pre-wrap break-words text-lg mb-6">
-						{post.linkPreview ? stripFirstUrl(post.content) : post.content}
+						{renderPostContent(
+							post.linkPreview ? stripFirstUrl(post.content) : post.content,
+							post.mentions,
+						)}
 					</p>
 
 					{post.images && post.images.length > 0 && (

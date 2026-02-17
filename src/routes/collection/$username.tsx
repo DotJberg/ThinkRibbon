@@ -13,13 +13,13 @@ import {
 	Library,
 	Pencil,
 	Plus,
-	Star,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { CollectionGameSearchModal } from "../../components/collection/CollectionGameSearchModal";
 import { EditCollectionModal } from "../../components/collection/EditCollectionModal";
 import { HoursPlayedBadge } from "../../components/collection/HoursPlayedBadge";
+import { StarRating } from "../../components/shared/StarRating";
 
 type CollectionStatus =
 	| "Unplayed"
@@ -413,21 +413,9 @@ function CollectionPage() {
 
 						{/* Rating */}
 						{displayRating && (
-							<div className="flex items-center gap-1 mt-2">
-								{[1, 2, 3, 4, 5].map((star) => (
-									<Star
-										key={star}
-										size={14}
-										className={
-											star <= displayRating
-												? "text-yellow-400 fill-yellow-400"
-												: "text-gray-600"
-										}
-									/>
-								))}
-								<span className="text-xs text-gray-500 ml-1">
-									{displayRating}/5
-								</span>
+							<div className="flex items-center gap-2 mt-2">
+								<StarRating rating={displayRating} size="sm" />
+								<span className="text-xs text-gray-500">{displayRating}/5</span>
 							</div>
 						)}
 
@@ -530,19 +518,7 @@ function CollectionPage() {
 										{statusLabels[playthrough.status as QuestLogStatus]}
 									</span>
 									{playthrough.quickRating && (
-										<div className="flex items-center gap-0.5">
-											{[1, 2, 3, 4, 5].map((star) => (
-												<Star
-													key={star}
-													size={12}
-													className={
-														star <= (playthrough.quickRating ?? 0)
-															? "text-yellow-400 fill-yellow-400"
-															: "text-gray-600"
-													}
-												/>
-											))}
-										</div>
+										<StarRating rating={playthrough.quickRating} size="sm" />
 									)}
 								</div>
 

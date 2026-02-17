@@ -1,10 +1,11 @@
 import { useUser } from "@clerk/clerk-react";
 import { useAction, useMutation } from "convex/react";
-import { Loader2, Search, Star, X, Zap } from "lucide-react";
+import { Loader2, Search, X, Zap } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameSearchResult } from "@/types/game";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { StarRating } from "./StarRating";
 
 interface QuickReviewModalProps {
 	isOpen: boolean;
@@ -23,7 +24,6 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 		null,
 	);
 	const [rating, setRating] = useState(0);
-	const [hoveredStar, setHoveredStar] = useState(0);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -70,14 +70,12 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 		setResults([]);
 		setSelectedGame(null);
 		setRating(0);
-		setHoveredStar(0);
 		onClose();
 	};
 
 	const handleBack = () => {
 		setSelectedGame(null);
 		setRating(0);
-		setHoveredStar(0);
 	};
 
 	const handleSubmit = async () => {
@@ -239,27 +237,13 @@ export function QuickReviewModal({ isOpen, onClose }: QuickReviewModalProps) {
 						{/* Star Rating */}
 						<div className="flex flex-col items-center gap-3">
 							<p className="text-sm text-gray-400">How would you rate it?</p>
-							<div className="flex gap-1">
-								{[1, 2, 3, 4, 5].map((star) => (
-									<button
-										key={star}
-										type="button"
-										onClick={() => setRating(star)}
-										onMouseEnter={() => setHoveredStar(star)}
-										onMouseLeave={() => setHoveredStar(0)}
-										className="p-1 transition-transform hover:scale-110"
-									>
-										<Star
-											size={32}
-											className={
-												star <= (hoveredStar || rating)
-													? "text-yellow-400 fill-yellow-400"
-													: "text-gray-600"
-											}
-										/>
-									</button>
-								))}
-							</div>
+							<StarRating
+								rating={rating}
+								size="lg"
+								interactive
+								onChange={setRating}
+								showLabel
+							/>
 						</div>
 
 						{/* Submit */}

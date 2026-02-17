@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getRatingLabel, isValidRating } from "./ratings";
 
 const questLogStatus = v.union(
 	v.literal("Playing"),
@@ -189,8 +190,8 @@ export const updateStatus = mutation({
 		// Generate post if requested
 		if (args.shareAsPost && args.quickRating && game) {
 			const statusText = getStatusText(args.newStatus);
-			const stars = "\u2B50".repeat(args.quickRating);
-			const content = `I just ${statusText} ${game.name}! ${stars}`;
+			const label = getRatingLabel(args.quickRating);
+			const content = `I just ${statusText} ${game.name}! ${args.quickRating}/5 - ${label}`;
 
 			await ctx.db.insert("posts", {
 				content: content.slice(0, 280),
@@ -432,8 +433,8 @@ export const quickRate = mutation({
 		quickRating: v.number(),
 	},
 	handler: async (ctx, args) => {
-		if (args.quickRating < 1 || args.quickRating > 5) {
-			throw new Error("Rating must be between 1 and 5");
+		if (!isValidRating(args.quickRating)) {
+			throw new Error("Rating must be between 0.5 and 5 in half-star increments");
 		}
 
 		const user = await ctx.db

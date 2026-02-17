@@ -4,6 +4,7 @@ import { BookOpen, Check, Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { getRatingLabel } from "../../../convex/ratings";
 
 type QuestLogStatus =
 	| "Playing"
@@ -124,7 +125,7 @@ export function QuestLogButton({
 					{statusLabels[entry.status]}
 					{entry.quickRating && (
 						<span className="ml-1 text-yellow-300">
-							{"⭐".repeat(entry.quickRating)}
+							{entry.quickRating}/5 - {getRatingLabel(entry.quickRating)}
 						</span>
 					)}
 				</button>

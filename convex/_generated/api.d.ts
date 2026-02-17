@@ -24,6 +24,7 @@ import type * as migrations_migrateCompletedToBeaten from "../migrations/migrate
 import type * as notifications from "../notifications.js";
 import type * as posts from "../posts.js";
 import type * as questlog from "../questlog.js";
+import type * as ratings from "../ratings.js";
 import type * as reports from "../reports.js";
 import type * as reviews from "../reviews.js";
 import type * as sitemap from "../sitemap.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   posts: typeof posts;
   questlog: typeof questlog;
+  ratings: typeof ratings;
   reports: typeof reports;
   reviews: typeof reviews;
   sitemap: typeof sitemap;

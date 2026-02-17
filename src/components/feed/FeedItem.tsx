@@ -30,6 +30,7 @@ import { PixelSpeechBubble } from "../shared/PixelSpeechBubble";
 import { ReportModal } from "../shared/ReportModal";
 import { SafeImage } from "../shared/SafeImage";
 import { SpoilerBadge } from "../shared/SpoilerWarning";
+import { StarRating } from "../shared/StarRating";
 import { TagDisplay } from "../shared/TagDisplay";
 
 // FeedItem type (previously from lib/server/feed)
@@ -502,18 +503,8 @@ export const FeedItemCard = memo(function FeedItemCard({
 
 			{/* Rating (for reviews) */}
 			{item.type === "review" && item.rating && (
-				<div className="flex items-center gap-1 mb-2">
-					{[1, 2, 3, 4, 5].map((star) => (
-						<Star
-							key={star}
-							size={16}
-							className={
-								star <= (item.rating || 0)
-									? "text-yellow-400 fill-yellow-400"
-									: "text-gray-600"
-							}
-						/>
-					))}
+				<div className="mb-2">
+					<StarRating rating={item.rating} size="sm" showLabel />
 				</div>
 			)}
 

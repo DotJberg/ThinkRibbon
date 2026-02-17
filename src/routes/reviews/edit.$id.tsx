@@ -316,6 +316,7 @@ function EditReviewPage() {
 							size="lg"
 							interactive
 							onChange={setRating}
+							showLabel
 						/>
 					</div>
 

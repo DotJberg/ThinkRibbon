@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { isValidRating } from "./ratings";
 
 const MAX_DRAFTS_PER_USER = 10;
 
@@ -235,8 +236,8 @@ export const saveReviewDraft = mutation({
 			.unique();
 		if (!user) throw new Error("User not found");
 
-		if (args.rating !== undefined && (args.rating < 1 || args.rating > 5)) {
-			throw new Error("Rating must be between 1 and 5");
+		if (args.rating !== undefined && !isValidRating(args.rating)) {
+			throw new Error("Rating must be between 0.5 and 5 in half-star increments");
 		}
 
 		// Update existing

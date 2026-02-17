@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
-import { History, Star, X } from "lucide-react";
+import { History, X } from "lucide-react";
 import { useEffect } from "react";
+import { StarRating } from "./StarRating";
 
 interface VersionEntry {
 	_id?: string;
@@ -117,18 +118,8 @@ export function VersionHistoryModal({
 
 									{/* Rating (reviews) */}
 									{contentType === "review" && entry.rating !== undefined && (
-										<div className="flex items-center gap-1 mb-2">
-											{[1, 2, 3, 4, 5].map((star) => (
-												<Star
-													key={star}
-													size={14}
-													className={
-														star <= (entry.rating ?? 0)
-															? "text-yellow-400 fill-yellow-400"
-															: "text-gray-600"
-													}
-												/>
-											))}
+										<div className="mb-2">
+											<StarRating rating={entry.rating} size="sm" />
 										</div>
 									)}
 

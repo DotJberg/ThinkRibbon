@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { createNotification } from "./notifications";
+import { isValidRating } from "./ratings";
 
 export const create = mutation({
 	args: {
@@ -35,8 +36,8 @@ export const create = mutation({
 			.unique();
 		if (!user) throw new Error("User not found");
 
-		if (args.rating < 1 || args.rating > 5) {
-			throw new Error("Rating must be between 1 and 5");
+		if (!isValidRating(args.rating)) {
+			throw new Error("Rating must be between 0.5 and 5 in half-star increments");
 		}
 
 		// Check for existing review on this game
@@ -129,8 +130,8 @@ export const update = mutation({
 			throw new Error("Unauthorized");
 		}
 
-		if (args.rating !== undefined && (args.rating < 1 || args.rating > 5)) {
-			throw new Error("Rating must be between 1 and 5");
+		if (args.rating !== undefined && !isValidRating(args.rating)) {
+			throw new Error("Rating must be between 0.5 and 5 in half-star increments");
 		}
 
 		// Save a version snapshot before patching (only on explicit save)

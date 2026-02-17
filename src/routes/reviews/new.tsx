@@ -13,6 +13,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { getRatingLabel } from "../../../convex/ratings";
 import { CoverImageUpload } from "../../components/editor/CoverImageUpload";
 import { NavigationWarning } from "../../components/editor/NavigationWarning";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
@@ -458,7 +459,9 @@ function NewReviewPage() {
 									{draft.title || "Untitled Review"}
 								</p>
 								<p className="text-sm text-gray-500">
-									{draft.rating ? `${draft.rating}/5 stars • ` : ""}
+									{draft.rating
+										? `${draft.rating}/5 - ${getRatingLabel(draft.rating)} • `
+										: ""}
 									Last edited{" "}
 									{new Date(
 										draft.updatedAt ?? draft._creationTime,
@@ -649,6 +652,7 @@ function NewReviewPage() {
 							size="lg"
 							interactive
 							onChange={setRating}
+							showLabel
 						/>
 					</div>
 

@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { ChevronRight, Gamepad2, Pencil } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { getRatingLabel } from "../../../convex/ratings";
 
 type QuestLogStatus =
 	| "Playing"
@@ -177,7 +178,8 @@ export function NowPlaying({ username, isOwnProfile }: NowPlayingProps) {
 										{/* Rating in corner */}
 										{entry.quickRating && (
 											<div className="absolute top-2 right-2 bg-black/70 text-yellow-400 text-xs px-2 py-1 rounded-full font-medium">
-												⭐ {entry.quickRating}/10
+												{entry.quickRating}/5 -{" "}
+												{getRatingLabel(entry.quickRating)}
 											</div>
 										)}
 									</div>

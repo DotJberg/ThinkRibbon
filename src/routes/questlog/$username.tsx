@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { getRatingLabel } from "../../../convex/ratings";
 import { GameSearchModal } from "../../components/questlog/GameSearchModal";
 import { StatusChangeModal } from "../../components/questlog/StatusChangeModal";
 
@@ -348,7 +349,7 @@ function TimelineView({
 
 							{entry.quickRating && (
 								<div className="text-yellow-400 text-sm mb-1">
-									{"⭐".repeat(entry.quickRating)} ({entry.quickRating}/5)
+									{entry.quickRating}/5 - {getRatingLabel(entry.quickRating)}
 								</div>
 							)}
 

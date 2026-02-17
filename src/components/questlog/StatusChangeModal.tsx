@@ -1,16 +1,10 @@
 import { useMutation } from "convex/react";
-import {
-	Calendar,
-	Loader2,
-	Monitor,
-	Share2,
-	Star,
-	Trash2,
-	X,
-} from "lucide-react";
+import { Calendar, Loader2, Monitor, Share2, Trash2, X } from "lucide-react";
 import { useId, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { getRatingLabel } from "../../../convex/ratings";
+import { StarRating } from "../shared/StarRating";
 
 type QuestLogStatus =
 	| "Playing"
@@ -94,7 +88,6 @@ export function StatusChangeModal({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isRemoving, setIsRemoving] = useState(false);
 	const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
-	const [hoverRating, setHoverRating] = useState<number>(0);
 	const [startedAt, setStartedAt] = useState<string>(
 		formatDateForInput(currentStartedAt),
 	);
@@ -118,7 +111,8 @@ export function StatusChangeModal({
 		Backlog: "added to backlog",
 	}[newStatus];
 
-	const previewPost = `I just ${statusText} ${gameName}! ${"⭐".repeat(quickRating)}`;
+	const ratingLabel = quickRating > 0 ? getRatingLabel(quickRating) : "";
+	const previewPost = `I just ${statusText} ${gameName}! ${quickRating}/5 - ${ratingLabel}`;
 
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
@@ -397,26 +391,14 @@ export function StatusChangeModal({
 										Your Rating
 									</span>
 									{/* Star Rating */}
-									<div className="flex justify-center gap-2">
-										{[1, 2, 3, 4, 5].map((rating) => (
-											<button
-												key={rating}
-												type="button"
-												onClick={() => setQuickRating(rating)}
-												onMouseEnter={() => setHoverRating(rating)}
-												onMouseLeave={() => setHoverRating(0)}
-												className="p-1 transition-transform hover:scale-110"
-											>
-												<Star
-													size={28}
-													className={`transition-colors ${
-														rating <= (hoverRating || quickRating)
-															? "text-yellow-400 fill-yellow-400"
-															: "text-gray-600"
-													}`}
-												/>
-											</button>
-										))}
+									<div className="flex justify-center">
+										<StarRating
+											rating={quickRating}
+											size="lg"
+											interactive
+											onChange={setQuickRating}
+											showLabel
+										/>
 									</div>
 									<p className="text-center text-sm text-gray-400">
 										{quickRating > 0 ? `${quickRating}/5` : "Select a rating"}

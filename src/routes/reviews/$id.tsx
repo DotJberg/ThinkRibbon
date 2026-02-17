@@ -356,7 +356,7 @@ function ReviewDetailPage() {
 									</div>
 								)}
 							</div>
-							<StarRating rating={review.rating} size="lg" />
+							<StarRating rating={review.rating} size="lg" showLabel />
 
 							{/* Tags & Genres */}
 							{(() => {

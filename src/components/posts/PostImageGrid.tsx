@@ -31,15 +31,12 @@ export function PostImageGrid({ images }: PostImageGridProps) {
 				}`}
 			>
 				{images.slice(0, 4).map((img, i) => {
-					const isThreeFirstImage = count === 3 && i === 0;
 					return (
 						<button
 							key={img.url}
 							type="button"
 							onClick={() => setLightboxIndex(i)}
-							className={`relative overflow-hidden bg-gray-700 ${
-								isThreeFirstImage ? "row-span-2" : ""
-							} ${count === 1 ? "max-h-96" : count === 2 ? "h-48" : "h-40"}`}
+							className={`relative overflow-hidden bg-gray-700 ${count === 1 ? "max-h-96" : count === 2 ? "h-48" : "h-40"}`}
 						>
 							<SafeImage
 								src={img.url}

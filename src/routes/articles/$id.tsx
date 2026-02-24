@@ -34,6 +34,7 @@ import {
 } from "../../components/shared/SpoilerWarning";
 import { TagDisplay } from "../../components/shared/TagDisplay";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
+import { useScrollToComment } from "../../hooks/useScrollToComment";
 import { getConvexClient } from "../../lib/convex-server";
 import {
 	buildMeta,
@@ -122,6 +123,7 @@ function ArticleDetailPage() {
 			: "skip",
 	);
 	const comments = commentsData?.comments ?? [];
+	useScrollToComment(commentsData !== undefined);
 	const [commentText, setCommentText] = useState("");
 	const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 	const [spoilerAccepted, setSpoilerAccepted] = useState(false);

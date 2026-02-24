@@ -30,6 +30,7 @@ import { LinkPreviewCard } from "../../components/shared/LinkPreviewCard";
 import { PixelSpeechBubble } from "../../components/shared/PixelSpeechBubble";
 import { ReportModal } from "../../components/shared/ReportModal";
 import { VersionHistoryModal } from "../../components/shared/VersionHistoryModal";
+import { useScrollToComment } from "../../hooks/useScrollToComment";
 import { getConvexClient } from "../../lib/convex-server";
 import { stripFirstUrl } from "../../lib/link-preview";
 import { renderPostContent } from "../../lib/renderPostContent";
@@ -94,6 +95,7 @@ function PostDetailPage() {
 	);
 	const comments = commentsData?.comments ?? [];
 	const isLoading = post === undefined;
+	useScrollToComment(commentsData !== undefined);
 	const [commentText, setCommentText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showMenu, setShowMenu] = useState(false);

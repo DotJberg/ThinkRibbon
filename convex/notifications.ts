@@ -59,6 +59,24 @@ export const getAll = query({
 		const enriched = await Promise.all(
 			notifications.map(async (n) => {
 				const actor = await ctx.db.get(n.actorId);
+
+				// For reply_comment and like_comment, resolve the comment to get
+				// the parent content page (targetType + targetId)
+				let contentType: string | null = null;
+				let contentId: string | null = null;
+				if (
+					n.type === "reply_comment" ||
+					n.type === "like_comment"
+				) {
+					const comment = await ctx.db.get(
+						n.targetId as Id<"comments">,
+					);
+					if (comment) {
+						contentType = comment.targetType;
+						contentId = comment.targetId;
+					}
+				}
+
 				return {
 					...n,
 					actor: actor
@@ -69,6 +87,7 @@ export const getAll = query({
 								avatarUrl: actor.avatarUrl,
 							}
 						: null,
+					...(contentType && contentId && { contentType, contentId }),
 				};
 			}),
 		);
@@ -105,6 +124,7 @@ export async function createNotification(
 	actorId: Id<"users">,
 	type: typeof notificationType.type,
 	targetId: string,
+	commentId?: string,
 ) {
 	if (userId === actorId) return;
 	await ctx.db.insert("notifications", {
@@ -112,6 +132,7 @@ export async function createNotification(
 		actorId,
 		type,
 		targetId,
+		...(commentId && { commentId }),
 	});
 }
 

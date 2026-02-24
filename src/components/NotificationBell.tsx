@@ -32,33 +32,62 @@ const notificationMessages: Record<string, string> = {
 	mention_review: "mentioned you in a review",
 };
 
+const contentRoutes: Record<string, string> = {
+	post: "/posts/$id",
+	article: "/articles/$id",
+	review: "/reviews/$id",
+};
+
 function getNotificationLink(
 	type: string,
 	targetId: string,
-): { to: string; params: Record<string, string> } {
+	commentId?: string,
+	contentType?: string,
+	contentId?: string,
+): { to: string; params: Record<string, string>; hash?: string } {
+	// Comment on content — navigate to content page, scroll to the comment
 	if (
-		type === "like_post" ||
 		type === "comment_post" ||
-		type === "mention_post"
+		type === "comment_article" ||
+		type === "comment_review"
 	) {
+		const suffix = type.split("_")[1]; // "post" | "article" | "review"
+		return {
+			to: contentRoutes[suffix],
+			params: { id: targetId },
+			...(commentId && { hash: `comment-${commentId}` }),
+		};
+	}
+
+	// Like on content — navigate to content page (no comment to scroll to)
+	if (type === "like_post" || type === "mention_post") {
 		return { to: "/posts/$id", params: { id: targetId } };
 	}
-	if (
-		type === "like_article" ||
-		type === "comment_article" ||
-		type === "mention_article"
-	) {
+	if (type === "like_article" || type === "mention_article") {
 		return { to: "/articles/$id", params: { id: targetId } };
 	}
-	if (
-		type === "like_review" ||
-		type === "comment_review" ||
-		type === "mention_review"
-	) {
+	if (type === "like_review" || type === "mention_review") {
 		return { to: "/reviews/$id", params: { id: targetId } };
 	}
-	// For comment-related notifications (like_comment, reply_comment),
-	// we can't easily link to the comment directly, so link to home
+
+	// reply_comment / like_comment — resolve via enriched contentType/contentId
+	if (
+		(type === "reply_comment" || type === "like_comment") &&
+		contentType &&
+		contentId
+	) {
+		const route = contentRoutes[contentType];
+		if (route) {
+			// For like_comment, targetId IS the comment; for reply_comment, commentId is the reply
+			const scrollTo = commentId || targetId;
+			return {
+				to: route,
+				params: { id: contentId },
+				hash: `comment-${scrollTo}`,
+			};
+		}
+	}
+
 	return { to: "/", params: {} };
 }
 
@@ -124,12 +153,19 @@ export default function NotificationBell() {
 					<div className="max-h-96 overflow-y-auto">
 						{notifications && notifications.length > 0 ? (
 							notifications.map((n) => {
-								const link = getNotificationLink(n.type, n.targetId);
+								const link = getNotificationLink(
+									n.type,
+									n.targetId,
+									n.commentId ?? undefined,
+									n.contentType ?? undefined,
+									n.contentId ?? undefined,
+								);
 								return (
 									<Link
 										key={n._id}
 										to={link.to}
 										params={link.params}
+										hash={link.hash}
 										onClick={() => setIsOpen(false)}
 										className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-700 transition-colors ${
 											!n.viewedAt ? "bg-gray-750" : ""

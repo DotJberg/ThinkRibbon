@@ -368,6 +368,7 @@ export default defineSchema({
 			v.literal("mention_review"),
 		),
 		targetId: v.string(),
+		commentId: v.optional(v.string()),
 		viewedAt: v.optional(v.number()),
 	})
 		.index("by_userId", ["userId"])

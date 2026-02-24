@@ -65,6 +65,7 @@ export const create = mutation({
 				user._id,
 				typeMap[args.targetType],
 				args.targetId,
+				commentId,
 			);
 		}
 
@@ -78,6 +79,7 @@ export const create = mutation({
 					user._id,
 					"reply_comment",
 					args.parentId,
+					commentId,
 				);
 			}
 		}

@@ -114,7 +114,10 @@ export function CommentItem({
 	// Render deleted placeholder
 	if (comment.deleted) {
 		return (
-			<div className={`flex gap-3 ${depth > 0 ? "ml-4 sm:ml-8 mt-4" : "mt-6"}`}>
+			<div
+				id={`comment-${commentId}`}
+				className={`flex gap-3 ${depth > 0 ? "ml-4 sm:ml-8 mt-4" : "mt-6"}`}
+			>
 				<div className="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0" />
 				<div className="flex-1 min-w-0">
 					<div className="bg-gray-800/30 rounded-xl p-3 border border-gray-700/30">
@@ -145,7 +148,10 @@ export function CommentItem({
 	}
 
 	return (
-		<div className={`flex gap-3 ${depth > 0 ? "ml-4 sm:ml-8 mt-4" : "mt-6"}`}>
+		<div
+			id={`comment-${commentId}`}
+			className={`flex gap-3 ${depth > 0 ? "ml-4 sm:ml-8 mt-4" : "mt-6"}`}
+		>
 			<Link
 				to="/profile/$username"
 				params={{ username: comment.author.username }}
